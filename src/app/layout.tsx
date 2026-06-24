@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
@@ -54,6 +55,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <CommandPalette />
         {children}
+        
+        {/* Google Analytics */}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-Z49LMP5ZKT"
+        />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Z49LMP5ZKT');
+          `}
+        </Script>
+
         <footer className="mx-auto max-w-page px-4 py-10 text-center text-xs text-muted sm:px-6 lg:px-10">
           <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/sobre" className="transition hover:text-zinc-200">Sobre</Link>
