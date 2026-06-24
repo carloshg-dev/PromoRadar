@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env*.local
+*.log
+.DS_Store
+.vercel
+next-env.d.ts
+/legacy/**/node_modules
+
+# ferramentas de skills de IA (instaladas localmente, não fazem parte do app)
+.agents/
+.claude/
+skills-lock.json
+*.tsbuildinfo

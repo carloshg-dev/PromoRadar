@@ -1,0 +1,97 @@
+name: Coleta (jobs paralelos + cadência 4x/dia)
+
+# Por que JOBS SEPARADOS: a coleta inteira num job só estourava o timeout (Firecrawl
+# é lento + salvar milhares de itens com a latência GitHub↔Supabase). Resultado: o job
+# morria em "running", sem salvar tudo e SEM AVISAR. Agora cada grupo é um job próprio,
+# com seu timeout, e cada um avisa no Telegram/Discord ao terminar.
+#
+# Cadência:
+#   • RÁPIDA (HTTP/API, custo zero) — roda em TODA disparada (4x/dia): kabum, ML,
+#     suplementos JSON, VTEX (Americanas/FG/Época). Pega promoção-relâmpago.
+#   • FIRECRAWL (browser) — só 1x/dia (06:00 BRT), dividido em 2 jobs p/ caber no tempo.
+#   Schedules: 06:00 BRT = completa (rápida + firecrawl); 00/12/18 BRT = só rápida.
+
+on:
+  schedule:
+    - cron: "0 9 * * *"        # 06:00 BRT — COMPLETA (rápida + firecrawl)
+    - cron: "0 3,15,21 * * *"  # 00:00 / 12:00 / 18:00 BRT — só RÁPIDA
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "completa (inclui Firecrawl) ou rapida (só HTTP)"
+        type: choice
+        options: [completa, rapida]
+        default: completa
+
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  PROMODETEC_LEADS_DISCORD_WEBHOOK_URL: ${{ secrets.PROMODETEC_LEADS_DISCORD_WEBHOOK_URL }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  DISCORD_DEALS_WEBHOOK_URL: ${{ secrets.DISCORD_DEALS_WEBHOOK_URL }}
+  TELEGRAM_FEED_CHAT_ID: ${{ secrets.TELEGRAM_FEED_CHAT_ID }}
+  ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+  ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+  ML_POR_CATEGORIA: "50"
+  AWIN_DATAFEED_URL: ${{ secrets.AWIN_DATAFEED_URL }}
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+jobs:
+  rapida:
+    name: Rápida (HTTP/API)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npm run scrape kabum mercadolivre soldiers integralmedica darklab americanas ferramentasgerais epocacosmeticos
+
+  firecrawl-tech:
+    name: Firecrawl tech (Terabyte/Amazon/Pichau)
+    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SCRAPE_VIA_FIRECRAWL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npm run scrape terabyte amazon pichau
+
+  firecrawl-extra:
+    name: Firecrawl extra (Havan/Growth/Max/Mecânico) + Awin (AliExpress)
+    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SCRAPE_VIA_FIRECRAWL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npm run scrape havan growth maxtitanium lojadomecanico awin
+
+  digest:
+    name: Resumo diário do site
+    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npm run digest

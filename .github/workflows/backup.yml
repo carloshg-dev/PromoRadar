@@ -1,0 +1,43 @@
+# Backup semanal do Postgres (Supabase Free NÃO tem backup automático).
+# Guarda um dump comprimido como artifact do GitHub por 90 dias.
+#
+# Requer 1 secret: SUPABASE_DB_URL
+#   → Supabase Dashboard → Settings → Database → Connection string → **Session pooler**
+#     (usar o pooler, não o host direto db.*.supabase.co: o direto é IPv6-only
+#      e os runners do GitHub são IPv4)
+#   → GitHub → Settings → Secrets and variables → Actions → New repository secret
+#
+# Restauração (se um dia precisar):
+#   gunzip backup-AAAA-MM-DD.sql.gz
+#   psql "$SUPABASE_DB_URL" < backup-AAAA-MM-DD.sql
+name: Backup semanal do banco
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # toda segunda, 08:00 UTC (05:00 BRT)
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dump do Postgres
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Falta o secret SUPABASE_DB_URL (string 'Session pooler' do Supabase). Veja o comentário no topo deste workflow."
+            exit 1
+          fi
+          # postgres:17 acompanha a versão do servidor do Supabase (pg_dump não pode ser mais antigo que o servidor)
+          docker run --rm -e SUPABASE_DB_URL postgres:17-alpine \
+            sh -c 'pg_dump --no-owner --no-privileges "$SUPABASE_DB_URL"' | gzip > "backup-$(date +%F).sql.gz"
+          ls -lh backup-*.sql.gz
+
+      - name: Guardar como artifact (90 dias)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-postgres-${{ github.run_id }}
+          path: backup-*.sql.gz
+          retention-days: 90

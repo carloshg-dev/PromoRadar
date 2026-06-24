@@ -1,0 +1,25 @@
+{
+  "name": "detec-difusor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Motor de distribuicao do PromoDetec: le vw_ofertas (read-only) e publica as melhores ofertas no Telegram + Discord, com card e link rastreado /r/. Nao toca no site.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "once": "cross-env RUN_ONCE=true tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "tsx": "^4.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/node-cron": "^3.0.11",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,9 @@
+services:
+  difusor:
+    build: .
+    container_name: detec-difusor
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data # dedup persiste entre restarts
+    # Sem portas expostas: e um worker de saida (so faz POST p/ Telegram/Discord).
