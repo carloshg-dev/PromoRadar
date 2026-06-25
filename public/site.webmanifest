@@ -1,7 +1,7 @@
 {
   "name": "PromoDetec",
   "short_name": "PromoDetec",
-  "description": "Detecte. Compare. Economize. — preços reais de hardware, histórico e PromoScore.",
+  "description": "Detecte. Compare. Economize. — ofertas verificadas de tecnologia, beleza, gadgets, perfumes, skincare e muito mais.",
   "icons": [
     { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }

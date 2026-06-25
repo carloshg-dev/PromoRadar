@@ -9,8 +9,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { CommandPalette } from "@/components/command-palette";
 import { Clarity } from "@/components/analytics/clarity";
 import { CookieConsent } from "@/components/analytics/cookie-consent";
-import { SeasonalRibbon } from "@/components/seasonal-ribbon";
-import { SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 
 // Geist (display) via pacote oficial self-hosted; Inter (corpo) e JetBrains (mono)
 // via next/font/google. Geist não existe em next/font/google nesta versão do Next.
@@ -19,24 +18,25 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "PromoDetec — Inteligência de Promoções de Hardware", template: "%s · PromoDetec" },
-  description: "Monitore preços reais de hardware, detecte falsos descontos e descubra oportunidades com o PromoScore.",
-  keywords: ["promoções", "hardware", "placa de vídeo", "histórico de preços", "kabum", "pichau", "terabyte", "mercado livre"],
+  title: { default: SITE_TITLE, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   manifest: "/site.webmanifest",
-  applicationName: "PromoDetec",
+  applicationName: SITE_NAME,
+  alternates: { canonical: SITE_URL },
   openGraph: {
     type: "website",
-    siteName: "PromoDetec",
+    siteName: SITE_NAME,
     url: SITE_URL,
-    title: "PromoDetec — Inteligência de Promoções de Hardware",
-    description: "Preços reais, histórico próprio e PromoScore: a oportunidade antes do mercado.",
-    images: [{ url: "/logo.png", width: 1536, height: 1024, alt: "PromoDetec — Detecte. Compare. Economize." }],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "PromoDetec - ofertas verificadas em tecnologia, beleza e mais." }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PromoDetec — Inteligência de Promoções de Hardware",
-    description: "Preços reais, histórico próprio e PromoScore: a oportunidade antes do mercado.",
-    images: ["/logo.png"],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
   // Verificação de canal da rede de afiliados Lomadee → <meta name="lomadee" content="...">
   other: { lomadee: "2324685" },
@@ -51,7 +51,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${inter.variable} ${mono.variable} ${GeistSans.variable} dark`}>
       <body className="min-h-screen font-sans antialiased">
         <Clarity />
-        <SeasonalRibbon />
         <Navbar />
         <CommandPalette />
         {children}
@@ -80,6 +79,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/contato" className="transition hover:text-zinc-200">Contato</Link>
           </nav>
           PromoDetec · detecte, compare, economize · {new Date().getFullYear()}
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-2 block text-[11px] text-brand-2 transition hover:text-white">
+            Atendimento: {SUPPORT_EMAIL}
+          </a>
           <span className="mt-1 block text-[10px] text-muted/70">
             O PromoDetec não vende produtos: comparamos preços públicos e direcionamos você à loja oficial.
             Preços e disponibilidade são da loja e podem mudar — ofertas válidas enquanto durarem os estoques.

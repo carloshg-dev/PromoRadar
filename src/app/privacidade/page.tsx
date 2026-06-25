@@ -1,11 +1,10 @@
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 export const metadata = {
   title: "Política de Privacidade",
   description: "Como o PromoDetec coleta, usa e protege seus dados, em conformidade com a LGPD.",
 };
-
-const CONTATO = "carloshg.designer@gmail.com";
 
 export default function Privacidade() {
   return (
@@ -74,7 +73,7 @@ export default function Privacidade() {
           </ul>
           <p className="mt-2">
             Para exercer esses direitos, escreva para{" "}
-            <a href={`mailto:${CONTATO}`} className="text-brand-2 hover:underline">{CONTATO}</a>.
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-brand-2 hover:underline">{SUPPORT_EMAIL}</a>.
           </p>
         </Secao>
 
@@ -88,7 +87,7 @@ export default function Privacidade() {
         <Secao titulo="8. Contato">
           <p>
             Dúvidas sobre privacidade?{" "}
-            <a href={`mailto:${CONTATO}`} className="text-brand-2 hover:underline">{CONTATO}</a>.
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-brand-2 hover:underline">{SUPPORT_EMAIL}</a>.
           </p>
         </Secao>
       </div>

@@ -3,10 +3,9 @@ import { listarOfertas, listarNoticias, ofertaDestaque, listarAfiliados } from "
 import type { Produto } from "@/core/domain/types";
 import { ProdutoCard } from "@/components/produto-card";
 import { NewsCarousel } from "@/components/news-carousel";
-import { CategoryRail } from "@/components/category-rail";
 import { FeaturedDeal } from "@/components/featured-deal";
 import { ParceirosFeed } from "@/components/parceiros-feed";
-import { ParceiroBanner } from "@/components/parceiro-banner";
+import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
 import { VitrineVertical } from "@/components/vitrine-vertical";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -14,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ScoreRing } from "@/components/score-ring";
 import {
-  Sparkles, Search, ArrowRight, Dumbbell, LineChart as LineChartIcon, Gauge, ShieldCheck, Scale,
+  Sparkles, Search, ArrowRight, Dumbbell,
   Palette, SprayCan, Headphones,
 } from "lucide-react";
 
@@ -47,7 +46,7 @@ export default async function Home() {
       Promise.all(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"].map((c) => listarOfertas({ categoria: c, limit: 3 }))),
       Promise.all(["whey-protein", "creatina", "pre-treino"].map((c) => listarOfertas({ categoria: c, limit: 4 }))),
     ]);
-    beleza = melhores(bel); perfumes = melhores(perf); gadgets = melhores(gad); fit = melhores(ft, 4);
+    beleza = melhores(bel); perfumes = melhores(perf); gadgets = melhores(gad); fit = melhores(ft, 5);
   } catch {}
 
   // Notícias (agora mais discretas, no rodapé): prioriza as que têm imagem.
@@ -61,6 +60,8 @@ export default async function Home() {
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática */}
       <ParceirosFeed produtos={afiliados} />
+
+      <SeasonalHomeHero />
 
       {/* HERO — comparador (Oferta em Destaque) na 1ª dobra, logo abaixo do feed */}
       <section className="relative overflow-hidden">
@@ -123,29 +124,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* PROVA DE VALOR — o diferencial visível em segundos */}
-      <section className="grid grid-cols-2 gap-3 pb-10 lg:grid-cols-4">
-        {[
-          { Icon: LineChartIcon, t: "Histórico real de preços", d: "Sabemos se o preço de hoje é mesmo barato.", c: "text-neon" },
-          { Icon: Gauge, t: "PromoScore 0–100", d: "Nota de quão real é cada desconto.", c: "text-brand-2" },
-          { Icon: ShieldCheck, t: "Detecta desconto falso", d: "Desmascara o “de/por” inflado.", c: "text-cyan-2" },
-          { Icon: Scale, t: "Compara entre lojas", d: "O mesmo produto, lado a lado.", c: "text-eletro" },
-        ].map(({ Icon, t, d, c }) => (
-          <div key={t} className="glass hover-raise rounded-2xl border border-line p-4">
-            <Icon className={`h-5 w-5 ${c}`} />
-            <div className="mt-2 text-sm font-semibold text-zinc-100">{t}</div>
-            <div className="mt-0.5 text-xs leading-snug text-muted">{d}</div>
-          </div>
-        ))}
-      </section>
-
       {/* OFERTAS VERIFICADAS — promoções reais dos parceiros Awin (conferidas + ativas) */}
       <OfertasVerificadas />
-
-      {/* PARCEIRO EM DESTAQUE — Allever (link de afiliado Lomadee; CTA focado em cupom) */}
-      <ParceiroBanner nome="Allever" badge="Cupons exclusivos"
-        descricao="Clique aqui para ativar cupons de desconto exclusivos e ofertas com entrega rápida em todo o Brasil."
-        href="https://lmdee.link/d5Ab31YmIyZu" />
 
       {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato) */}
       <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
@@ -154,12 +134,6 @@ export default async function Home() {
         href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumes} />
       <VitrineVertical titulo="Gadgets" Icon={Headphones} accentText="text-gadget-2" accentGrad="from-gadget to-cyan"
         href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgets} />
-
-      {/* CATEGORIAS (atalhos grandes) */}
-      <section id="categorias" className="py-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">Explorar por categoria</h2>
-        <CategoryRail />
-      </section>
 
       {/* DESTAQUES (PromoScore) — a inteligência, mantida abaixo do feed */}
       <section className="pb-16">
@@ -175,7 +149,7 @@ export default async function Home() {
           </div>
         ) : (
           <EmptyState icon="🛰️" title="Coleta em preparação"
-            hint="As ofertas aparecem aqui assim que a primeira coleta rodar. Enquanto isso, explore as categorias acima."
+            hint="As ofertas aparecem aqui assim que a primeira coleta rodar. Enquanto isso, explore as categorias pelo menu superior."
             action={<Link href="/ofertas"><Button variant="outline" size="sm">Ir para ofertas</Button></Link>} />
         )}
       </section>

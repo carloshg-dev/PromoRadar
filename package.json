@@ -2,7 +2,7 @@
   "name": "promoradar",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma de inteligência de promoções de hardware e tecnologia.",
+  "description": "Plataforma de ofertas verificadas, comparativo de preços reais e oportunidades em tecnologia, beleza, gadgets e compras do dia a dia.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

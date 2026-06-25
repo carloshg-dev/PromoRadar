@@ -1,11 +1,10 @@
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 export const metadata = {
   title: "Termos de Uso",
   description: "Condições de uso do PromoDetec — comparador de preços de fontes públicas.",
 };
-
-const CONTATO = "carloshg.designer@gmail.com";
 
 export default function Termos() {
   return (
@@ -74,7 +73,7 @@ export default function Termos() {
         <Secao titulo="9. Lei aplicável e contato">
           <p>
             Estes Termos seguem as leis do <strong className="text-zinc-200">Brasil</strong>. Dúvidas?{" "}
-            <a href={`mailto:${CONTATO}`} className="text-brand-2 hover:underline">{CONTATO}</a>.
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-brand-2 hover:underline">{SUPPORT_EMAIL}</a>.
           </p>
         </Secao>
       </div>

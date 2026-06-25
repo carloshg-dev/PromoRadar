@@ -2,7 +2,7 @@
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { BadgeCheck, ArrowUpRight, Laptop, Smartphone, Headphones, Watch, Tablet, Speaker, SprayCan, Zap, Gamepad2 } from "lucide-react";
-import { ofertasAtivas } from "@/lib/ofertas-verificadas";
+import { ofertasAtivas, type OfertaVerificada } from "@/lib/ofertas-verificadas";
 import { linkAfiliado } from "@/lib/afiliados";
 
 /**
@@ -30,10 +30,40 @@ function LogoLoja({ loja }: { loja: string }) {
   const [erro, setErro] = useState(false);
   const src = LOGO[loja];
   if (!src || erro) {
-    return <span className="rounded-md bg-bg-soft px-1.5 py-0.5 text-[10px] font-semibold text-zinc-300">{loja}</span>;
+    return <span className="inline-flex h-8 w-[88px] items-center justify-center rounded-md border border-line bg-bg-soft px-2 text-[10px] font-semibold text-zinc-300 sm:w-[112px]">{loja}</span>;
   }
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={loja} onError={() => setErro(true)} className="h-4 w-auto max-w-[84px] rounded bg-white object-contain px-1" />;
+  return (
+    <span className="inline-flex h-8 w-[88px] items-center justify-center rounded-md border border-white/20 bg-white px-2 shadow-sm sm:w-[112px]">
+      <img src={src} alt={`${loja} logo`} onError={() => setErro(true)} className="max-h-5 w-auto max-w-[76px] object-contain sm:max-h-6 sm:max-w-[100px]" />
+    </span>
+  );
+}
+
+function ImagemOferta({ oferta, Icon }: { oferta: OfertaVerificada; Icon: LucideIcon }) {
+  const [erro, setErro] = useState(false);
+
+  if (!oferta.imagemUrl || erro) {
+    return (
+      <div className="mb-3 grid aspect-[4/3] place-items-center rounded-xl border border-line bg-bg-soft/70">
+        <Icon className="h-8 w-8 text-brand-2" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-3 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-white">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={oferta.imagemUrl}
+        alt={oferta.titulo}
+        loading="lazy"
+        decoding="async"
+        onError={() => setErro(true)}
+        className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-[1.04]"
+      />
+    </div>
+  );
 }
 
 export function OfertasVerificadas() {
@@ -64,12 +94,15 @@ export function OfertasVerificadas() {
           return (
             <a key={inicio + i} href={linkAfiliado(o.url)} target="_blank" rel="sponsored noopener noreferrer"
               className="glass hover-raise group flex flex-col rounded-2xl border border-line p-3 transition-colors hover:border-neon/40">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between gap-2">
                 <LogoLoja loja={o.loja} />
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-neon"><BadgeCheck className="h-3 w-3" /> verificada</span>
+                <span className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-neon/10 px-2 text-[10px] font-medium text-neon">
+                  <BadgeCheck className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">verificada</span>
+                </span>
               </div>
-              <Icon className="h-5 w-5 text-brand-2" />
-              <h3 className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs font-medium leading-snug text-zinc-100">{o.titulo}</h3>
+              <ImagemOferta oferta={o} Icon={Icon} />
+              <h3 className="line-clamp-2 min-h-[2.5rem] text-xs font-medium leading-snug text-zinc-100">{o.titulo}</h3>
               <div className="mt-2 flex items-center justify-between gap-1">
                 <span className="rounded-md bg-neon/15 px-1.5 py-0.5 text-[11px] font-bold text-neon">{o.selo}</span>
                 <span className="shrink-0 text-[10px] text-muted">até {ddmm(o.ateISO)}</span>

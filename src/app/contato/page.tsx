@@ -1,12 +1,11 @@
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import { Mail, Handshake, Newspaper, ShieldCheck } from "lucide-react";
 
 export const metadata = {
   title: "Contato",
   description: "Fale com o PromoDetec — parcerias, imprensa, privacidade e suporte.",
 };
-
-const CONTATO = "carloshg.designer@gmail.com";
 
 export default function Contato() {
   return (
@@ -17,9 +16,9 @@ export default function Contato() {
         Estamos abertos a parcerias, imprensa, dúvidas de privacidade e correções. Respondemos o mais rápido possível.
       </p>
 
-      <a href={`mailto:${CONTATO}`}
+      <a href={`mailto:${SUPPORT_EMAIL}`}
         className="glass hover-raise mt-6 inline-flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-5 py-4 text-base font-semibold text-white transition hover:bg-brand/20">
-        <Mail className="h-5 w-5 text-brand-2" /> {CONTATO}
+        <Mail className="h-5 w-5 text-brand-2" /> {SUPPORT_EMAIL}
       </a>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
