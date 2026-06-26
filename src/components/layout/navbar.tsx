@@ -7,7 +7,7 @@ import { NavDesktop } from "@/components/layout/nav-desktop";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 overflow-hidden border-b border-emerald-400/30 bg-[#09130b]/95 shadow-[0_12px_34px_-26px_rgba(34,224,107,.75)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 overflow-visible border-b border-emerald-400/30 bg-[#09130b]/95 shadow-[0_12px_34px_-26px_rgba(34,224,107,.75)] backdrop-blur-xl">
       <picture aria-hidden className="pointer-events-none absolute inset-0 opacity-35 mix-blend-screen">
         <source media="(max-width: 639px)" srcSet="/topbar_mobile_clean.png.png" />
         <img src="/topbar_desktop_clean.png.png" alt="" className="h-full w-full object-cover object-[center_58%]" />
