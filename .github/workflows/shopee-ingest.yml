@@ -1,0 +1,35 @@
+name: Ingestao Shopee Feed
+
+# ⚠️ CRON DESLIGADO de proposito. O motor v1 (extraido do ambiente de teste) ainda
+# NAO foi revisado e aponta pro banco de PRODUCAO. So roda em disparo MANUAL
+# (workflow_dispatch). Reativar o `schedule` abaixo SOMENTE depois de:
+#   1) revisar o motor (dry-run primeiro, stale-sweep restrito a loja shopee);
+#   2) rodar o SQL da loja 'shopee' no Supabase;
+#   3) configurar os secrets (SHOPEE_FEED_URL, SUPABASE_*, etc.) neste repo.
+on:
+  # schedule:
+  #   - cron: "40 0 * * *" # 21:40 BRT — REATIVAR APOS REVISAO
+  workflow_dispatch: {}
+
+concurrency:
+  group: shopee-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SHOPEE_FEED_URL: ${{ secrets.SHOPEE_FEED_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PISO_PRECO_BRL: ${{ secrets.PISO_PRECO_BRL }}
+      SHOPEE_TOP_N: ${{ secrets.SHOPEE_TOP_N }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/ingest-shopee-feed.ts
