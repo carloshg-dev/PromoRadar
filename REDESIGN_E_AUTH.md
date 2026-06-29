@@ -1,4 +1,4 @@
-# PromoRadar — Redesign UX + Autenticação
+# promodetec — Redesign UX + Autenticação
 
 ## 1. Auditoria do frontend anterior (problemas)
 

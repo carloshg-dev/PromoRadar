@@ -195,7 +195,7 @@ varre até 2.000 linhas por render) — hoje subi o cache delas de 2 para 10 min
 
 ## 5. GitHub público × privado
 
-**Hoje: público** (`paulohelon280/PromoRadar`). Sem segredos no histórico (auditei), então não há vazamento — mas:
+**Hoje: público** (`paulohelon280/promodetec`). Sem segredos no histórico (auditei), então não há vazamento — mas:
 
 | | Público | Privado |
 |---|---------|---------|
@@ -233,7 +233,7 @@ A notícia boa: a arquitetura atual **não exige migração de mudança**, só d
 - **Vercel Free → Pro / Supabase Free → Pro:** é um botão. Mesmo deploy, mesmas URLs,
   mesmas chaves → **zero downtime, sessões preservadas, banco intacto, SEO intacto**.
 - **Domínio próprio (fazer CEDO, não depois):** cookies de sessão e SEO pertencem ao
-  domínio. Se trocarmos `promo-radar-mauve.vercel.app` → `promodetec.com.br` com usuários
+  domínio. Se trocarmos `promodetec.vercel.app` → `promodetec.com.br` com usuários
   ativos, todos deslogam e o Google reaprende do zero. Comprando agora: aponta o DNS na
   Vercel, o `.vercel.app` passa a redirecionar 301 automaticamente, e o custo é ~R$ 40/ano.
   Depois, atualizar `NEXT_PUBLIC_SITE_URL` e as *Redirect URLs* no Supabase Auth e no Google OAuth.

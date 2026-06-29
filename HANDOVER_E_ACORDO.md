@@ -1,4 +1,4 @@
-# PromoRadar — Transferência de contas e acordo de manutenção
+# promodetec — Transferência de contas e acordo de manutenção
 
 > Documento de apoio. Não é aconselhamento jurídico ou financeiro — ajuste com bom senso e, se o valor envolvido crescer, consulte um contador/advogado.
 
@@ -16,7 +16,7 @@ Separe sempre duas coisas:
 
 ### 1. GitHub
 Opção A (recomendada): o repositório nasce na conta dele.
-1. Seu amigo cria conta no GitHub e cria o repositório `PromoRadar`.
+1. Seu amigo cria conta no GitHub e cria o repositório `promodetec`.
 2. Ele te adiciona como colaborador (Settings → Collaborators).
 3. Você faz o push para o repositório dele.
 
@@ -39,7 +39,7 @@ Opção B: se já estiver na sua conta, use Settings → General → **Transfer 
 4. Ele te adiciona como membro do time para você continuar fazendo deploy.
 
 ### 4. Domínio (opcional)
-Se quiserem um domínio próprio (ex: `promoradar.com.br`), registre **no nome dele** (Registro.br para `.br`) e aponte para a Vercel. Custo ~R$40–60/ano, no cartão dele.
+Se quiserem um domínio próprio (ex: `promodetec.com.br`), registre **no nome dele** (Registro.br para `.br`) e aponte para a Vercel. Custo ~R$40–60/ano, no cartão dele.
 
 ### 5. Senhas e acessos
 Use um gerenciador de senhas compartilhado (ex: Bitwarden) com as credenciais no nome dele. Evita o cenário "só você tem acesso ao que é dele".
@@ -60,7 +60,7 @@ Tudo isso deve cair no cartão dele, não no seu.
 
 ## Modelo simples de acordo (ajuste os valores e termos)
 
-> **Acordo de prestação de serviços — PromoRadar**
+> **Acordo de prestação de serviços — promodetec**
 >
 > **Partes:** [Seu nome] ("Desenvolvedor") e [Nome do amigo] ("Cliente").
 >

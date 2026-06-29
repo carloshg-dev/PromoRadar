@@ -45,6 +45,23 @@ const AWIN_MIDS: Record<string, string> = {
   // "kabum.com.br": "XXXX",     // Kabum — em análise (Pending)
 };
 
+/**
+ * Mercado Livre — links de afiliado gerados no PAINEL (meli.la), 1 por produto.
+ * Não há API pública pra cunhar link nem "tag" stateless como a Amazon: o código
+ * meli.la é OPACO (gerado no servidor do ML). Logo, não dá pra COMPUTAR o link a
+ * partir da URL — só PROCURAR neste mapa (MLB id → link manual). Popular conforme
+ * o dono gera no painel. Automação real de verdade só com a API ML Afiliados.
+ */
+const ML_AFILIADO: Record<string, string> = {
+  // "MLB56655816": "https://meli.la/2MTTvCN",  // exemplo de entrada (MLB id → meli.la)
+};
+
+/** Extrai o id de catálogo/anúncio (MLB + dígitos) de uma URL do Mercado Livre, ou null. */
+function extrairMLB(u: URL): string | null {
+  const m = (u.pathname + u.search).toUpperCase().match(/MLB-?(\d{6,})/);
+  return m ? `MLB${m[1]}` : null;
+}
+
 export function linkAfiliado(url: string, _lojaSlug?: string | null): string {
   let u: URL;
   try { u = new URL(url); } catch { return url; }
@@ -53,7 +70,7 @@ export function linkAfiliado(url: string, _lojaSlug?: string | null): string {
   // Já é link de afiliado pronto → não mexe (Lomadee encurtado; Shopee manual).
   // Shopee: a Open API deles ainda não liberou pra gente, então os links curtos
   // shope.ee/... entram como URL final estática (já carregam o afiliado embutido).
-  if (host === "lmdee.link" || host === "awin1.com" || host === "shope.ee" || host.endsWith("shopee.com.br")) return url;
+  if (host === "lmdee.link" || host === "awin1.com" || host === "meli.la" || host === "shope.ee" || host.endsWith("shopee.com.br")) return url;
 
   // Amazon Associados — tag no fim da URL.
   if (host === "amazon.com.br" || host.endsWith(".amazon.com.br") || host === "amzn.to") {
@@ -68,5 +85,40 @@ export function linkAfiliado(url: string, _lojaSlug?: string | null): string {
     return `https://www.awin1.com/cread.php?awinmid=${mid}&awinaffid=${AWIN_PUBLISHER}&ued=${ued}`;
   }
 
+  // Mercado Livre — só PROCURA o link manual (meli.la) no mapa por MLB id. Sem
+  // entrada → devolve a URL crua e o "Dois Níveis" capa o CTA na vitrine.
+  if (host === "mercadolivre.com.br" || host.endsWith(".mercadolivre.com.br")
+      || host === "mercadolibre.com.br" || host.endsWith(".mercadolibre.com.br")) {
+    const mlb = extrairMLB(u);
+    if (mlb && ML_AFILIADO[mlb]) return ML_AFILIADO[mlb];
+    return url;
+  }
+
   return url;
+}
+
+/**
+ * O link de SAÍDA deste produto carrega o nosso ID de afiliado? Fonte única da
+ * verdade do modelo "Dois Níveis": true → CTA "Ver oferta" (redirect /r/);
+ * false → CTA capado "Comparar preço" (sem redirect externo). Decide pela URL,
+ * não pelo slug da loja (que diverge do adapter_key no banco).
+ */
+export function ehLinkMonetizado(url: string | null | undefined): boolean {
+  if (!url) return false;
+  let u: URL;
+  try { u = new URL(url); } catch { return false; }
+  const host = u.hostname.replace(/^www\./, "").toLowerCase();
+  // já vem como link de afiliado pronto
+  if (host === "lmdee.link" || host === "awin1.com" || host === "meli.la"
+      || host === "shope.ee" || host.endsWith("shopee.com.br")) return true;
+  // Amazon (tag) e Awin (MID aprovado) — embrulháveis no clique
+  if (host === "amazon.com.br" || host.endsWith(".amazon.com.br") || host === "amzn.to") return true;
+  if (AWIN_MIDS[host]) return true;
+  // Mercado Livre só monetiza se o produto tem link manual mapeado
+  if (host === "mercadolivre.com.br" || host.endsWith(".mercadolivre.com.br")
+      || host === "mercadolibre.com.br" || host.endsWith(".mercadolibre.com.br")) {
+    const mlb = extrairMLB(u);
+    return Boolean(mlb && ML_AFILIADO[mlb]);
+  }
+  return false;
 }

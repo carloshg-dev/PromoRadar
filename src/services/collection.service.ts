@@ -13,6 +13,7 @@ import { conflitaCategoria } from "@/infrastructure/scraping/core/categoria-guar
 import { computePromoScore } from "@/core/promo-score/promo-score";
 import { notificarColeta, notificarAfiliacao } from "@/infrastructure/notify/owner";
 import { redeAfiliada } from "@/lib/afiliados";
+import { degolada, PISO_GUILHOTINA } from "@/core/guilhotina";
 import { avisarPromocoesNovas, type DealNovo } from "@/infrastructure/notify/promo-feed";
 import type { AdapterKey, RawProduct } from "@/core/domain/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -67,6 +68,11 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       if (!lojaId) throw new Error(`Loja '${adapter.key}' não cadastrada`);
 
       for (const item of itens) {
+        // Guilhotina: oferta abaixo do piso (R$20) é isca/erro de feed → descartada.
+        if (degolada(item.precoAtual)) {
+          stats.descartados++;
+          continue;
+        }
         // Guarda de sanidade: descarta produto cujo título não pertence à categoria
         // (ex: PC/notebook/gabinete/placa-mãe rotulados como "SSD"). Vale p/ todos.
         if (conflitaCategoria(item.categoriaSlug, item.titulo)) {
@@ -82,7 +88,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
           ctx.log("error", `Salvar '${item.titulo}': ${(e as Error).message}`);
         }
       }
-      if (stats.descartados) ctx.log("info", `descartados ${stats.descartados} itens fora de categoria`);
+      if (stats.descartados) ctx.log("info", `descartados ${stats.descartados} itens (guilhotina <R$${PISO_GUILHOTINA} / fora de categoria)`);
     } catch (e) {
       stats.erros++;
       ctx.log("error", `Adapter ${adapter.key} falhou: ${(e as Error).message}`);

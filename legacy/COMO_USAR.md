@@ -1,4 +1,4 @@
-# 📡 PromoRadar — Guia Completo
+# 📡 promodetec — Guia Completo
 
 ## O que é este projeto?
 
@@ -11,9 +11,9 @@ e o HTML exibe tudo com preços verificados e links diretos.
 ## Estrutura do Projeto
 
 ```
-PromoRadar_COMPLETO/
+promodetec_COMPLETO/
 │
-├── PromoRadar.html          ← Interface web — abra no Chrome/Edge
+├── promodetec.html          ← Interface web — abra no Chrome/Edge
 │
 └── backend/
     ├── INICIAR.bat          ← Clique 2x para iniciar tudo (Windows)
@@ -67,7 +67,7 @@ python scheduler.py
 
 ### 2. Abra o app
 ```
-Duplo clique em: PromoRadar.html
+Duplo clique em: promodetec.html
 ```
 O badge no topo ficará **✅ ONLINE** quando conectado.
 
@@ -80,11 +80,11 @@ Sites das lojas
       ↓
  Python Scrapers  ──→  coleta preços reais a cada 15 min
       ↓
- SQLite Local    ──→  salva em database/promoradar.db
+ SQLite Local    ──→  salva em database/promodetec.db
       ↓
  FastAPI :8765   ──→  API local que o HTML consome
       ↓
- PromoRadar.html ──→  exibe promoções com links diretos
+ promodetec.html ──→  exibe promoções com links diretos
 ```
 
 ---
@@ -152,8 +152,8 @@ INTERVALO_LIMPEZA  = 60   # limpa promos antigas a cada 1 hora
 - Tudo roda **100% local** no seu computador
 - Nenhum dado enviado para servidores externos
 - API só aceita conexões de `127.0.0.1` (localhost)
-- Banco de dados salvo em `backend/database/promoradar.db`
+- Banco de dados salvo em `backend/database/promodetec.db`
 
 ---
 
-**PromoRadar v2.0** — Sistema de automação local de promoções
+**promodetec v2.0** — Sistema de automação local de promoções

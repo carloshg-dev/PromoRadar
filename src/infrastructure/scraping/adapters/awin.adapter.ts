@@ -18,6 +18,14 @@ const MAX_FEEDS = 4;       // nº de feeds baixados por rodada
 const MAX_POR_FEED = 700;  // teto de produtos por feed
 const MAX_TOTAL = 2500;    // teto geral (cabe no free tier; o feed mostra aleatório)
 
+/** Câmbio p/ feeds que não vêm em real (a AliExpress costuma vir em USD). Sem isto,
+ *  "US$ 3" virava "R$ 3" na vitrine (bug real). Configurável por env; default conservador. */
+const TAXAS_FX: Record<string, number> = {
+  BRL: 1,
+  USD: Number(process.env.AWIN_FX_USD) || 5.4,
+  EUR: Number(process.env.AWIN_FX_EUR) || 5.9,
+};
+
 /** Parser CSV tolerante (aspas + vírgula dentro do campo + "" escapado). */
 function parseCsvLinha(linha: string): string[] {
   const out: string[] = [];
@@ -71,7 +79,7 @@ export class AwinAdapter extends StoreAdapter {
         const ix = (n: string) => head.indexOf(n);
         const iNome = ix("product_name"), iLink = ix("aw_deep_link"),
           iImg = ix("aw_image_url"), iImg2 = ix("merchant_image_url"),
-          iPreco = ix("search_price"), iOld = ix("product_price_old"),
+          iPreco = ix("search_price"), iOld = ix("product_price_old"), iCur = ix("currency"),
           iMarca = ix("brand_name"), iMerch = ix("merchant_name"), iPid = ix("aw_product_id");
         if (iNome < 0 || iLink < 0 || iPreco < 0) { ctx.log("warn", `Awin feed ${f.fid}: colunas faltando`); continue; }
 
@@ -82,12 +90,17 @@ export class AwinAdapter extends StoreAdapter {
           const nome = row[iNome]?.trim();
           const link = row[iLink]?.trim();
           const img = (row[iImg]?.trim() || (iImg2 >= 0 ? row[iImg2]?.trim() : "")) || "";
-          const preco = Number(row[iPreco]);
+          // Converte pela moeda do feed (a AliExpress costuma vir em USD). Moeda fora
+          // do mapa → descarta a linha (melhor sem produto do que com preço errado).
+          const moeda = (iCur >= 0 ? row[iCur]?.trim().toUpperCase() : "") || "BRL";
+          const fx = TAXAS_FX[moeda];
+          const preco = fx ? Number(row[iPreco]) * fx : NaN;
           if (!nome || !link || !img || !Number.isFinite(preco) || preco <= 0) continue;
           const sku = `awin-${(iPid >= 0 ? row[iPid]?.trim() : "") || `${f.fid}-${r}`}`;
           if (vistos.has(sku)) continue;
           vistos.add(sku);
-          const old = iOld >= 0 ? Number(row[iOld]) : NaN;
+          const oldNum = iOld >= 0 ? Number(row[iOld]) : NaN;
+          const old = Number.isFinite(oldNum) && fx ? oldNum * fx : NaN;
           out.push({
             skuLoja: sku,
             titulo: nome.slice(0, 500),

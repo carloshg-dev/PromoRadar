@@ -46,7 +46,7 @@ export function SeasonalHomeHero({ produtosRodizio }: { produtosRodizio: Produto
         <div className="relative z-10 max-w-[620px]">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#00e46a]/35 bg-[#00e46a]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#90ffb6] shadow-[0_0_28px_-14px_rgba(34,224,107,.9)]">
             <Trophy className="h-3.5 w-3.5" />
-            Copa &amp; Arraiá PromoDetec
+            Copa & Arraiá PromoDetec
           </span>
           <h2 className="mt-5 max-w-xl text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,.65)] sm:text-5xl lg:text-6xl">
             A grande jogada é comprar no clima <span className="block text-[#00d85f] text-neon-glow">da festa.</span>

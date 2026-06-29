@@ -2,8 +2,8 @@
 
 Plataforma de **inteligência de promoções** de hardware e tecnologia. Não é só um comparador de preços: monitora preços reais, mantém histórico próprio, detecta falsos descontos com o algoritmo proprietário **PromoScore**, e agrega notícias de tecnologia.
 
-- **Produção:** https://promodetec.vercel.app (domínio antigo `promo-radar-mauve.vercel.app` deve redirecionar 301 para cá)
-- **Repo:** https://github.com/paulohelon280/PromoRadar
+- **Produção:** https://promodetec.vercel.app (domínio antigo `promodetec.vercel.app` deve redirecionar 301 para cá)
+- **Repo:** https://github.com/paulohelon280/promodetec
 - **Stack:** Next.js 14 (App Router) · TypeScript strict · TailwindCSS · Supabase (Postgres) · Vercel
 - **Projeto Supabase:** `sksjukjkxkptresysbno` (região sa-east-1)
 - **Auditoria estratégica (segurança, papéis, escala, monetização, parceiros):** [docs/AUDITORIA-ESTRATEGICA.md](docs/AUDITORIA-ESTRATEGICA.md)

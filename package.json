@@ -1,5 +1,5 @@
 {
-  "name": "promoradar",
+  "name": "promodetec",
   "version": "1.0.0",
   "private": true,
   "description": "Plataforma de ofertas verificadas, comparativo de preços reais e oportunidades em tecnologia, beleza, gadgets e compras do dia a dia.",
@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "next build && next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "scrape": "tsx scripts/run-scraper.ts",

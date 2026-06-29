@@ -3,11 +3,14 @@ import type { Produto } from "@/core/domain/types";
 import { ScorePill } from "@/components/score-ring";
 import { formatBRL, timeAgo, corLoja } from "@/lib/utils";
 import { temaSazonal } from "@/lib/seasonal";
-import { Trophy, ImageOff, ArrowUpRight } from "lucide-react";
+import { ehLinkMonetizado } from "@/lib/afiliados";
+import { Trophy, ImageOff, ArrowUpRight, Scale } from "lucide-react";
 
 export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
   const cor = corLoja(p.lojaSlug ?? p.lojaNome);
   const tema = temaSazonal(); // micro-badge sazonal (Copa/Arraiá/etc.)
+  // Modelo "Dois Níveis": só a loja monetizada ganha CTA de saída (não damos clique de graça).
+  const monetizado = ehLinkMonetizado(p.url);
 
   // Só é "menor histórico" se já houver variação real de preço (min < max).
   const temHistorico = p.precoMinHist != null && p.precoMaxHist != null && p.precoMaxHist > p.precoMinHist;
@@ -96,18 +99,26 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
             <span className="label-mono text-[10px] text-muted">{timeAgo(p.atualizadoEm)}</span>
           </div>
 
-          {/* CTA → loja parceira (monetizado via /r/). z-20 fica ACIMA do link que
-              cobre o card, então este botão leva direto à loja; o resto leva ao produto. */}
-          {/* <a> puro (NÃO <Link>): a saída /r/ é um redirect 302 server-side.
-              Com <Link>, o Next faz prefetch/navegação RSC que segue o 302 até a
-              loja e toma CORS (os erros do console). <a> faz navegação normal do
-              browser no clique — sem prefetch, sem RSC, sem CORS. rel sponsored =
-              boa prática de afiliado p/ o Google. */}
-          <a href={`/r/${p.id}?o=card`} rel="nofollow sponsored"
-            className="relative z-20 mt-3 flex items-center justify-center gap-1 rounded-lg border border-brand/30 bg-brand/10 py-2 text-xs font-semibold text-brand-2 transition-colors hover:bg-brand/20 hover:text-white">
-            Ver oferta <span className="max-w-[7rem] truncate font-normal opacity-75">· {p.lojaNome}</span>
-            <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
-          </a>
+          {/* CTA — modelo "Dois Níveis":
+              • monetizado → "Ver oferta" leva à loja via /r/ (redirect 302 server-side, registra clique).
+                <a> puro (NÃO <Link>): com <Link> o Next faz prefetch/RSC que segue o 302 e toma CORS.
+                rel sponsored = boa prática de afiliado p/ o Google.
+              • não monetizado → CTA CAPADO "Comparar preço": SEM redirect externo (não damos tráfego
+                de graça), só leva à página interna do produto (comparação entre lojas + histórico).
+              z-20 fica ACIMA do link que cobre o card. */}
+          {monetizado ? (
+            <a href={`/r/${p.id}?o=card`} rel="nofollow sponsored"
+              className="relative z-20 mt-3 flex items-center justify-center gap-1 rounded-lg border border-brand/30 bg-brand/10 py-2 text-xs font-semibold text-brand-2 transition-colors hover:bg-brand/20 hover:text-white">
+              Ver oferta <span className="max-w-[7rem] truncate font-normal opacity-75">· {p.lojaNome}</span>
+              <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+            </a>
+          ) : (
+            <Link href={`/produto/${p.id}`}
+              className="relative z-20 mt-3 flex items-center justify-center gap-1 rounded-lg border border-line bg-bg-soft/60 py-2 text-xs font-semibold text-muted transition-colors hover:bg-bg-soft hover:text-zinc-200">
+              Comparar preço <span className="max-w-[7rem] truncate font-normal opacity-75">· {p.lojaNome}</span>
+              <Scale className="h-3.5 w-3.5 shrink-0" />
+            </Link>
+          )}
         </div>
       </div>
     </div>
