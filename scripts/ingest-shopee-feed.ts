@@ -15,6 +15,7 @@ config({ path: ".env.local" });
 type CategoriaSlug =
   | "placas-de-video" | "processadores" | "ssds" | "memorias-ram"
   | "fontes" | "placas-mae" | "monitores" | "notebooks"
+  | "perifericos" | "gabinetes"
   | "whey-protein" | "creatina" | "pre-treino" | "fit-outros"
   | "geladeiras" | "fogoes" | "maquinas-lavar" | "tvs" | "micro-ondas" | "ar-condicionado"
   | "furadeiras" | "serras" | "lixadeiras" | "compressores" | "ferramentas-manuais"
@@ -118,6 +119,7 @@ const REQUIRED_HEADERS = [
 const VALID_CATEGORY_SLUGS: readonly CategoriaSlug[] = [
   "placas-de-video", "processadores", "ssds", "memorias-ram",
   "fontes", "placas-mae", "monitores", "notebooks",
+  "perifericos", "gabinetes",
   "whey-protein", "creatina", "pre-treino", "fit-outros",
   "geladeiras", "fogoes", "maquinas-lavar", "tvs", "micro-ondas", "ar-condicionado",
   "furadeiras", "serras", "lixadeiras", "compressores", "ferramentas-manuais",
@@ -129,6 +131,13 @@ const VALID_CATEGORY_SLUGS: readonly CategoriaSlug[] = [
 ];
 
 const CATEGORY_RULES: ReadonlyArray<{ slug: CategoriaSlug; terms: readonly string[] }> = [
+  // Gabinetes e periféricos vêm PRIMEIRO: anúncio Shopee BR entope o título de
+  // palavra-chave ("Gabinete Gamer Notebook PC Placa de Video Mouse..."), então casar
+  // componentes antes jogava gabinete em Notebooks. Termos específicos: sem "gabinete"
+  // cru (evita gabinete de cozinha); sem "mouse"/"keyboard"/"headset" cru (evita teclado
+  // musical, garrafa squeeze, fone bluetooth). Cadeira gamer entra aqui (pedido do dono).
+  { slug: "gabinetes", terms: ["gabinete gamer", "gabinete atx", "gabinete micro atx", "gabinete pc", "gabinete para pc", "gabinete para computador", "gabinete computador", "gabinete cpu", "pc case", "computer case", "gaming case"] },
+  { slug: "perifericos", terms: ["mouse gamer", "gaming mouse", "mouse sem fio", "mouse usb", "mouse optico", "mouse para pc", "teclado mecanico", "teclado gamer", "teclado para pc", "teclado para computador", "mousepad", "mouse pad", "headset gamer", "gaming headset", "headset para pc", "cadeira gamer", "cadeira gaming"] },
   { slug: "placas-de-video", terms: ["graphics card", "placa de video", "gpu"] },
   { slug: "processadores", terms: ["processor", "processador", "cpu"] },
   { slug: "ssds", terms: ["ssd", "solid state drive"] },

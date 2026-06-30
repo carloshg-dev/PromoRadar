@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CollectButton } from "@/components/collect-button";
 import { CollectAllButton } from "@/components/collect-all-button";
 import { CleanupButton } from "@/components/cleanup-button";
+import { AddOfferForm } from "@/components/admin/add-offer-form";
 import { timeAgo } from "@/lib/utils";
 import { Package, LineChart, Activity, Zap, ShieldCheck, Users, MousePointerClick, Search, Eye, Smartphone } from "lucide-react";
 
@@ -16,7 +17,7 @@ export const revalidate = 30;
 const ADAPTERS_UI = [
   "kabum", "mercadolivre", "pichau", "terabyte", "amazon", "growth", "soldiers",
   "maxtitanium", "integralmedica", "darklab", "havan", "americanas",
-  "ferramentasgerais", "epocacosmeticos", "lojadomecanico",
+  "ferramentasgerais", "epocacosmeticos", "lojadomecanico", "awin",
 ] as const;
 
 interface MembroEquipe { email: string | null; role: Papel }
@@ -124,6 +125,12 @@ export default async function Admin() {
         <Metric icon={<Zap className="h-4 w-4" />} label="Última" value={ultimo ? ultimo.status : "—"} isText
           sub={ultimo ? timeAgo(ultimo.criado_em) : undefined} />
       </div>
+
+      {podeColetar(papel) && (
+        <section className="mt-8">
+          <AddOfferForm />
+        </section>
+      )}
 
       {/* ANALYTICS (eventos próprios, 7 dias) */}
       <section className="mt-8">

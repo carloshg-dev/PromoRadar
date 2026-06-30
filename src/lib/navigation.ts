@@ -4,7 +4,7 @@ import {
   Refrigerator, CookingPot, WashingMachine, Tv, Microwave, AirVent,
   Drill, Wrench, Hammer, Wind, Cog, HardHat,
   Headphones, Watch, Speaker, BatteryCharging, Webcam,
-  SprayCan, Gem, Palette, Droplet, Scissors, Shirt, type LucideIcon,
+  SprayCan, Gem, Palette, Droplet, Scissors, Shirt, Mouse, Box, type LucideIcon,
 } from "lucide-react";
 
 /**
@@ -104,6 +104,8 @@ export const VERTICAIS: ReadonlyArray<Vertical> = [
       { slug: "placas-mae", nome: "Placas-Mãe", Icon: CircuitBoard },
       { slug: "monitores", nome: "Monitores", Icon: Monitor },
       { slug: "notebooks", nome: "Notebooks", Icon: Laptop },
+      { slug: "perifericos", nome: "Periféricos", Icon: Mouse },
+      { slug: "gabinetes", nome: "Gabinetes", Icon: Box },
     ],
   },
   {

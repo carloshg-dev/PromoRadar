@@ -3,6 +3,7 @@
 export type CategoriaSlug =
   | "placas-de-video" | "processadores" | "ssds" | "memorias-ram"
   | "fontes" | "placas-mae" | "monitores" | "notebooks"
+  | "perifericos" | "gabinetes"
   // vertical Mundo Fit (suplementos + acessórios)
   | "whey-protein" | "creatina" | "pre-treino" | "fit-outros"
   // vertical Casa & Eletro (eletrodomésticos)

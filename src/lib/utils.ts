@@ -27,6 +27,8 @@ const CORES_LOJA: Record<string, string> = {
   shopee: "#EE4D2D",      // laranja-coral oficial da Shopee (NÃO é roxo)
   aliexpress: "#E62E04",  // vermelho-laranja AliExpress (loja do feed Awin)
   awin: "#E62E04",
+  carrefour: "#004E9F",   // azul Carrefour
+  curadoria: "#7c5dff",   // ofertas adicionadas à mão pelo painel (cor da marca)
   // Mundo Fit — cada marca com sua identidade (verde Growth, dourado Soldiers,
   // e três vermelhos distintos: Max tijolo, Integral puro, Dark Lab vivo).
   // Suplemento não cruza gráfico com hardware (assinaturas de classe distintas).
