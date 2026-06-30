@@ -162,24 +162,16 @@ export const VERTICAIS: ReadonlyArray<Vertical> = [
   },
   {
     slug: "perfumes",
-    label: "Beleza",
-    href: "/categoria/perfumes-importados",
+    label: "Moda e Beleza",
+    href: "/categoria/moda",
     accent: ACCENT_PARFUM,
     categorias: [
+      { slug: "moda", nome: "Roupas, Calçados & Acessórios", Icon: Shirt },
       { slug: "perfumes-importados", nome: "Perfumes Importados", Icon: SprayCan },
       { slug: "perfumes-arabes", nome: "Perfumes Árabes", Icon: Gem },
       { slug: "maquiagem", nome: "Maquiagem", Icon: Palette },
       { slug: "skincare", nome: "Skincare", Icon: Droplet },
       { slug: "cabelos", nome: "Cabelos", Icon: Scissors },
-    ],
-  },
-  {
-    slug: "moda",
-    label: "Moda",
-    href: "/categoria/moda",
-    accent: ACCENT_PARFUM,
-    categorias: [
-      { slug: "moda", nome: "Roupas, calçados & acessórios", Icon: Shirt },
     ],
   },
 ];

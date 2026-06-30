@@ -24,6 +24,9 @@ const CORES_LOJA: Record<string, string> = {
   mercadolivre: "#FFE600",
   "mercado livre": "#FFE600",
   amazon: "#FF9900",
+  shopee: "#EE4D2D",      // laranja-coral oficial da Shopee (NÃO é roxo)
+  aliexpress: "#E62E04",  // vermelho-laranja AliExpress (loja do feed Awin)
+  awin: "#E62E04",
   // Mundo Fit — cada marca com sua identidade (verde Growth, dourado Soldiers,
   // e três vermelhos distintos: Max tijolo, Integral puro, Dark Lab vivo).
   // Suplemento não cruza gráfico com hardware (assinaturas de classe distintas).
@@ -48,6 +51,8 @@ const CORES_LOJA: Record<string, string> = {
   // Perfumes
   epocacosmeticos: "#7B2D8E", // roxo Época
   "epoca cosmeticos": "#7B2D8E",
+  // Moda
+  diesel: "#D52B5E", // rosa-vermelho Diesel (logo branca sobre fundo rosa)
 };
 
 export function corLoja(lojaSlugOuNome: string | null | undefined): string {

@@ -86,7 +86,7 @@ export function OfertasMercadoLivre() {
                     )}
                   </>
                 ) : (
-                  <span className="text-[11px] text-muted">Preço no anúncio</span>
+                  <span className="text-[11px] font-medium text-zinc-300">Preço no anúncio</span>
                 )}
               </div>
               <span className="mt-3 inline-flex items-center justify-center gap-1 rounded-lg border border-[#FFE600]/30 bg-[#FFE600]/10 py-1.5 text-xs font-semibold text-[#FFE600] transition-colors group-hover:bg-[#FFE600]/20 group-hover:text-white">

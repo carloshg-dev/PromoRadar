@@ -86,6 +86,10 @@ export function PriceHistoryChart({
   const path = buildSmoothPath(normalized);
   const areaPath = path ? `${path} L100 90 L0 90 Z` : "";
   const calculated = getSummary(validPoints, summary);
+  // Min/Méd/Máx só fazem sentido quando há VARIAÇÃO de preço. Produto novo (1 leitura)
+  // ou de preço estável tem min=méd=máx → mostrar 3 números idênticos parece quebrado.
+  const temVariacao = calculated.min != null && calculated.max != null
+    && Math.round(calculated.max * 100) > Math.round(calculated.min * 100);
   const selectedPoint = normalized.reduce<ChartPoint | null>((best, point) => {
     if (!best) return point;
     return point.value > best.value ? point : best;
@@ -156,23 +160,39 @@ export function PriceHistoryChart({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
-          {[
-            ["Mínimo", calculated.min, accent],
-            ["Médio", calculated.avg, "#ffffff"],
-            ["Máximo", calculated.max, "#fb7185"],
-          ].map(([label, value, color]) => (
-            <div key={label as string} className="rounded-2xl border border-white/12 bg-slate-950/42 px-4 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.04)]">
-              <div className="text-xs text-zinc-300/80">{label}</div>
-              <div className="mt-1 text-lg font-black" style={{ color: color as string }}>{formatBRL(value as number | null)}</div>
-              <div className="mt-1 text-xs text-zinc-200/80">dados do produto</div>
+        {temVariacao ? (
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
+            {[
+              ["Mínimo", calculated.min, accent],
+              ["Médio", calculated.avg, "#ffffff"],
+              ["Máximo", calculated.max, "#fb7185"],
+            ].map(([label, value, color]) => (
+              <div key={label as string} className="rounded-2xl border border-white/12 bg-slate-950/42 px-4 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.04)]">
+                <div className="text-xs text-zinc-300/80">{label}</div>
+                <div className="mt-1 text-lg font-black" style={{ color: color as string }}>{formatBRL(value as number | null)}</div>
+                <div className="mt-1 text-xs text-zinc-200/80">dados do produto</div>
+              </div>
+            ))}
+            <div className="flex items-center gap-2 text-sm text-zinc-200/78 sm:col-span-3">
+              <ShieldCheck className="h-5 w-5" style={{ color: accent }} />
+              Monitoramento diário em milhares de lojas parceiras
             </div>
-          ))}
-          <div className="flex items-center gap-2 text-sm text-zinc-200/78 sm:col-span-3">
-            <ShieldCheck className="h-5 w-5" style={{ color: accent }} />
-            Monitoramento diário em milhares de lojas parceiras
           </div>
-        </div>
+        ) : (
+          <div className="grid gap-3">
+            <div className="rounded-2xl border border-white/12 bg-slate-950/42 px-4 py-5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.04)]">
+              <div className="text-xs text-zinc-300/80">Preço atual</div>
+              <div className="mt-1 text-2xl font-black" style={{ color: accent }}>
+                {formatBRL(calculated.min ?? calculated.avg ?? calculated.max)}
+              </div>
+              <div className="mt-1 text-xs text-zinc-200/80">Novo no radar — ainda sem variação de preço registrada</div>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-zinc-200/78">
+              <ShieldCheck className="h-5 w-5" style={{ color: accent }} />
+              A partir de agora acompanhamos cada mudança de preço deste item
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

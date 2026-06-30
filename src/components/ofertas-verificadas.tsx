@@ -107,6 +107,7 @@ export function OfertasVerificadas() {
                 <span className="rounded-md bg-neon/15 px-1.5 py-0.5 text-[11px] font-bold text-neon">{o.selo}</span>
                 <span className="shrink-0 text-[10px] text-muted">até {ddmm(o.ateISO)}</span>
               </div>
+              <span className="mt-1.5 text-[10px] font-medium text-zinc-300">Preço no site do Carrefour</span>
               <span className="mt-3 inline-flex items-center justify-center gap-1 rounded-lg border border-brand/30 bg-brand/10 py-1.5 text-xs font-semibold text-brand-2 transition-colors group-hover:bg-brand/20 group-hover:text-white">
                 Ver oferta <ArrowUpRight className="h-3.5 w-3.5" />
               </span>

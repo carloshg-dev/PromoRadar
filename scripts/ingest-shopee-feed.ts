@@ -163,7 +163,11 @@ const CATEGORY_RULES: ReadonlyArray<{ slug: CategoriaSlug; terms: readonly strin
   { slug: "maquiagem", terms: ["makeup", "maquiagem", "lipstick", "batom", "mascara de cilios"] },
   { slug: "skincare", terms: ["skincare", "skin care", "sunscreen", "protetor solar", "serum facial"] },
   { slug: "cabelos", terms: ["hair care", "cabelo", "shampoo", "conditioner"] },
-  { slug: "moda", terms: ["women clothes", "men clothes", "kids fashion", "clothing", "apparel", "women shoes", "men shoes", "footwear", "fashion accessor", "roupa", "calcado", "tenis", "sapato", "vestido", "camiseta", "bolsa"] },
+  // Moda: casa nas CATEGORIAS de moda da Shopee (taxonomia oficial em inglês), NÃO em
+  // palavra solta do título — "roupa" puxava guarda-ROUPA (móvel) e passar ROUPA (tábua);
+  // "vestido" puxava reVESTIDO; "bolsa" puxava bolsa térmica. As global_category da Shopee
+  // são autoritativas → alta precisão (o que não for moda de verdade cai no bucket neutro).
+  { slug: "moda", terms: ["women clothes", "men clothes", "women shoes", "men shoes", "fashion accessor", "kids fashion", "muslim fashion"] },
 ];
 
 const AFFILIATE_SHORT_HOSTS = new Set(["s.shopee.com.br", "shope.ee"]);
@@ -459,10 +463,13 @@ function buildRawCategoryText(row: ShopeeCsvRow): string {
 }
 
 function resolveDiscountPct(row: ShopeeCsvRow, salePrice: number, originalPrice: number | null): number | null {
+  // O feed Shopee traz discount_percentage SEMPRE em pontos percentuais ("0".."100").
+  // NÃO tratar <=1 como fração: "1" é 1% de verdade, não 100%. Era o bug do "100% OFF"
+  // em massa — itens com 1% viravam 100%, inflavam o quality score e dominavam o Top-N
+  // (por isso TODO item selecionado aparecia com 100% de desconto).
   const rawDiscount = parseMoney(pick(row, ["discount_percentage"]));
   if (rawDiscount != null && Number.isFinite(rawDiscount) && rawDiscount > 0) {
-    const normalized = rawDiscount <= 1 ? rawDiscount * 100 : rawDiscount;
-    return clamp(Math.round(normalized), 0, 100);
+    return clamp(Math.round(rawDiscount), 0, 100);
   }
 
   if (originalPrice != null && originalPrice > salePrice) {
