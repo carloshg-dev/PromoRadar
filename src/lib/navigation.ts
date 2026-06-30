@@ -4,7 +4,7 @@ import {
   Refrigerator, CookingPot, WashingMachine, Tv, Microwave, AirVent,
   Drill, Wrench, Hammer, Wind, Cog, HardHat,
   Headphones, Watch, Speaker, BatteryCharging, Webcam,
-  SprayCan, Gem, Palette, Droplet, Scissors, type LucideIcon,
+  SprayCan, Gem, Palette, Droplet, Scissors, Shirt, type LucideIcon,
 } from "lucide-react";
 
 /**
@@ -171,6 +171,15 @@ export const VERTICAIS: ReadonlyArray<Vertical> = [
       { slug: "maquiagem", nome: "Maquiagem", Icon: Palette },
       { slug: "skincare", nome: "Skincare", Icon: Droplet },
       { slug: "cabelos", nome: "Cabelos", Icon: Scissors },
+    ],
+  },
+  {
+    slug: "moda",
+    label: "Moda",
+    href: "/categoria/moda",
+    accent: ACCENT_PARFUM,
+    categorias: [
+      { slug: "moda", nome: "Roupas, calçados & acessórios", Icon: Shirt },
     ],
   },
 ];

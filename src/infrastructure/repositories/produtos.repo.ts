@@ -55,28 +55,49 @@ export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
 }
 
 /**
+ * Seleciona até `n` produtos VARIADOS por categoria (rodízio round-robin) — evita
+ * o feed/carrossel virar "só um tipo" (ex: só PC parts ou só conectores). Embaralha
+ * antes pra a vitrine "passar aleatório" a cada revalidação.
+ */
+function diversificar(produtos: Produto[], n: number): Produto[] {
+  const arr = [...produtos];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = arr[i]!; arr[i] = arr[j]!; arr[j] = t;
+  }
+  const baldes = new Map<string, Produto[]>();
+  for (const p of arr) {
+    const k = p.categoriaSlug ?? "_";
+    const b = baldes.get(k);
+    if (b) b.push(p); else baldes.set(k, [p]);
+  }
+  const filas = [...baldes.values()];
+  const out: Produto[] = [];
+  let i = 0;
+  while (out.length < n && filas.some((f) => f.length)) {
+    const fila = filas[i % filas.length]!;
+    if (fila.length) out.push(fila.shift()!);
+    i++;
+  }
+  return out;
+}
+
+/**
  * Produtos de AFILIADO p/ o feed "Achados dos parceiros" da home — só o que
- * monetiza: Amazon (tag promodetec-20) + Lomadee (lmdee.link). Embaralha p/ o
- * feed "passar aleatório" a cada revalidação. Independe de categoria (soltos).
+ * monetiza (Amazon, AliExpress/Awin, Lomadee, Shopee). VARIADO por categoria
+ * (diversificar) pra não repetir o mesmo tipo de produto no carrossel.
  */
 export async function listarAfiliados(limit = 24): Promise<Produto[]> {
   const sb = createPublicClient();
   const { data, error } = await sb
     .from("vw_ofertas")
     .select(SELECT)
-    .or("loja_slug.eq.amazon,loja_slug.eq.aliexpress,url.ilike.%lmdee.link%,url.ilike.%awin1.com%")
+    .or("loja_slug.eq.amazon,loja_slug.eq.aliexpress,url.ilike.%lmdee.link%,url.ilike.%awin1.com%,url.ilike.%shopee.com.br%")
     .eq("em_estoque", true)
     .order("atualizado_em", { ascending: false })
-    .limit(160);
+    .limit(400);
   if (error) throw error;
-  const todos = (data ?? []).map(map);
-  for (let i = todos.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = todos[i]!;
-    todos[i] = todos[j]!;
-    todos[j] = tmp;
-  }
-  return todos.slice(0, limit);
+  return diversificar((data ?? []).map(map), limit);
 }
 
 export interface ProdutoRodizio extends Produto {
@@ -94,7 +115,6 @@ type PontoHistoricoRow = PontoHistorico & {
  */
 export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12): Promise<ProdutoRodizio[]> {
   const sb = createPublicClient();
-  const poolSize = Math.min(Math.max(limit * 4, limit), 48);
   const { data, error } = await sb
     .from("vw_ofertas")
     .select(SELECT)
@@ -102,18 +122,11 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
     .eq("em_estoque", true)
     .not("preco_atual", "is", null)
     .order("atualizado_em", { ascending: false })
-    .limit(poolSize);
+    .limit(400);
   if (error) throw error;
 
-  const pool = (data ?? []).map(map);
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = pool[i]!;
-    pool[i] = pool[j]!;
-    pool[j] = tmp;
-  }
-
-  const produtos = pool.slice(0, limit);
+  // VARIADO por categoria (round-robin) — não deixa o rodízio virar "só PC parts".
+  const produtos = diversificar((data ?? []).map(map), limit);
   if (!produtos.length) return [];
 
   const ids = produtos.map((produto) => produto.id);

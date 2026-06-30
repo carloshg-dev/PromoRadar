@@ -22,6 +22,7 @@ type CategoriaSlug =
   | "fones-bluetooth" | "smartwatch" | "caixa-de-som" | "power-bank" | "webcam-acao"
   | "perfumes-importados" | "perfumes-arabes"
   | "maquiagem" | "skincare" | "cabelos"
+  | "moda"
   | "ofertas-parceiros";
 
 type ShopeeCsvRow = Record<string, string | undefined>;
@@ -123,6 +124,7 @@ const VALID_CATEGORY_SLUGS: readonly CategoriaSlug[] = [
   "chaves-soquetes", "epi",
   "fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao",
   "perfumes-importados", "perfumes-arabes", "maquiagem", "skincare", "cabelos",
+  "moda",
   "ofertas-parceiros",
 ];
 
@@ -161,6 +163,7 @@ const CATEGORY_RULES: ReadonlyArray<{ slug: CategoriaSlug; terms: readonly strin
   { slug: "maquiagem", terms: ["makeup", "maquiagem", "lipstick", "batom", "mascara de cilios"] },
   { slug: "skincare", terms: ["skincare", "skin care", "sunscreen", "protetor solar", "serum facial"] },
   { slug: "cabelos", terms: ["hair care", "cabelo", "shampoo", "conditioner"] },
+  { slug: "moda", terms: ["women clothes", "men clothes", "kids fashion", "clothing", "apparel", "women shoes", "men shoes", "footwear", "fashion accessor", "roupa", "calcado", "tenis", "sapato", "vestido", "camiseta", "bolsa"] },
 ];
 
 const AFFILIATE_SHORT_HOSTS = new Set(["s.shopee.com.br", "shope.ee"]);

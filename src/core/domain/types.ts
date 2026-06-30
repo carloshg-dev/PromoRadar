@@ -15,6 +15,8 @@ export type CategoriaSlug =
   // vertical Beleza (perfumes + cosméticos: maquiagem, skincare, cabelos)
   | "perfumes-importados" | "perfumes-arabes"
   | "maquiagem" | "skincare" | "cabelos"
+  // vertical Moda (roupas, calçados e acessórios — alimentada pela Shopee)
+  | "moda"
   // bucket NEUTRO p/ o feed de afiliados (Lomadee solto — fora das verticais/comparador)
   | "ofertas-parceiros";
 
