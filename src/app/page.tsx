@@ -8,6 +8,7 @@ import { FeaturedDeal } from "@/components/featured-deal";
 import { ParceirosFeed } from "@/components/parceiros-feed";
 import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
+import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
 import { VitrineVertical } from "@/components/vitrine-vertical";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -130,8 +131,9 @@ export default async function Home() {
 
       {/* OFERTAS VERIFICADAS — promoções reais dos parceiros Awin (conferidas + ativas) */}
       <OfertasVerificadas />
-      {/* OFERTAS MERCADO LIVRE — desligado do ar até ter FOTO dos produtos (showcase imageless
-          fica feio). Componente + dados prontos em ofertas-mercadolivre.* — religar após buscar imagens. */}
+
+      {/* OFERTAS MERCADO LIVRE — showcase curado (meli.la) com foto + título REAIS resolvidos do destino */}
+      <OfertasMercadoLivre />
 
       {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato) */}
       <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
