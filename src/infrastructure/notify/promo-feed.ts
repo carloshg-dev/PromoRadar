@@ -25,7 +25,7 @@ export interface DealNovo {
   score: number;
 }
 
-const SITE = "https://promodetec.vercel.app";
+const SITE = "https://promodetec.com.br";
 const fmt = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 

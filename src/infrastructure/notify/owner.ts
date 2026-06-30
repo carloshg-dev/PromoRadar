@@ -13,7 +13,7 @@ import type { CollectionResult } from "@/services/collection.service";
  */
 
 const COR = { sucesso: 0x2ecc71, parcial: 0xf1c40f, falha: 0xe74c3c, info: 0x5865f2 } as const;
-const SITE = "https://promodetec.vercel.app";
+const SITE = "https://promodetec.com.br";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
