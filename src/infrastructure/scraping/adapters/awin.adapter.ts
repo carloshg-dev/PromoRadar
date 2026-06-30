@@ -11,12 +11,14 @@ import type { RawProduct, CategoriaSlug } from "@/core/domain/types";
  * verificadas"). Tudo vai pro bucket NEUTRO `ofertas-parceiros` (solto no feed).
  */
 
-const FEEDLIST = process.env.AWIN_DATAFEED_URL;
 const CAT: CategoriaSlug = "ofertas-parceiros";
-const ALVOS = new Set(["17665", "18879", "76888", "117737", "78382"]); // advertiser ids aprovados (Carrefour, AliExpress, Doce Beleza, Sanavita, Panasonic)
-const MAX_FEEDS = 4;       // nº de feeds baixados por rodada
-const MAX_POR_FEED = 700;  // teto de produtos por feed
-const MAX_TOTAL = 2500;    // teto geral (cabe no free tier; o feed mostra aleatório)
+// SÓ AliExpress por enquanto. O feed Awin junta vários anunciantes numa ÚNICA loja
+// ("AliExpress"), então rotular Diesel/Extra/L'Occitane como "AliExpress" seria ERRADO.
+// Multi-loja (cada anunciante com identidade própria) + categoria = Fase 2 (alimenta o comparador).
+const ALVOS = new Set(["18879"]); // Aliexpress BR & LATAM
+const MAX_FEEDS = 4;       // várias páginas do feed da AliExpress
+const MAX_POR_FEED = 700;  // teto por feed
+const MAX_TOTAL = 2500;    // teto geral (cabe no free tier)
 
 /** Câmbio p/ feeds que não vêm em real (a AliExpress costuma vir em USD). Sem isto,
  *  "US$ 3" virava "R$ 3" na vitrine (bug real). Configurável por env; default conservador. */
@@ -49,6 +51,9 @@ export class AwinAdapter extends StoreAdapter {
   readonly nome = "AliExpress";
 
   async coletar(ctx: AdapterContext): Promise<RawProduct[]> {
+    // Lê em RUNTIME (não no topo do módulo): no runner local, o dotenv carrega o
+    // .env.local DEPOIS dos imports, então um const no topo pegava `undefined`.
+    const FEEDLIST = process.env.AWIN_DATAFEED_URL;
     if (!FEEDLIST) { ctx.log("warn", "Awin sem AWIN_DATAFEED_URL — pulando."); return []; }
 
     // 1) Lista mestra → feeds dos nossos anunciantes (col 0 advId, 5 feedId, 12 url).

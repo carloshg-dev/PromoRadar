@@ -22,10 +22,10 @@ export default function Contato() {
       </a>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        <Card Icon={Handshake} t="Parcerias &amp; anunciantes" d="Lojas e marcas que querem aparecer ou integrar ofertas." />
+        <Card Icon={Handshake} t="Parcerias & anunciantes" d="Lojas e marcas que querem aparecer ou integrar ofertas." />
         <Card Icon={Newspaper} t="Imprensa" d="Pautas, dados de mercado e citações sobre o PromoDetec." />
         <Card Icon={ShieldCheck} t="Privacidade (LGPD)" d="Acesso, correção ou exclusão dos seus dados." />
-        <Card Icon={Mail} t="Suporte &amp; correções" d="Achou um preço errado ou um bug? Conte pra gente." />
+        <Card Icon={Mail} t="Suporte & correções" d="Achou um preço errado ou um bug? Conte pra gente." />
       </div>
 
       <p className="mt-8 text-xs text-muted">
@@ -40,8 +40,8 @@ function Card({ Icon, t, d }: { Icon: typeof Mail; t: string; d: string }) {
   return (
     <div className="glass rounded-xl border border-line p-4">
       <Icon className="h-5 w-5 text-brand-2" />
-      <div className="mt-1.5 font-semibold text-zinc-100" dangerouslySetInnerHTML={{ __html: t }} />
-      <div className="mt-0.5 text-xs text-muted" dangerouslySetInnerHTML={{ __html: d }} />
+      <div className="mt-1.5 font-semibold text-zinc-100">{t}</div>
+      <div className="mt-0.5 text-xs text-muted">{d}</div>
     </div>
   );
 }
