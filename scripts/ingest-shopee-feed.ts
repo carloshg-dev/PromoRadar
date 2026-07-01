@@ -9,6 +9,7 @@ import { createGunzip } from "node:zlib";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import csv from "csv-parser";
 import { config } from "dotenv";
+import { contemTermoProibido } from "../src/core/blacklist-nicho";
 
 config({ path: ".env.local" });
 
@@ -79,6 +80,7 @@ interface IngestStats {
   lojaPausada: number;
   semItemId: number;
   semTitulo: number;
+  bloqueadoPorNicho: number;
   precoInvalido: number;
   dedupSubstituidos: number;
   upserted: number;
@@ -206,6 +208,7 @@ const stats: IngestStats = {
   lojaPausada: 0,
   semItemId: 0,
   semTitulo: 0,
+  bloqueadoPorNicho: 0,
   precoInvalido: 0,
   dedupSubstituidos: 0,
   upserted: 0,
@@ -370,6 +373,15 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
   if (!titulo) {
     stats.semTitulo += 1;
     increment(stats.invalidos, "titulo_ausente");
+    return null;
+  }
+
+  // BLACKLIST DE NICHO (módulo isolado, ver src/core/blacklist-nicho.ts) — feeds
+  // B2C trazem lixo B2B de infraestrutura (fibra óptica, OLT/ONU de operadora).
+  // Descarta silencioso: não é erro, é fora do nosso público.
+  if (contemTermoProibido(titulo) || contemTermoProibido(buildRawCategoryText(row))) {
+    stats.bloqueadoPorNicho += 1;
+    increment(stats.invalidos, "fora_do_nicho_b2c");
     return null;
   }
 

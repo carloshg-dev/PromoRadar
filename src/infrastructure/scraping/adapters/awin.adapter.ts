@@ -1,6 +1,7 @@
 import { gunzipSync } from "node:zlib";
 import { StoreAdapter, type AdapterContext } from "@/infrastructure/scraping/core/adapter";
 import type { RawProduct, CategoriaSlug } from "@/core/domain/types";
+import { contemTermoProibido } from "@/core/blacklist-nicho";
 
 /**
  * Awin — feed de PRODUTOS oficial (formato Darwin/Google). Lê a URL Mestre de
@@ -101,6 +102,10 @@ export class AwinAdapter extends StoreAdapter {
           const fx = TAXAS_FX[moeda];
           const preco = fx ? Number(row[iPreco]) * fx : NaN;
           if (!nome || !link || !img || !Number.isFinite(preco) || preco <= 0) continue;
+          // BLACKLIST DE NICHO (módulo isolado, src/core/blacklist-nicho.ts): a
+          // AliExpress também traz lixo B2B de infraestrutura de telecom — fora
+          // do público B2C. Descarta silencioso.
+          if (contemTermoProibido(nome)) continue;
           const sku = `awin-${(iPid >= 0 ? row[iPid]?.trim() : "") || `${f.fid}-${r}`}`;
           if (vistos.has(sku)) continue;
           vistos.add(sku);

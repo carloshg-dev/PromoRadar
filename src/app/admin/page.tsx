@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CollectButton } from "@/components/collect-button";
 import { CollectAllButton } from "@/components/collect-all-button";
 import { CleanupButton } from "@/components/cleanup-button";
+import { RetroactiveCleanupButton } from "@/components/retroactive-cleanup-button";
 import { AddOfferForm } from "@/components/admin/add-offer-form";
 import { timeAgo } from "@/lib/utils";
 import { Package, LineChart, Activity, Zap, ShieldCheck, Users, MousePointerClick, Search, Eye, Smartphone } from "lucide-react";
@@ -188,7 +189,10 @@ export default async function Admin() {
       {podeGerirEquipe(papel) && (
         <section className="mt-8">
           <h2 className="mb-3 label-mono text-[11px] text-muted">Manutenção do catálogo (super admin)</h2>
-          <CleanupButton />
+          <div className="grid gap-3">
+            <CleanupButton />
+            <RetroactiveCleanupButton />
+          </div>
         </section>
       )}
 

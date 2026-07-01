@@ -1,5 +1,5 @@
 import { listarOfertasPaginado } from "@/infrastructure/repositories/produtos.repo";
-import { ProdutoCard } from "@/components/produto-card";
+import { VitrineComFiltroLoja } from "@/components/vitrine/filtro-lojas";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Paginacao } from "@/components/ui/paginacao";
@@ -44,9 +44,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
 
       {produtos.length ? (
         <>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-            {produtos.map((p) => <ProdutoCard key={p.id} p={p} />)}
-          </div>
+          <VitrineComFiltroLoja produtos={produtos} />
           <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref="/ofertas"
             params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
         </>
