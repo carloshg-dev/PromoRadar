@@ -20,6 +20,17 @@ function parseCsvLinha(linha) {
   out.push(cur); return out;
 }
 
+// Preco robusto: trata "999.00" (ponto decimal) E "799,00" (virgula) — o feed da Diesel
+// mistura os dois formatos entre colunas. Remove simbolo/milhar e normaliza p/ Number.
+function parseMoeda(v) {
+  if (v == null) return NaN;
+  const s = String(v).trim().replace(/[^\d.,]/g, '');
+  if (!s) return NaN;
+  const norm = /,\d{1,2}$/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  const n = Number(norm);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 (async () => {
   if (!FEEDLIST) throw new Error('sem AWIN_DATAFEED_URL');
   const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -57,7 +68,7 @@ function parseCsvLinha(linha) {
   const head = parseCsvLinha(linhas[0] || '').map(h => h.trim());
   const ix = n => head.indexOf(n);
   const iNome = ix('product_name'), iLink = ix('aw_deep_link'), iImg = ix('aw_image_url'), iImg2 = ix('merchant_image_url'),
-    iPreco = ix('search_price'), iOld = ix('product_price_old'), iCur = ix('currency'), iMarca = ix('brand_name'),
+    iPreco = ix('search_price'), iRrp = ix('rrp_price'), iOld = ix('product_price_old'), iCur = ix('currency'), iMarca = ix('brand_name'),
     iPid = ix('aw_product_id'), iCat = ix('merchant_category'), iDesc = ix('description');
 
   const rows = []; const vistos = new Set(); const titulosVistos = new Set(); let moda = 0, beleza = 0, fora = 0;
@@ -66,8 +77,12 @@ function parseCsvLinha(linha) {
     const row = parseCsvLinha(linhas[r]);
     const nome = (row[iNome] || '').trim(); const link = (row[iLink] || '').trim();
     const img = ((row[iImg] || '').trim() || (iImg2 >= 0 ? (row[iImg2] || '').trim() : '')) || '';
-    const moeda = (iCur >= 0 ? (row[iCur] || '').trim().toUpperCase() : '') || 'BRL'; const fx = FX[moeda];
-    const preco = fx ? Number(row[iPreco]) * fx : NaN;
+    const moeda = (iCur >= 0 ? (row[iCur] || '').trim().toUpperCase() : '') || 'BRL'; const fx = FX[moeda] || 1;
+    // A Diesel INVERTE as colunas: search_price traz o "De" (ex: 999) e rrp_price o "Por"
+    // (799). Robusto p/ os dois padroes: o que o cliente PAGA e sempre o MENOR dos dois;
+    // o "De" e o maior. parseMoeda trata "999.00" (ponto) e "799,00" (virgula) no mesmo feed.
+    const cand = [row[iPreco], iRrp >= 0 ? row[iRrp] : ''].map(v => parseMoeda(v) * fx).filter(v => Number.isFinite(v) && v > 0);
+    const preco = cand.length ? Math.min(...cand) : NaN;
     if (!nome || !link || !img || !Number.isFinite(preco) || preco < PISO) { fora++; continue; }
     const sku = `diesel-${(iPid >= 0 ? (row[iPid] || '').trim() : '') || r}`;
     if (vistos.has(sku)) continue; vistos.add(sku);
@@ -80,11 +95,13 @@ function parseCsvLinha(linha) {
     const slug = ehPerfume ? 'perfumes-importados' : 'moda';
     if (!catId[slug]) continue;
     if (ehPerfume) beleza++; else moda++;
-    const old = iOld >= 0 && fx ? Number(row[iOld]) * fx : NaN;
+    // "De" = maior candidato (quando ha promocao) -> preco_original + desconto real.
+    const maxc = cand.length ? Math.max(...cand) : NaN;
+    const old = (Number.isFinite(maxc) && maxc > preco) ? maxc : NaN;
     rows.push({ loja_id: lojaId, categoria_id: catId[slug], sku_loja: sku, titulo: nome.slice(0, 500),
       marca: (iMarca >= 0 && (row[iMarca] || '').trim()) || 'Diesel', url: link, imagem_url: img,
-      preco_atual: preco, preco_original: Number.isFinite(old) && old > preco ? old : null,
-      desconto_pct: Number.isFinite(old) && old > preco ? Math.round((1 - preco / old) * 100) : 0,
+      preco_atual: preco, preco_original: Number.isFinite(old) ? old : null,
+      desconto_pct: Number.isFinite(old) ? Math.round((1 - preco / old) * 100) : 0,
       // Diesel (premium, sem dado de desconto) ganha um score-base de "parceiro em
       // destaque" p/ NÃO afundar como nulls-last quando a categoria crescer. Não
       // inventa selo de desconto (desconto_pct só sai se houver preco_original real).
