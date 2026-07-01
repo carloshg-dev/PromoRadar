@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
-import { linkAfiliado } from "@/lib/afiliados";
+import { linkAfiliado, ehLinkMonetizado } from "@/lib/afiliados";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +22,14 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   // id desconhecido ou URL suspeita → home (nunca redirecionar para fora do esperado)
   if (!data?.url || !/^https?:\/\//i.test(data.url)) {
     return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // TRAVA DE VAZAMENTO: /r/ é a ÚNICA porta de saída do site — o gate de monetização
+  // tem que estar AQUI (servidor), não só escondido atrás do botão do card. Assim,
+  // mesmo que algum link antigo/direto aponte pra /r/{id} de um produto de loja que
+  // não nos afiliou, ele NUNCA sai de graça — cai na página interna de comparação.
+  if (!ehLinkMonetizado(data.url)) {
+    return NextResponse.redirect(new URL(`/produto/${data.id}`, req.url));
   }
 
   const ua = req.headers.get("user-agent") ?? "";
