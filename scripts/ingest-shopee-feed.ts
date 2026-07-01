@@ -611,7 +611,10 @@ async function markStaleProducts(supabase: SupabaseClient, lojaId: string, runSt
     .from("produtos")
     .update({ em_estoque: false }, { count: "exact" })
     .eq("loja_id", lojaId)
-    .lt("visto_em", runStartedAt);
+    .lt("visto_em", runStartedAt)
+    // BLINDAGEM (v4.0): a varredura NUNCA apaga oferta adicionada à mão pelo painel
+    // (sku_loja "manual:..."). O robô automático não derruba a curadoria humana.
+    .not("sku_loja", "like", "manual:%");
 
   if (error) {
     console.error(`[Shopee] Falha ao marcar stale: ${error.message}`);

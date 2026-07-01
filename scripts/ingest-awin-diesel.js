@@ -101,7 +101,9 @@ function parseCsvLinha(linha) {
     // stale-sweep escopado à loja Diesel: o que não foi visto neste run sai de estoque.
     const { error: stErr, count } = await sb.from('produtos')
       .update({ em_estoque: false }, { count: 'exact' })
-      .eq('loja_id', lojaId).lt('visto_em', runStart);
+      .eq('loja_id', lojaId).lt('visto_em', runStart)
+      // BLINDAGEM: preserva ofertas adicionadas a mao pelo painel (sku 'manual:...')
+      .not('sku_loja', 'like', 'manual:%');
     if (stErr) console.log('erro stale-sweep:', stErr.message);
     else console.log(`stale Diesel fora de estoque: ${count ?? 0}`);
   }

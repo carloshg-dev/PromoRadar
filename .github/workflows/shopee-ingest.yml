@@ -1,14 +1,12 @@
 name: Ingestao Shopee Feed
 
-# ⚠️ CRON DESLIGADO de proposito. O motor v1 (extraido do ambiente de teste) ainda
-# NAO foi revisado e aponta pro banco de PRODUCAO. So roda em disparo MANUAL
-# (workflow_dispatch). Reativar o `schedule` abaixo SOMENTE depois de:
-#   1) revisar o motor (dry-run primeiro, stale-sweep restrito a loja shopee);
-#   2) rodar o SQL da loja 'shopee' no Supabase;
-#   3) configurar os secrets (SHOPEE_FEED_URL, SUPABASE_*, etc.) neste repo.
+# CRON LIGADO (v4.0 Fatia 1). Motor revisado (desconto/moda/perifericos corrigidos,
+# stale-sweep restrito a loja shopee + BLINDAGEM dos manuais). Loja 'shopee' ja existe.
+# ⚠️ REQUISITO: setar o secret SHOPEE_FEED_URL neste repo (URL estavel do datafeed).
+# Os demais (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) ja existem via scrape.yml.
 on:
-  # schedule:
-  #   - cron: "40 0 * * *" # 21:40 BRT — REATIVAR APOS REVISAO
+  schedule:
+    - cron: "40 0 * * *" # 21:40 BRT — o feed Shopee atualiza ~20h00-21h30
   workflow_dispatch: {}
 
 concurrency:
@@ -21,10 +19,10 @@ jobs:
     timeout-minutes: 40
     env:
       SHOPEE_FEED_URL: ${{ secrets.SHOPEE_FEED_URL }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      PISO_PRECO_BRL: ${{ secrets.PISO_PRECO_BRL }}
-      SHOPEE_TOP_N: ${{ secrets.SHOPEE_TOP_N }}
+      PISO_PRECO_BRL: "20"
+      SHOPEE_TOP_N: "400"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

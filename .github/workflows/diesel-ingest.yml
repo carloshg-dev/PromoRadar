@@ -1,0 +1,33 @@
+name: Ingestao Diesel (Awin)
+
+# Importa o feed Awin da Diesel (advId 17846) -> categoria moda. Feed pequeno (~28
+# itens) e estavel -> 1x/dia de manha basta. Usa os secrets que JA existem (mesmos do
+# scrape.yml: AWIN_DATAFEED_URL, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).
+# Blindagem: o stale-sweep NAO apaga ofertas manuais (sku 'manual:').
+on:
+  schedule:
+    - cron: "30 9 * * *" # 06:30 BRT
+  workflow_dispatch: {}
+
+concurrency:
+  group: diesel-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWIN_DATAFEED_URL: ${{ secrets.AWIN_DATAFEED_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PISO_PRECO_BRL: "20"
+      AWIN_FX_USD: "5.4"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: node scripts/ingest-awin-diesel.js
