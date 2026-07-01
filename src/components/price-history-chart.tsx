@@ -126,8 +126,8 @@ export function PriceHistoryChart({
                   </defs>
                   <path d={areaPath} fill="url(#rodizio-price-fill)" />
                   <path d={path} fill="none" stroke={accent} strokeLinecap="round" strokeWidth="2.2" vectorEffect="non-scaling-stroke" />
-                  {normalized.map((point) => (
-                    <circle key={`${point.label}-${point.x}`} cx={point.x} cy={point.y} r="1.8" fill={accent} vectorEffect="non-scaling-stroke" />
+                  {normalized.map((point, i) => (
+                    <circle key={`${point.label}-${i}`} cx={point.x} cy={point.y} r="1.8" fill={accent} vectorEffect="non-scaling-stroke" />
                   ))}
                   {selectedPoint ? (
                     <circle cx={selectedPoint.x} cy={selectedPoint.y} r="3.2" fill="#0b1f18" stroke="#fff" strokeWidth="1.7" vectorEffect="non-scaling-stroke" />
@@ -152,8 +152,8 @@ export function PriceHistoryChart({
               ) : null}
 
               <div className="absolute inset-x-0 bottom-0 flex justify-between px-1 text-[11px] text-zinc-300/80">
-                {validPoints.map((point) => (
-                  <span key={point.label}>{point.label}</span>
+                {validPoints.map((point, i) => (
+                  <span key={`${point.label}-${i}`}>{point.label}</span>
                 ))}
               </div>
             </div>

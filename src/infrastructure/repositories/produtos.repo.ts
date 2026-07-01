@@ -1,6 +1,7 @@
 import { createPublicClient } from "@/infrastructure/supabase/client";
 import type { Produto, CategoriaSlug } from "@/core/domain/types";
 import { assinatura, rotuloClasse } from "@/core/matching/match";
+import { ehLinkMonetizado } from "@/lib/afiliados";
 
 const SELECT = `id,titulo,marca,url,imagem_url,preco_atual,preco_original,desconto_pct,
   promo_score,preco_min_hist,preco_max_hist,preco_avg_hist,em_estoque,atualizado_em,
@@ -42,16 +43,28 @@ export interface OfertaFiltro {
 
 export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
   const sb = createPublicClient();
+  const limite = f.limit ?? 60;
+  // Pool maior que o limite pedido: dá margem pra achar monetizados pra promover
+  // à frente sem re-buscar. Piso BAIXO (30) protege o egress do Supabase free — vitrine
+  // pequena (3-5 itens) não precisa varrer 60 linhas pra achar afiliado no topo.
+  const pool = Math.min(400, Math.max(limite * 6, 30));
   let q = sb.from("vw_ofertas").select(SELECT).order("promo_score", { ascending: false, nullsFirst: false });
   if (f.categorias && f.categorias.length) q = q.in("categoria_slug", f.categorias);
   else if (f.categoria && f.categoria !== "all") q = q.eq("categoria_slug", f.categoria);
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", `%${f.busca}%`);
-  q = q.limit(f.limit ?? 60);
+  q = q.limit(pool);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []).map(map);
+  const produtos = (data ?? []).map(map);
+  // MONETIZADO PRIMEIRO: loja que paga comissão vira destaque mesmo com nota menor
+  // — promo_score só desempata dentro do mesmo grupo (monetizado × não-monetizado).
+  produtos.sort((a, b) => {
+    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
+    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
+  });
+  return produtos.slice(0, limite);
 }
 
 /**
@@ -158,6 +171,9 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
 /** Página de ofertas com total — para paginação real nas listas (/ofertas, /categoria). */
 export interface PaginaOfertas { produtos: Produto[]; total: number }
 
+/** Teto do pool p/ reordenar "monetizado primeiro" — cobre as páginas rasas (99% do tráfego). */
+const POOL_ORDENACAO = 1000;
+
 export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number } = {}): Promise<PaginaOfertas> {
   const sb = createPublicClient();
   const porPagina = f.limit ?? 60;
@@ -172,9 +188,23 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", `%${f.busca}%`);
-  const { data, error, count } = await q.range(de, de + porPagina - 1);
+
+  // Páginas rasas: puxa o pool (top por nota) e reordena MONETIZADO PRIMEIRO — a loja que
+  // te paga comissão vira destaque, mesmo com nota menor (a nota vira só desempate interno).
+  // Assim o gamer que entra na Tech vê Amazon/Shopee/AliExpress no topo, não quem nos rejeitou.
+  // Página funda de lista gigante (raríssimo): ranged puro por nota, sem custo de reordenar.
+  const rasa = de < POOL_ORDENACAO;
+  const { data, error, count } = await q.range(rasa ? 0 : de, rasa ? POOL_ORDENACAO - 1 : de + porPagina - 1);
   if (error) throw error;
-  return { produtos: (data ?? []).map(map), total: count ?? 0 };
+  const total = count ?? 0;
+  if (!rasa) return { produtos: (data ?? []).map(map), total };
+
+  const pool = (data ?? []).map(map);
+  pool.sort((a, b) => {
+    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
+    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
+  });
+  return { produtos: pool.slice(de, de + porPagina), total };
 }
 
 /** Comparação de uma classe de produto entre lojas (matching por assinatura de modelo). */

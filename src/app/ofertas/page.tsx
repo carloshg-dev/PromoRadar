@@ -30,7 +30,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas" }]} />
       <h1 className="mt-3 text-2xl font-bold">Melhores ofertas</h1>
       <p className="mt-1 text-sm text-muted">
-        Ordenadas por PromoScore — o preço real, não a vitrine.
+        Comparadas em tempo real — o preço que importa, não a vitrine.
         {total > 0 && <span className="label-mono ml-2 text-[11px]">{total.toLocaleString("pt-BR")} produtos no radar</span>}
       </p>
 

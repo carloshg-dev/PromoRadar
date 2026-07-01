@@ -58,8 +58,9 @@ export default function Privacidade() {
         <Secao titulo="5. Afiliados">
           <p>
             O PromoDetec participa de programas de afiliados. Podemos receber comissão quando você compra por meio dos
-            nossos links — <strong className="text-zinc-200">sem custo extra pra você</strong>. Isso não influencia o
-            PromoScore, que é calculado a partir do histórico real de preços.
+            nossos links — <strong className="text-zinc-200">sem custo extra pra você</strong>. O preço e o histórico
+            exibidos são os mesmos pra todo mundo — mas, entre ofertas equivalentes, lojas parceiras podem aparecer em
+            posição de destaque na ordenação.
           </p>
         </Secao>
 

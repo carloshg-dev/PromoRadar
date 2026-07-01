@@ -23,7 +23,7 @@ export default function Termos() {
           <p>
             O PromoDetec é um <strong className="text-zinc-200">comparador e agregador de ofertas</strong> que reúne
             preços de <strong className="text-zinc-200">fontes públicas</strong> de diversas lojas e os apresenta com
-            histórico e o PromoScore. <strong className="text-zinc-200">Não vendemos produtos</strong> nem processamos
+            histórico de preços. <strong className="text-zinc-200">Não vendemos produtos</strong> nem processamos
             pagamentos: ao escolher uma oferta, você é direcionado ao site oficial da loja, onde a compra acontece.
           </p>
         </Secao>
@@ -40,7 +40,9 @@ export default function Termos() {
         <Secao titulo="4. Afiliados">
           <p>
             Participamos de programas de afiliados e podemos receber comissão por compras feitas via nossos links,
-            <strong className="text-zinc-200"> sem custo extra pra você</strong>. Isso não afeta o PromoScore.
+            <strong className="text-zinc-200"> sem custo extra pra você</strong>. O preço e o histórico exibidos são
+            os mesmos pra todo mundo — mas, entre ofertas equivalentes, lojas parceiras podem aparecer em posição de
+            destaque na ordenação.
           </p>
         </Secao>
 

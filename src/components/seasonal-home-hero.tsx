@@ -52,7 +52,7 @@ export function SeasonalHomeHero({ produtosRodizio }: { produtosRodizio: Produto
             A grande jogada é comprar no clima <span className="block text-[#00d85f] text-neon-glow">da festa.</span>
           </h2>
           <p className="mt-5 max-w-lg text-sm leading-6 text-zinc-100/88 sm:text-base">
-            Ofertas garimpadas para torcer, festejar e comparar com calma: do placar do PromoScore ao arraiá de categorias, a melhor compra entra em campo quando o preço faz sentido.
+            Ofertas garimpadas para torcer, festejar e comparar com calma: da comparação de preços ao arraiá de categorias, a melhor compra entra em campo quando o preço faz sentido.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link href="/ofertas">

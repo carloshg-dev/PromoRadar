@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Produto } from "@/core/domain/types";
-import { ScorePill } from "@/components/score-ring";
 import { formatBRL, timeAgo, corLoja } from "@/lib/utils";
 import { temaSazonal } from "@/lib/seasonal";
 import { ehLinkMonetizado } from "@/lib/afiliados";
@@ -43,8 +42,6 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
           style={{ color: cor, backgroundColor: "rgba(12,12,15,0.92)", border: `1px solid ${cor}55` }}>
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: cor }} />{p.lojaNome}
         </span>
-        {/* score */}
-        <span className="absolute right-2 top-2.5 z-10"><ScorePill score={p.promoScore} /></span>
         {/* desconto */}
         {desconto != null && (
           <span className="absolute bottom-2 left-2 z-10 rounded-md bg-emerald-500 px-1.5 py-0.5 text-[11px] font-bold text-emerald-950 shadow">−{desconto}%</span>

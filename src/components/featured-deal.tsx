@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Destaque } from "@/infrastructure/repositories/produtos.repo";
-import { ScoreRing } from "@/components/score-ring";
 import { PriceChart } from "@/components/price-chart";
 import { StorePriceBars } from "@/components/store-price-bars";
 import { formatBRL, corLoja } from "@/lib/utils";
@@ -9,7 +8,7 @@ import { Sparkles, ImageOff, TrendingDown, ArrowUpRight, LineChart as LineChartI
 
 /**
  * Card "Oferta em destaque" da home — espelha o mockup: foto + melhor preço +
- * PromoScore + gráfico de histórico (verde) + comparação entre lojas. Usa dados
+ * gráfico de histórico (verde) + comparação entre lojas. Usa dados
  * reais (a melhor comparação do momento).
  */
 export function FeaturedDeal({ d }: { d: Destaque }) {
@@ -46,7 +45,6 @@ export function FeaturedDeal({ d }: { d: Destaque }) {
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: corRef }} />{ref.lojaNome}
           </div>
         </div>
-        <ScoreRing score={c.melhorScore} size={68} showLabel={false} />
       </div>
 
       {/* gráfico de barras = comparação entre lojas (dado real, sempre preenchido) */}

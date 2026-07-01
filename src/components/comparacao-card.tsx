@@ -1,5 +1,4 @@
 import type { Comparacao } from "@/infrastructure/repositories/produtos.repo";
-import { ScorePill } from "@/components/score-ring";
 import { StorePriceBars } from "@/components/store-price-bars";
 import { formatBRL } from "@/lib/utils";
 import { TrendingDown, ImageOff } from "lucide-react";
@@ -28,7 +27,6 @@ export function ComparacaoCard({ c }: { c: Comparacao }) {
           </div>
           <h3 className="truncate font-display text-lg font-bold tracking-tightest text-white">{c.rotulo}</h3>
         </div>
-        <ScorePill score={c.melhorScore} />
       </div>
 
       {/* gráfico de barras: preço por loja */}

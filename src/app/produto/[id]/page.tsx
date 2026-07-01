@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { obterProduto, historicoPrecos, comparacaoDeProduto, relacionados } from "@/infrastructure/repositories/produtos.repo";
 import { PriceChart, type ChartPoint } from "@/components/price-chart";
-import { PromoScoreBadge } from "@/components/promo-score-badge";
 import { StorePriceBars } from "@/components/store-price-bars";
 import { ProdutoCard } from "@/components/produto-card";
 import { Card } from "@/components/ui/card";
@@ -112,7 +111,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
           </Card>
         </div>
 
-        {/* Compra + score */}
+        {/* Compra */}
         <Card className="glass flex h-fit flex-col p-5">
           <div className="mb-4 grid aspect-square place-items-center overflow-hidden rounded-xl bg-white">
             {p.imagemUrl ? (
@@ -122,7 +121,6 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
               <ImageOff className="h-10 w-10 text-muted/40" />
             )}
           </div>
-          <PromoScoreBadge score={p.promoScore} />
           <div className="mt-4 font-display text-3xl font-extrabold text-neon">{formatBRL(p.precoAtual)}</div>
           {p.precoOriginal && p.precoAtual && p.precoOriginal > p.precoAtual && (
             <div className="text-sm text-muted line-through">{formatBRL(p.precoOriginal)}</div>

@@ -16,7 +16,7 @@ export async function AuthAside() {
   const s = await stats();
   const beneficios = [
     { icon: <TrendingUp className="h-4 w-4" />, t: "Histórico real de preços", d: "Veja a evolução e ignore descontos maquiados." },
-    { icon: <Sparkles className="h-4 w-4" />, t: "PromoScore de 0 a 100", d: "Cada oferta classificada pela inteligência do PromoDetec." },
+    { icon: <Sparkles className="h-4 w-4" />, t: "Comparação entre lojas", d: "Preço lado a lado nas lojas parceiras, sem precisar abrir 10 abas." },
     { icon: <ShieldCheck className="h-4 w-4" />, t: "Alertas inteligentes", d: "Avisamos quando o preço que você quer aparecer." },
   ];
   return (

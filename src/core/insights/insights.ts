@@ -69,12 +69,6 @@ export function gerarInsights(p: Produto, serie: SeriePonto[]): Insight[] {
     else if (t.direcao === "alta") out.push({ tipo: "alerta", icon: "↗️", texto: "Tendência recente de alta no preço." });
   }
 
-  // PromoScore
-  if (p.promoScore != null) {
-    if (p.promoScore >= 80) out.push({ tipo: "positivo", icon: "✨", texto: `PromoScore ${p.promoScore}: oportunidade ${p.promoScore >= 95 ? "excepcional" : "excelente"}.` });
-    else if (p.promoScore < 60) out.push({ tipo: "neutro", icon: "🧮", texto: `PromoScore ${p.promoScore}: preço comum no momento.` });
-  }
-
   if (!out.length) out.push({ tipo: "neutro", icon: "⏳", texto: "Coletando histórico — insights melhoram a cada atualização." });
   return out;
 }

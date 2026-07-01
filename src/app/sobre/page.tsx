@@ -3,7 +3,7 @@ import { LineChart, Gauge, ShieldCheck, Scale } from "lucide-react";
 
 export const metadata = {
   title: "Sobre",
-  description: "O que é o PromoDetec: inteligência de promoções com histórico real de preços e o PromoScore.",
+  description: "O que é o PromoDetec: inteligência de promoções com histórico real de preços e detecção de desconto falso.",
 };
 
 export default function Sobre() {
@@ -12,8 +12,8 @@ export default function Sobre() {
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Sobre" }]} />
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Sobre o PromoDetec</h1>
       <p className="mt-3 text-base text-muted">
-        Um radar de promoções com <strong className="text-zinc-200">memória de preços</strong> e uma
-        nota de confiança — feito para você comprar no momento certo, com dados e não com vitrine.
+        Um radar de promoções com <strong className="text-zinc-200">memória de preços</strong> de verdade
+        — feito para você comprar no momento certo, com dados e não com vitrine.
       </p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-zinc-300">
@@ -21,8 +21,7 @@ export default function Sobre() {
           <h2 className="mb-2 text-lg font-semibold text-zinc-100">O que é</h2>
           <p>
             O PromoDetec monitora os preços das principais lojas do Brasil ao longo do dia, guarda o
-            histórico de cada produto e dá a cada oferta uma nota de <strong className="text-zinc-200">0 a 100</strong> —
-            o <strong className="text-zinc-200">PromoScore</strong> — que mostra o quão boa é a promoção de verdade.
+            histórico de cada produto e compara com o preço de hoje pra mostrar se a promoção é real.
             Cobrimos seis frentes: <strong className="text-zinc-200">tecnologia, casa &amp; eletro, ferramentas,
             suplementos, gadgets e perfumes</strong>. É um site (não um app pra instalar): você abre pelo navegador,
             de qualquer lugar.
@@ -43,7 +42,7 @@ export default function Sobre() {
           <h2 className="mb-3 text-lg font-semibold text-zinc-100">Como funciona</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             <Item Icon={LineChart} t="Histórico real de preços" d="Coletamos os preços várias vezes ao dia e guardamos tudo." />
-            <Item Icon={Gauge} t="PromoScore 0–100" d="Uma nota que revela quão real é cada desconto." />
+            <Item Icon={Gauge} t="Coleta contínua" d="Preços atualizados várias vezes ao dia, direto das lojas." />
             <Item Icon={ShieldCheck} t="Detecta desconto falso" d="Comparamos com a média histórica, não com a vitrine." />
             <Item Icon={Scale} t="Compara entre lojas" d="O mesmo modelo, lado a lado, mostrando onde é mais barato." />
           </ul>

@@ -23,6 +23,5 @@ export const SITE_KEYWORDS = [
   "cabelo",
   "beleza",
   "histórico de preços",
-  "PromoScore",
 ];
 export const SUPPORT_EMAIL = "suporte@promodetec.com.br";
