@@ -23,6 +23,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       PISO_PRECO_BRL: "20"
       SHOPEE_TOP_N: "400"
+      SHOPEE_AFFILIATE_ID: "18318451097" # ID de afiliado do dono (publico — vai na URL). Sem isso, links salvos ficam SEM comissao.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

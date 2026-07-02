@@ -10,6 +10,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import csv from "csv-parser";
 import { config } from "dotenv";
 import { contemTermoProibido } from "../src/core/blacklist-nicho";
+import { linkShopeeAfiliado, shopeeAffiliateId } from "../src/core/shopee-afiliado";
 
 config({ path: ".env.local" });
 
@@ -398,7 +399,13 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
     return null;
   }
 
-  const url = pick(row, ["product_short link", "product_link", "Link de Afiliado"]);
+  // ATRIBUIÇÃO DE COMISSÃO: o feed traz o link CRU + um short link "an_redir" GENÉRICO
+  // (sem o ID de ninguém). Envelopamos o link cru com o ID do dono (utm_source=an_<id>).
+  // Sem SHOPEE_AFFILIATE_ID no ambiente da coleta, cai no short link do feed (antigo).
+  const afId = shopeeAffiliateId();
+  const linkCru = pick(row, ["product_link"]);
+  const linkShort = pick(row, ["product_short link", "Link de Afiliado"]);
+  const url = afId && linkCru ? linkShopeeAfiliado(linkCru, afId) : (linkShort || linkCru);
   if (!url || !hasAffiliateTracking(url)) {
     stats.semTracking += 1;
     increment(stats.invalidos, "link_sem_tracking_afiliado");
