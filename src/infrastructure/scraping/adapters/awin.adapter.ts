@@ -1,25 +1,29 @@
 import { gunzipSync } from "node:zlib";
 import { StoreAdapter, type AdapterContext } from "@/infrastructure/scraping/core/adapter";
-import type { RawProduct, CategoriaSlug } from "@/core/domain/types";
+import type { RawProduct } from "@/core/domain/types";
 import { contemTermoProibido } from "@/core/blacklist-nicho";
+import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
 
 /**
- * Awin — feed de PRODUTOS oficial (formato Darwin/Google). Lê a URL Mestre de
- * Feeds (AWIN_DATAFEED_URL), acha os feeds dos nossos anunciantes e baixa o
- * catálogo (.csv.gz) com FOTO + PREÇO + link de afiliado PRONTO (aw_deep_link,
- * já com o publisher 2936727). Hoje só a AliExpress BR&LATAM (18879) expõe feed
- * pra nós (Carrefour/Doce Beleza/Sanavita não têm → ficam nas "Ofertas
- * verificadas"). Tudo vai pro bucket NEUTRO `ofertas-parceiros` (solto no feed).
+ * Awin — feed de PRODUTOS oficial (formato Darwin), agora MULTI-LOJA. Lê a URL
+ * Mestre de Feeds (AWIN_DATAFEED_URL), agrupa os feeds POR ANUNCIANTE aprovado
+ * (fonte única: src/core/awin-anunciantes.ts) e emite cada produto com a
+ * IDENTIDADE da própria loja (slug/nome/logo) — o collection.service cria a
+ * loja no banco na 1ª aparição. Links já vêm monetizados (aw_deep_link com o
+ * publisher), com FOTO + PREÇO.
+ *
+ * • Diesel (17846) fica FORA daqui de propósito (ingestao: "cron-proprio"):
+ *   scripts/ingest-awin-diesel.js já cuida dela — incluir aqui = ingestão DUPLA.
+ * • Anunciante aprovado SEM feed no feedList é normal (nem todo advertiser expõe
+ *   datafeed) — é logado e segue monetizando só pelo wrapper de deeplink.
+ * • Preço: o que o cliente paga = MENOR entre search_price/rrp_price/
+ *   product_price_old (o feed Diesel ensinou que as colunas podem vir INVERTIDAS);
+ *   o maior vira o "De". parseMoeda aceita "999.00" e "799,00" no mesmo feed.
  */
 
-const CAT: CategoriaSlug = "ofertas-parceiros";
-// SÓ AliExpress por enquanto. O feed Awin junta vários anunciantes numa ÚNICA loja
-// ("AliExpress"), então rotular Diesel/Extra/L'Occitane como "AliExpress" seria ERRADO.
-// Multi-loja (cada anunciante com identidade própria) + categoria = Fase 2 (alimenta o comparador).
-const ALVOS = new Set(["18879"]); // Aliexpress BR & LATAM
-const MAX_FEEDS = 4;       // várias páginas do feed da AliExpress
-const MAX_POR_FEED = 700;  // teto por feed
-const MAX_TOTAL = 2500;    // teto geral (cabe no free tier)
+const MAX_TOTAL = 4500;         // teto geral por rodada (egress do free tier)
+const MAX_FEEDS_PADRAO = 2;     // feeds por anunciante (AliExpress sobe via config)
+const MAX_POR_ANUNCIANTE = 500; // produtos por anunciante (idem)
 
 /** Câmbio p/ feeds que não vêm em real (a AliExpress costuma vir em USD). Sem isto,
  *  "US$ 3" virava "R$ 3" na vitrine (bug real). Configurável por env; default conservador. */
@@ -47,9 +51,19 @@ function parseCsvLinha(linha: string): string[] {
   return out;
 }
 
+/** Preço robusto: "1.234,56" (BR), "999.00" (ponto) e "799,00" no MESMO feed. */
+function parseMoeda(v: string | null | undefined): number {
+  if (v == null) return NaN;
+  const s = String(v).trim().replace(/[^\d.,]/g, "");
+  if (!s) return NaN;
+  const norm = /,\d{1,2}$/.test(s) ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+  const n = Number(norm);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 export class AwinAdapter extends StoreAdapter {
   readonly key = "awin" as const;
-  readonly nome = "AliExpress";
+  readonly nome = "Awin"; // fallback de exibição — cada item carrega a própria loja
 
   async coletar(ctx: AdapterContext): Promise<RawProduct[]> {
     // Lê em RUNTIME (não no topo do módulo): no runner local, o dotenv carrega o
@@ -57,77 +71,106 @@ export class AwinAdapter extends StoreAdapter {
     const FEEDLIST = process.env.AWIN_DATAFEED_URL;
     if (!FEEDLIST) { ctx.log("warn", "Awin sem AWIN_DATAFEED_URL — pulando."); return []; }
 
-    // 1) Lista mestra → feeds dos nossos anunciantes (col 0 advId, 5 feedId, 12 url).
-    const feeds: Array<{ nome: string; fid: string; url: string }> = [];
+    const alvos = anunciantesDoAdapter(); // mid → anunciante (Diesel fora: cron próprio)
+
+    // 1) Lista mestra → feeds POR anunciante (col 0 advId, 5 feedId, 12 url).
+    const feedsPorMid = new Map<string, Array<{ fid: string; url: string }>>();
     try {
       const lista = await this.fetchHtml(FEEDLIST);
       for (const ln of lista.split("\n")) {
         const c = ln.split('","').map((s) => s.replace(/^"|"$/g, ""));
-        if (ALVOS.has(c[0] ?? "") && (c[12] ?? "").startsWith("http")) {
-          feeds.push({ nome: c[1] ?? "", fid: c[5] ?? "", url: c[12]! });
+        const mid = c[0] ?? "";
+        if (alvos.has(mid) && (c[12] ?? "").startsWith("http")) {
+          if (!feedsPorMid.has(mid)) feedsPorMid.set(mid, []);
+          feedsPorMid.get(mid)!.push({ fid: c[5] ?? "", url: c[12]! });
         }
       }
     } catch (e) { ctx.log("warn", `Awin feedList falhou: ${(e as Error).message}`); return []; }
-    ctx.log("info", `Awin: ${feeds.length} feeds dos nossos anunciantes`);
+
+    const semFeed = [...alvos.entries()].filter(([mid]) => !feedsPorMid.has(mid)).map(([, a]) => a.nome);
+    ctx.log("info", `Awin: ${feedsPorMid.size}/${alvos.size} anunciantes com datafeed`);
+    if (semFeed.length) ctx.log("info", `Awin sem datafeed (seguem só no wrapper de link): ${semFeed.join(", ")}`);
 
     const out: RawProduct[] = [];
     const vistos = new Set<string>();
-    let nFeeds = 0;
-    for (const f of feeds) {
-      if (out.length >= MAX_TOTAL || nFeeds >= MAX_FEEDS) break;
-      nFeeds++;
-      try {
-        const res = await fetch(f.url, { headers: { "User-Agent": this.UA } });
-        if (!res.ok) { ctx.log("warn", `Awin feed ${f.fid}: HTTP ${res.status}`); continue; }
-        const csv = gunzipSync(Buffer.from(await res.arrayBuffer())).toString("utf8");
-        const linhas = csv.split("\n");
-        const head = parseCsvLinha(linhas[0] ?? "").map((h) => h.trim());
-        const ix = (n: string) => head.indexOf(n);
-        const iNome = ix("product_name"), iLink = ix("aw_deep_link"),
-          iImg = ix("aw_image_url"), iImg2 = ix("merchant_image_url"),
-          iPreco = ix("search_price"), iOld = ix("product_price_old"), iCur = ix("currency"),
-          iMarca = ix("brand_name"), iMerch = ix("merchant_name"), iPid = ix("aw_product_id");
-        if (iNome < 0 || iLink < 0 || iPreco < 0) { ctx.log("warn", `Awin feed ${f.fid}: colunas faltando`); continue; }
 
-        let n = 0;
-        for (let r = 1; r < linhas.length && n < MAX_POR_FEED && out.length < MAX_TOTAL; r++) {
-          if (!linhas[r]?.trim()) continue;
-          const row = parseCsvLinha(linhas[r]!);
-          const nome = row[iNome]?.trim();
-          const link = row[iLink]?.trim();
-          const img = (row[iImg]?.trim() || (iImg2 >= 0 ? row[iImg2]?.trim() : "")) || "";
-          // Converte pela moeda do feed (a AliExpress costuma vir em USD). Moeda fora
-          // do mapa → descarta a linha (melhor sem produto do que com preço errado).
-          const moeda = (iCur >= 0 ? row[iCur]?.trim().toUpperCase() : "") || "BRL";
-          const fx = TAXAS_FX[moeda];
-          const preco = fx ? Number(row[iPreco]) * fx : NaN;
-          if (!nome || !link || !img || !Number.isFinite(preco) || preco <= 0) continue;
-          // BLACKLIST DE NICHO (módulo isolado, src/core/blacklist-nicho.ts): a
-          // AliExpress também traz lixo B2B de infraestrutura de telecom — fora
-          // do público B2C. Descarta silencioso.
-          if (contemTermoProibido(nome)) continue;
-          const sku = `awin-${(iPid >= 0 ? row[iPid]?.trim() : "") || `${f.fid}-${r}`}`;
-          if (vistos.has(sku)) continue;
-          vistos.add(sku);
-          const oldNum = iOld >= 0 ? Number(row[iOld]) : NaN;
-          const old = Number.isFinite(oldNum) && fx ? oldNum * fx : NaN;
-          out.push({
-            skuLoja: sku,
-            titulo: nome.slice(0, 500),
-            url: link,
-            imagemUrl: img,
-            marca: (iMarca >= 0 && row[iMarca]?.trim()) || (iMerch >= 0 ? row[iMerch] ?? null : null) || "AliExpress",
-            categoriaSlug: CAT,
-            precoAtual: preco,
-            precoOriginal: Number.isFinite(old) && old > preco ? old : null,
-            emEstoque: true,
-          });
-          n++;
-        }
-        ctx.log("info", `Awin feed ${f.fid} (${f.nome}): ${n} produtos`);
-        await this.sleep(800);
-      } catch (e) { ctx.log("warn", `Awin feed ${f.fid} falhou: ${(e as Error).message}`); }
+    for (const [mid, anunciante] of alvos) {
+      if (out.length >= MAX_TOTAL) break;
+      const feeds = feedsPorMid.get(mid) ?? [];
+      if (!feeds.length) continue;
+
+      const capProdutos = anunciante.maxProdutos ?? MAX_POR_ANUNCIANTE;
+      const capFeeds = anunciante.maxFeeds ?? MAX_FEEDS_PADRAO;
+      const loja = {
+        slug: anunciante.slug,
+        nome: anunciante.nome,
+        baseUrl: anunciante.baseUrl,
+        logoUrl: awinLogoUrl(mid),
+      };
+      let n = 0;
+
+      for (const f of feeds.slice(0, capFeeds)) {
+        if (n >= capProdutos || out.length >= MAX_TOTAL) break;
+        try {
+          const res = await fetch(f.url, { headers: { "User-Agent": this.UA } });
+          if (!res.ok) { ctx.log("warn", `Awin ${anunciante.slug} feed ${f.fid}: HTTP ${res.status}`); continue; }
+          const csv = gunzipSync(Buffer.from(await res.arrayBuffer())).toString("utf8");
+          const linhas = csv.split("\n");
+          const head = parseCsvLinha(linhas[0] ?? "").map((h) => h.trim());
+          const ix = (nomeCol: string) => head.indexOf(nomeCol);
+          const iNome = ix("product_name"), iLink = ix("aw_deep_link"),
+            iImg = ix("aw_image_url"), iImg2 = ix("merchant_image_url"),
+            iPreco = ix("search_price"), iRrp = ix("rrp_price"), iOld = ix("product_price_old"),
+            iCur = ix("currency"), iMarca = ix("brand_name"), iMerch = ix("merchant_name"),
+            iPid = ix("aw_product_id");
+          if (iNome < 0 || iLink < 0 || iPreco < 0) { ctx.log("warn", `Awin ${anunciante.slug} feed ${f.fid}: colunas faltando`); continue; }
+
+          for (let r = 1; r < linhas.length && n < capProdutos && out.length < MAX_TOTAL; r++) {
+            if (!linhas[r]?.trim()) continue;
+            const row = parseCsvLinha(linhas[r]!);
+            const nome = row[iNome]?.trim();
+            const link = row[iLink]?.trim();
+            const img = (row[iImg]?.trim() || (iImg2 >= 0 ? row[iImg2]?.trim() : "")) || "";
+            // Moeda fora do mapa → descarta (melhor sem produto do que com preço errado).
+            const moeda = (iCur >= 0 ? row[iCur]?.trim().toUpperCase() : "") || "BRL";
+            const fx = TAXAS_FX[moeda];
+            if (!fx) continue;
+            // O que o cliente PAGA = MENOR candidato; o "De" = maior (colunas podem
+            // vir invertidas entre anunciantes — caso Diesel).
+            const cand = [iPreco, iRrp, iOld]
+              .filter((i) => i >= 0)
+              .map((i) => parseMoeda(row[i]) * fx)
+              .filter((v) => Number.isFinite(v) && v > 0);
+            const preco = cand.length ? Math.min(...cand) : NaN;
+            if (!nome || !link || !img || !Number.isFinite(preco) || preco <= 0) continue;
+            // BLACKLIST DE NICHO (módulo isolado): feeds também trazem lixo B2B de
+            // infraestrutura de telecom — fora do público. Descarta silencioso.
+            if (contemTermoProibido(nome)) continue;
+            const sku = `awin-${(iPid >= 0 ? row[iPid]?.trim() : "") || `${f.fid}-${r}`}`;
+            const dedupKey = `${anunciante.slug}:${sku}`;
+            if (vistos.has(dedupKey)) continue;
+            vistos.add(dedupKey);
+            const maxc = cand.length ? Math.max(...cand) : NaN;
+            out.push({
+              skuLoja: sku,
+              titulo: nome.slice(0, 500),
+              url: link,
+              imagemUrl: img,
+              marca: (iMarca >= 0 && row[iMarca]?.trim()) || (iMerch >= 0 ? row[iMerch] ?? null : null) || anunciante.nome,
+              categoriaSlug: anunciante.categoria,
+              precoAtual: preco,
+              precoOriginal: Number.isFinite(maxc) && maxc > preco ? maxc : null,
+              emEstoque: true,
+              loja,
+            });
+            n++;
+          }
+          await this.sleep(600);
+        } catch (e) { ctx.log("warn", `Awin ${anunciante.slug} feed ${f.fid} falhou: ${(e as Error).message}`); }
+      }
+      if (n) ctx.log("info", `Awin ${anunciante.nome}: ${n} produtos (${Math.min(feeds.length, capFeeds)}/${feeds.length} feeds)`);
     }
+
     ctx.log("info", `Awin: ${out.length} produtos no total`);
     return out;
   }

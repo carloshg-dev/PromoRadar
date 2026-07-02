@@ -39,6 +39,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   const jobId = job.id as string;
 
   const lojas = await mapaLojas(sb);
+  const lojasPorSlug = await mapaLojasPorSlug(sb);
   const categorias = await mapaCategorias(sb);
 
   const result: CollectionResult = { jobId, coletados: 0, salvos: 0, erros: 0, porAdapter: {} };
@@ -64,8 +65,12 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       const itens = await adapter.coletar(ctx);
       stats.coletados = itens.length;
       ctx.log("info", `coletados=${itens.length} itens`);
-      const lojaId = lojas.get(adapter.key);
-      if (!lojaId) throw new Error(`Loja '${adapter.key}' não cadastrada`);
+      // Adapter clássico (1 loja): exige a loja cadastrada, como sempre. Adapter
+      // MULTI-LOJA (itens com `loja` própria): cada loja resolve — e nasce — no loop.
+      const lojaPadraoId = lojas.get(adapter.key);
+      if (!lojaPadraoId && itens.some((i) => !i.loja)) {
+        throw new Error(`Loja '${adapter.key}' não cadastrada`);
+      }
 
       for (const item of itens) {
         // Guilhotina: oferta abaixo do piso (R$20) é isca/erro de feed → descartada.
@@ -80,7 +85,10 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
           continue;
         }
         try {
-          const deal = await salvarProduto(sb, item, lojaId, adapter.nome, categorias);
+          const alvo = item.loja
+            ? await resolverLoja(sb, lojasPorSlug, item.loja, adapter.key)
+            : { id: lojaPadraoId!, nome: adapter.nome };
+          const deal = await salvarProduto(sb, item, alvo.id, alvo.nome, categorias);
           if (deal) novosDeals.push(deal);
           stats.salvos++;
         } catch (e) {
@@ -223,6 +231,57 @@ async function salvarProduto(
 async function mapaLojas(sb: SupabaseClient): Promise<Map<string, string>> {
   const { data } = await sb.from("lojas").select("id,adapter_key");
   return new Map((data ?? []).map((l) => [l.adapter_key as string, l.id as string]));
+}
+
+type LojaRef = { id: string; nome: string };
+
+async function mapaLojasPorSlug(sb: SupabaseClient): Promise<Map<string, LojaRef>> {
+  const { data } = await sb.from("lojas").select("id,slug,nome");
+  return new Map(
+    (data ?? []).map((l) => [l.slug as string, { id: l.id as string, nome: l.nome as string }]),
+  );
+}
+
+/**
+ * Resolve a loja de um item MULTI-LOJA; na 1ª aparição a loja é CRIADA (com
+ * nome/logo/selo) e cacheada — coletas seguintes só reusam. Se o insert falhar
+ * (corrida entre jobs / slug já existente), reusa a linha existente pelo slug.
+ */
+async function resolverLoja(
+  sb: SupabaseClient,
+  cache: Map<string, LojaRef>,
+  loja: NonNullable<RawProduct["loja"]>,
+  adapterKey: string,
+): Promise<LojaRef> {
+  const hit = cache.get(loja.slug);
+  if (hit) return hit;
+
+  const { data, error } = await sb
+    .from("lojas")
+    .insert({
+      slug: loja.slug,
+      nome: loja.nome,
+      base_url: loja.baseUrl ?? null,
+      logo_url: loja.logoUrl ?? null,
+      adapter_key: adapterKey,
+      ativo: true,
+      selo: "oficial",
+    })
+    .select("id,nome")
+    .single();
+  if (!error && data) {
+    const ref = { id: data.id as string, nome: data.nome as string };
+    cache.set(loja.slug, ref);
+    return ref;
+  }
+
+  const { data: existente } = await sb.from("lojas").select("id,nome").eq("slug", loja.slug).maybeSingle();
+  if (existente) {
+    const ref = { id: existente.id as string, nome: existente.nome as string };
+    cache.set(loja.slug, ref);
+    return ref;
+  }
+  throw new Error(`criar loja '${loja.slug}': ${error?.message ?? "motivo desconhecido"}`);
 }
 async function mapaCategorias(sb: SupabaseClient): Promise<Map<string, string>> {
   const { data } = await sb.from("categorias").select("id,slug");

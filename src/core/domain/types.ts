@@ -25,7 +25,7 @@ export type AdapterKey =
   | "kabum" | "pichau" | "terabyte" | "mercadolivre" | "amazon"
   | "growth" | "soldiers" | "maxtitanium" | "integralmedica" | "darklab"
   | "havan" | "americanas" | "ferramentasgerais"
-  | "epocacosmeticos" | "lojadomecanico" | "lomadee" | "awin";
+  | "lojadomecanico" | "lomadee" | "awin";
 
 /** Item normalizado que todo adapter de scraping deve produzir. */
 export interface RawProduct {
@@ -38,6 +38,9 @@ export interface RawProduct {
   precoAtual: number;
   precoOriginal?: number | null;
   emEstoque: boolean;
+  /** Identidade de loja POR ITEM — p/ adapters multi-loja (ex. Awin: 1 feed →
+   *  N anunciantes). Ausente → o item pertence à loja única do adapter. */
+  loja?: { slug: string; nome: string; baseUrl?: string | null; logoUrl?: string | null } | null;
 }
 
 /** Estatísticas históricas usadas pelo PromoScore. */

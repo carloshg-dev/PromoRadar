@@ -18,7 +18,7 @@ export const revalidate = 30;
 const ADAPTERS_UI = [
   "kabum", "mercadolivre", "pichau", "terabyte", "amazon", "growth", "soldiers",
   "maxtitanium", "integralmedica", "darklab", "havan", "americanas",
-  "ferramentasgerais", "epocacosmeticos", "lojadomecanico", "awin",
+  "ferramentasgerais", "lojadomecanico", "awin",
 ] as const;
 
 interface MembroEquipe { email: string | null; role: Papel }

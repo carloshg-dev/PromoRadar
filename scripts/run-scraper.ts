@@ -20,7 +20,6 @@ const ALIAS: Record<string, AdapterKey> = {
   havan: "havan",
   americanas: "americanas", amz_br: "americanas",
   ferramentasgerais: "ferramentasgerais", fg: "ferramentasgerais",
-  epocacosmeticos: "epocacosmeticos", epoca: "epocacosmeticos",
   lojadomecanico: "lojadomecanico", mecanico: "lojadomecanico",
   lomadee: "lomadee",
   awin: "awin", aliexpress: "awin",

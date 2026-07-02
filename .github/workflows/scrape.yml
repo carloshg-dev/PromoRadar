@@ -7,7 +7,8 @@ name: Coleta (jobs paralelos + cadência 4x/dia)
 #
 # Cadência:
 #   • RÁPIDA (HTTP/API, custo zero) — roda em TODA disparada (4x/dia): kabum, ML,
-#     suplementos JSON, VTEX (Americanas/FG/Época). Pega promoção-relâmpago.
+#     suplementos JSON, VTEX (Americanas/FG). Pega promoção-relâmpago.
+#     (Época REMOVIDA 02/07/2026: pausada na Lomadee + fora da Awin = sem monetização.)
 #   • FIRECRAWL (browser) — só 1x/dia (06:00 BRT), dividido em 2 jobs p/ caber no tempo.
 #   Schedules: 06:00 BRT = completa (rápida + firecrawl); 00/12/18 BRT = só rápida.
 
@@ -54,7 +55,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape kabum mercadolivre soldiers integralmedica darklab americanas ferramentasgerais epocacosmeticos
+      - run: npm run scrape kabum mercadolivre soldiers integralmedica darklab americanas ferramentasgerais
 
   firecrawl-tech:
     name: Firecrawl tech (Terabyte/Amazon/Pichau)
@@ -71,7 +72,7 @@ jobs:
       - run: npm run scrape terabyte amazon pichau
 
   firecrawl-extra:
-    name: Firecrawl extra (Havan/Growth/Max/Mecânico) + Awin (AliExpress)
+    name: Firecrawl extra (Havan/Growth/Max/Mecânico) + Awin (multi-loja)
     if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45

@@ -6,7 +6,7 @@ import type { AdapterKey } from "@/core/domain/types";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const VALID: AdapterKey[] = ["kabum", "mercadolivre", "pichau", "terabyte", "amazon", "growth", "soldiers", "maxtitanium", "integralmedica", "darklab", "havan", "americanas", "ferramentasgerais", "epocacosmeticos", "lojadomecanico"];
+const VALID: AdapterKey[] = ["kabum", "mercadolivre", "pichau", "terabyte", "amazon", "growth", "soldiers", "maxtitanium", "integralmedica", "darklab", "havan", "americanas", "ferramentasgerais", "lojadomecanico", "lomadee", "awin"];
 
 /**
  * Coleta manual de um adapter. Restrito: staff com permissão de coleta

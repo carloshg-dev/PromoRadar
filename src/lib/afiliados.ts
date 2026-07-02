@@ -8,9 +8,12 @@
  * Status por rede:
  *   • Amazon Associados → tag `promodetec-20` (ATIVO).
  *   • Lomadee → o produto já é coletado com a URL lmdee.link (afiliada na origem).
- *   • Awin → deeplink awinmid/awinaffid quando os anunciantes forem aprovados
- *     (hoje todos "Pending"); o publisher id 2936727 já está aqui pronto.
+ *   • Shopee → rastreio embutido na COLETA (src/core/shopee-afiliado.ts) → passa direto.
+ *   • Awin → ATIVO: 12 anunciantes aprovados (fonte única src/core/awin-anunciantes.ts);
+ *     produtos do feed já chegam com aw_deep_link; o wrapper cobre links manuais.
  */
+
+import { midsPorDominio } from "@/core/awin-anunciantes";
 
 const AMAZON_TAG = process.env.AMAZON_ASSOCIATE_TAG || "promodetec-20";
 // Publisher (awinaffid) lido do ambiente — conta PJ/MEI. Fallback no ID atual
@@ -26,8 +29,10 @@ const AWIN_PUBLISHER = process.env.AWIN_PUBLISHER_ID || "2936727";
 export const REDE_POR_LOJA: Record<string, string> = {
   amazon: "Amazon Associados",
   lomadee: "Lomadee",
-  awin: "Awin", // loja AliExpress (feed de produtos Awin)
-  // kabum/epocacosmeticos: "Awin" → ligar quando saírem de "Pending" no painel
+  awin: "Awin",   // lojas do feed Awin multi-loja (AliExpress, Panasonic, Extra…)
+  diesel: "Awin", // cron próprio (scripts/ingest-awin-diesel.js), mesma rede
+  shopee: "Shopee Afiliados", // rastreio embutido na coleta (an_18318451097)
+  // kabum: "Awin" → ligar quando sair de "Pending" no painel
 };
 
 /** Rede de afiliado da loja, ou null se ainda não monetiza. */
@@ -35,15 +40,9 @@ export function redeAfiliada(adapterKey: string): string | null {
   return REDE_POR_LOJA[adapterKey] ?? null;
 }
 
-/** awinmid por domínio de loja — preencher conforme cada anunciante for APROVADO. */
-const AWIN_MIDS: Record<string, string> = {
-  "aliexpress.com": process.env["AWIN_MID_AliexpressBR&LATAM"] || "18879", // AliExpress BR & LATAM
-  "carrefour.com.br": "17665",   // Carrefour BR — APROVADO via Awin
-  "docebeleza.com.br": "76888",  // Doce Beleza BR — APROVADO via Awin
-  "sanavita.com.br": "117737",   // Sanavita — APROVADO via Awin
-  "panasonic.com.br": "78382",   // Panasonic BR — APROVADO via Awin
-  // "kabum.com.br": "XXXX",     // Kabum — em análise (Pending)
-};
+/** awinmid por domínio — gerado da fonte única src/core/awin-anunciantes.ts (12
+ *  anunciantes aprovados). Anunciante novo = 1 entrada lá, e o wrapper acompanha. */
+const AWIN_MIDS: Record<string, string> = midsPorDominio();
 
 /**
  * Mercado Livre — links de afiliado gerados no PAINEL (meli.la), 1 por produto.

@@ -27,7 +27,6 @@ const LOJA_POR_DOMINIO: Record<string, LojaDetectada> = {
   "terabyteshop.com.br": { slug: "terabyte", nome: "TerabyteShop" },
   "pichau.com.br": { slug: "pichau", nome: "Pichau" },
   "americanas.com.br": { slug: "americanas", nome: "Americanas" },
-  "epocacosmeticos.com.br": { slug: "epocacosmeticos", nome: "Época Cosméticos" },
 };
 
 /** Deduz a loja pelo domínio. Em deeplink Awin, olha o destino real (?ued=). */

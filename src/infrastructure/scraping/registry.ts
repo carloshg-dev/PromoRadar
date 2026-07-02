@@ -13,7 +13,6 @@ import { DarkLabAdapter } from "@/infrastructure/scraping/adapters/darklab.adapt
 import { HavanAdapter } from "@/infrastructure/scraping/adapters/havan.adapter";
 import { AmericanasAdapter } from "@/infrastructure/scraping/adapters/americanas.adapter";
 import { FerramentasGeraisAdapter } from "@/infrastructure/scraping/adapters/ferramentasgerais.adapter";
-import { EpocaCosmeticosAdapter } from "@/infrastructure/scraping/adapters/epocacosmeticos.adapter";
 import { LojaDoMecanicoAdapter } from "@/infrastructure/scraping/adapters/lojadomecanico.adapter";
 import { LomadeeAdapter } from "@/infrastructure/scraping/adapters/lomadee.adapter";
 import { AwinAdapter } from "@/infrastructure/scraping/adapters/awin.adapter";
@@ -32,7 +31,8 @@ export const ADAPTERS: Record<AdapterKey, () => StoreAdapter> = {
   havan: () => new HavanAdapter(),
   americanas: () => new AmericanasAdapter(),
   ferramentasgerais: () => new FerramentasGeraisAdapter(),
-  epocacosmeticos: () => new EpocaCosmeticosAdapter(),
+  // epocacosmeticos REMOVIDA (02/07/2026): pausada na Lomadee e fora da Awin =
+  // sem rota de monetização; papel de beleza passa pros anunciantes Awin/Lomadee.
   lojadomecanico: () => new LojaDoMecanicoAdapter(),
   lomadee: () => new LomadeeAdapter(),
   awin: () => new AwinAdapter(),

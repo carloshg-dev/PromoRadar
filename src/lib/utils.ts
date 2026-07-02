@@ -50,11 +50,22 @@ const CORES_LOJA: Record<string, string> = {
   "ferramentas gerais": "#F25C05",
   lojadomecanico: "#F7901E", // laranja Loja do Mecânico
   "loja do mecanico": "#F7901E",
-  // Perfumes
-  epocacosmeticos: "#7B2D8E", // roxo Época
-  "epoca cosmeticos": "#7B2D8E",
+  // Beleza (anunciantes Awin)
+  docebeleza: "#E5007E", // rosa Doce Beleza
+  "doce beleza": "#E5007E",
+  loccitane: "#FFC845", // amarelo provençal L'Occitane
   // Moda
   diesel: "#D52B5E", // rosa-vermelho Diesel (logo branca sobre fundo rosa)
+  olympikus: "#00A859", // verde Olympikus
+  // Varejo & eletro (anunciantes Awin)
+  extra: "#E4002B",
+  pontofrio: "#F9B000",
+  "ponto frio": "#F9B000",
+  polishop: "#00A3E0",
+  panasonic: "#0041C0",
+  spicy: "#CC092F",
+  // Fit (anunciante Awin)
+  sanavita: "#6CB33F",
 };
 
 export function corLoja(lojaSlugOuNome: string | null | undefined): string {
