@@ -1,5 +1,6 @@
 import { listarOfertasPaginado } from "@/infrastructure/repositories/produtos.repo";
-import { VitrineComFiltroLoja } from "@/components/vitrine/filtro-lojas";
+import { GridProdutos } from "@/components/vitrine/grid-produtos";
+import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Paginacao } from "@/components/ui/paginacao";
@@ -18,13 +19,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function Categoria({ params, searchParams }: {
   params: { slug: string };
-  searchParams: { pagina?: string };
+  searchParams: { pagina?: string; loja?: string };
 }) {
   const pagina = Math.max(1, Number(searchParams.pagina) || 1);
+  const loja = searchParams.loja ?? "";
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
   let total = 0;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria: params.slug, limit: POR_PAGINA, pagina }));
+    ({ produtos, total } = await listarOfertasPaginado({ categoria: params.slug, loja: loja || undefined, limit: POR_PAGINA, pagina }));
   } catch { produtos = []; }
   const nome = nomeCategoria(params.slug);
 
@@ -37,10 +39,12 @@ export default async function Categoria({ params, searchParams }: {
         <p className="label-mono mt-1 text-[11px] text-muted">{total.toLocaleString("pt-BR")} produtos no radar</p>
       )}
       <SubcategoriaNav slugAtivo={params.slug} />
+      <BarraLojas baseHref={`/categoria/${params.slug}`} ativa={loja} />
       {produtos.length ? (
         <>
-          <VitrineComFiltroLoja produtos={produtos} />
-          <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`} />
+          <GridProdutos produtos={produtos} />
+          <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`}
+            params={{ loja: loja || undefined }} />
         </>
       ) : (
         <EmptyState className="mt-8" icon="📦" title="Sem ofertas nesta categoria ainda"

@@ -1,7 +1,7 @@
 import { createPublicClient } from "@/infrastructure/supabase/client";
 import type { Produto, CategoriaSlug } from "@/core/domain/types";
 import { assinatura, rotuloClasse } from "@/core/matching/match";
-import { ehLinkMonetizado } from "@/lib/afiliados";
+import { ehLinkMonetizado, redeAfiliada } from "@/lib/afiliados";
 
 const SELECT = `id,titulo,marca,url,imagem_url,preco_atual,preco_original,desconto_pct,
   promo_score,preco_min_hist,preco_max_hist,preco_avg_hist,em_estoque,atualizado_em,
@@ -72,45 +72,114 @@ export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
  * o feed/carrossel virar "só um tipo" (ex: só PC parts ou só conectores). Embaralha
  * antes pra a vitrine "passar aleatório" a cada revalidação.
  */
-function diversificar(produtos: Produto[], n: number): Produto[] {
-  const arr = [...produtos];
+/** Fisher-Yates — base de toda vitrine rotativa. */
+function embaralhar<T>(itens: T[]): T[] {
+  const arr = [...itens];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const t = arr[i]!; arr[i] = arr[j]!; arr[j] = t;
   }
+  return arr;
+}
+
+/**
+ * REGRA DO DONO (02/07/2026): carrossel/balões/qualquer vitrine em loop mostram
+ * TODAS as marcas afiliadas em ordem ALEATÓRIA e é PROIBIDA a mesma loja duas
+ * vezes seguidas. Baldes por loja (pré-embaralhados) + a cada passo sorteia
+ * entre as lojas ≠ anterior, pesando a fila maior (mantém a regra viável até o
+ * fim). Só repete a vizinha se ela for a única com itens restantes.
+ */
+export function aleatorioSemLojaSeguida(produtos: Produto[], n: number): Produto[] {
   const baldes = new Map<string, Produto[]>();
-  for (const p of arr) {
-    const k = p.categoriaSlug ?? "_";
-    const b = baldes.get(k);
-    if (b) b.push(p); else baldes.set(k, [p]);
+  for (const p of embaralhar(produtos)) {
+    const b = baldes.get(p.lojaSlug);
+    if (b) b.push(p); else baldes.set(p.lojaSlug, [p]);
   }
-  const filas = [...baldes.values()];
   const out: Produto[] = [];
-  let i = 0;
-  while (out.length < n && filas.some((f) => f.length)) {
-    const fila = filas[i % filas.length]!;
-    if (fila.length) out.push(fila.shift()!);
-    i++;
+  let ultima = "";
+  while (out.length < n) {
+    const cheias = [...baldes.entries()].filter(([, fila]) => fila.length);
+    if (!cheias.length) break;
+    const candidatas = cheias.filter(([slug]) => slug !== ultima);
+    const pool = candidatas.length ? candidatas : cheias;
+    const maior = Math.max(...pool.map(([, f]) => f.length));
+    const topo = pool.filter(([, f]) => f.length === maior);
+    const [slug, fila] = topo[Math.floor(Math.random() * topo.length)]!;
+    out.push(fila.shift()!);
+    ultima = slug;
   }
   return out;
 }
 
 /**
+ * Pool BALANCEADO POR LOJA das marcas afiliadas — só itens com foto + preço.
+ * Uma fatia recente POR loja monetizada (data-driven: lojas ativas cujo
+ * adapter_key tem rede em REDE_POR_LOJA). Motivo: um lote de coleta recém-
+ * gravado dominava o "mais recente" e a vitrine virava parede de UMA marca
+ * (bug real: coleta Awin salvou a Olympikus por último → só Olympikus no ar).
+ */
+const POOL_POR_LOJA = 24;
+async function poolAfiliadosPorLoja(sb: ReturnType<typeof createPublicClient>): Promise<Produto[]> {
+  const { data: lojas } = await sb.from("lojas").select("slug,adapter_key").eq("ativo", true);
+  const slugs = (lojas ?? [])
+    .filter((l) => redeAfiliada(l.adapter_key as string))
+    .map((l) => l.slug as string);
+  if (!slugs.length) return [];
+  const fatias = await Promise.all(slugs.map(async (slug) => {
+    const { data } = await sb
+      .from("vw_ofertas")
+      .select(SELECT)
+      .eq("loja_slug", slug)
+      .eq("em_estoque", true)
+      .not("imagem_url", "is", null)
+      .not("preco_atual", "is", null)
+      .order("atualizado_em", { ascending: false })
+      .limit(POOL_POR_LOJA);
+    return (data ?? []).map(map);
+  }));
+  return fatias.flat();
+}
+
+/**
  * Produtos de AFILIADO p/ o feed "Achados dos parceiros" da home — só o que
- * monetiza (Amazon, AliExpress/Awin, Lomadee, Shopee). VARIADO por categoria
- * (diversificar) pra não repetir o mesmo tipo de produto no carrossel.
+ * monetiza. Pool balanceado POR LOJA + aleatório SEM a mesma loja em sequência
+ * (regra do dono 02/07).
  */
 export async function listarAfiliados(limit = 24): Promise<Produto[]> {
   const sb = createPublicClient();
-  const { data, error } = await sb
-    .from("vw_ofertas")
-    .select(SELECT)
-    .or("loja_slug.eq.amazon,loja_slug.eq.aliexpress,url.ilike.%lmdee.link%,url.ilike.%awin1.com%,url.ilike.%shopee.com.br%")
-    .eq("em_estoque", true)
-    .order("atualizado_em", { ascending: false })
-    .limit(400);
-  if (error) throw error;
-  return diversificar((data ?? []).map(map), limit);
+  return aleatorioSemLojaSeguida(await poolAfiliadosPorLoja(sb), limit);
+}
+
+/**
+ * "Achados" de uma ou mais categorias p/ vitrines da home — pool RECENTE da
+ * vertical (não top-score: o topo por nota dessas categorias era 100% uma loja
+ * só) + sorteio sem loja repetida em sequência (regra do dono 02/07). Recência
+ * garante que loja nova coletada entra na roda no mesmo dia.
+ */
+export async function achadosPorCategorias(slugs: CategoriaSlug[], n: number): Promise<Produto[]> {
+  const sb = createPublicClient();
+  const base = () =>
+    sb.from("vw_ofertas")
+      .select(SELECT)
+      .in("categoria_slug", slugs)
+      .eq("em_estoque", true)
+      .not("imagem_url", "is", null)
+      .not("preco_atual", "is", null);
+  // DUAS fatias no pool: RECENTES (loja recém-coletada entra na roda no mesmo
+  // dia) + TOP por nota (as consagradas não somem quando chega lote novo).
+  // Uma fatia só — qualquer que fosse — virava parede de uma marca.
+  const [recentes, top] = await Promise.all([
+    base().order("atualizado_em", { ascending: false }).limit(60),
+    base().order("promo_score", { ascending: false, nullsFirst: false }).limit(60),
+  ]);
+  if (recentes.error) throw recentes.error;
+  if (top.error) throw top.error;
+  const porId = new Map<string, Produto>();
+  for (const r of [...(recentes.data ?? []), ...(top.data ?? [])]) {
+    const p = map(r);
+    porId.set(p.id, p);
+  }
+  return aleatorioSemLojaSeguida([...porId.values()], n);
 }
 
 export interface ProdutoRodizio extends Produto {
@@ -128,18 +197,8 @@ type PontoHistoricoRow = PontoHistorico & {
  */
 export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12): Promise<ProdutoRodizio[]> {
   const sb = createPublicClient();
-  const { data, error } = await sb
-    .from("vw_ofertas")
-    .select(SELECT)
-    .or("loja_slug.eq.amazon,loja_slug.eq.aliexpress,url.ilike.%lmdee.link%,url.ilike.%awin1.com%,url.ilike.%shopee.com.br%")
-    .eq("em_estoque", true)
-    .not("preco_atual", "is", null)
-    .order("atualizado_em", { ascending: false })
-    .limit(400);
-  if (error) throw error;
-
-  // VARIADO por categoria (round-robin) — não deixa o rodízio virar "só PC parts".
-  const produtos = diversificar((data ?? []).map(map), limit);
+  // Pool balanceado POR LOJA + aleatório sem loja repetida em sequência (regra do dono).
+  const produtos = aleatorioSemLojaSeguida(await poolAfiliadosPorLoja(sb), limit);
   if (!produtos.length) return [];
 
   const ids = produtos.map((produto) => produto.id);

@@ -1,5 +1,6 @@
 import { listarOfertasPaginado } from "@/infrastructure/repositories/produtos.repo";
-import { VitrineComFiltroLoja } from "@/components/vitrine/filtro-lojas";
+import { GridProdutos } from "@/components/vitrine/grid-produtos";
+import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Paginacao } from "@/components/ui/paginacao";
@@ -14,14 +15,15 @@ const POR_PAGINA = 60;
 export const metadata = { title: "Melhores ofertas" };
 export const revalidate = 120;
 
-export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string } }) {
+export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string } }) {
   const categoria = searchParams.categoria ?? "all";
   const busca = searchParams.busca ?? "";
+  const loja = searchParams.loja ?? "";
   const pagina = Math.max(1, Number(searchParams.pagina) || 1);
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
   let total = 0;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria, busca, limit: POR_PAGINA, pagina }));
+    ({ produtos, total } = await listarOfertasPaginado({ categoria, busca, loja: loja || undefined, limit: POR_PAGINA, pagina }));
   } catch { produtos = []; }
 
   return (
@@ -37,16 +39,19 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
       <form className="mt-5 flex flex-wrap gap-2" action="/ofertas">
         <Input name="busca" defaultValue={busca} placeholder="Buscar produto…" className="min-w-[220px] flex-1" />
         <input type="hidden" name="categoria" value={categoria} />
+        {loja && <input type="hidden" name="loja" value={loja} />}
         <Button>Buscar</Button>
       </form>
 
       <CategoriaFiltro baseHref="/ofertas" ativo={categoria} />
+      <BarraLojas baseHref="/ofertas" ativa={loja}
+        params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
 
       {produtos.length ? (
         <>
-          <VitrineComFiltroLoja produtos={produtos} />
+          <GridProdutos produtos={produtos} />
           <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref="/ofertas"
-            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
+            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined }} />
         </>
       ) : (
         <EmptyState className="mt-8" icon="🔍" title="Nenhuma oferta neste filtro"

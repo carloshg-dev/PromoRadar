@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertaDestaque, listarAfiliados, listarAfiliadosRodizio } from "@/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarNoticias, ofertaDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { ProdutoCard } from "@/components/produto-card";
@@ -21,14 +21,6 @@ import {
 
 export const revalidate = 300;
 
-/** Junta as melhores ofertas de várias categorias (p/ as vitrines por vertical). */
-function melhores(listas: Produto[][], n = 5): Produto[] {
-  return listas.flat().sort((a, b) => {
-    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
-    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
-  }).slice(0, n);
-}
-
 export default async function Home() {
   // Feed de AFILIADOS (topo) — só o que monetiza (Amazon + Lomadee), aleatório.
   let afiliados: Produto[] = [];
@@ -37,24 +29,26 @@ export default async function Home() {
   let produtosRodizio: ProdutoRodizio[] = [];
   try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
 
-  // Top ofertas por PromoScore (sem piso: nas 1as coletas o histórico é curto).
+  // Destaques: pool top-60 (monetizado primeiro) apresentado ALEATÓRIO sem loja
+  // repetida em sequência (REGRA DO DONO 02/07 — nada de parede de uma marca).
   let destaques: Produto[] = [];
-  try { destaques = await listarOfertas({ limit: 12 }); } catch {}
+  try { destaques = aleatorioSemLojaSeguida(await listarOfertas({ limit: 60 }), 12); } catch {}
 
   // Oferta em destaque (card com gráfico real) — a melhor comparação do momento.
   let destaque: Awaited<ReturnType<typeof ofertaDestaque>> = null;
   try { destaque = await ofertaDestaque(); } catch {}
 
-  // Vitrines em destaque — Beleza, Perfumes e Gadgets (o público é impactado ao entrar).
+  // Vitrines em destaque — Beleza, Perfumes, Gadgets e Fit. Achados RECENTES da
+  // vertical, sorteados SEM loja repetida em sequência (regra do dono): loja nova
+  // coletada entra na roda no mesmo dia, e nenhuma vitrine vira parede de marca.
   let beleza: Produto[] = [], perfumes: Produto[] = [], gadgets: Produto[] = [], fit: Produto[] = [];
   try {
-    const [bel, perf, gad, ft] = await Promise.all([
-      Promise.all(["maquiagem", "skincare", "cabelos"].map((c) => listarOfertas({ categoria: c, limit: 5 }))),
-      Promise.all(["perfumes-importados", "perfumes-arabes"].map((c) => listarOfertas({ categoria: c, limit: 6 }))),
-      Promise.all(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"].map((c) => listarOfertas({ categoria: c, limit: 3 }))),
-      Promise.all(["whey-protein", "creatina", "pre-treino"].map((c) => listarOfertas({ categoria: c, limit: 4 }))),
+    [beleza, perfumes, gadgets, fit] = await Promise.all([
+      achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 5),
+      achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 5),
+      achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 5),
+      achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 5),
     ]);
-    beleza = melhores(bel); perfumes = melhores(perf); gadgets = melhores(gad); fit = melhores(ft, 5);
   } catch {}
 
   // Notícias (agora mais discretas, no rodapé): prioriza as que têm imagem.
