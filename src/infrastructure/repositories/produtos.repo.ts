@@ -89,13 +89,13 @@ function embaralhar<T>(itens: T[]): T[] {
  * entre as lojas ≠ anterior, pesando a fila maior (mantém a regra viável até o
  * fim). Só repete a vizinha se ela for a única com itens restantes.
  */
-export function aleatorioSemLojaSeguida(produtos: Produto[], n: number): Produto[] {
-  const baldes = new Map<string, Produto[]>();
+export function aleatorioSemLojaSeguida<T extends { lojaSlug: string }>(produtos: T[], n: number): T[] {
+  const baldes = new Map<string, T[]>();
   for (const p of embaralhar(produtos)) {
     const b = baldes.get(p.lojaSlug);
     if (b) b.push(p); else baldes.set(p.lojaSlug, [p]);
   }
-  const out: Produto[] = [];
+  const out: T[] = [];
   let ultima = "";
   while (out.length < n) {
     const cheias = [...baldes.entries()].filter(([, fila]) => fila.length);
@@ -384,37 +384,62 @@ export async function listarComparacoes(opts: { categoria?: string; categorias?:
   return out.slice(0, opts.limit ?? 60);
 }
 
-/** Oferta em destaque para a home: a melhor comparação + o histórico do item mais barato. */
-export interface Destaque {
-  comparacao: Comparacao;
+/**
+ * Vitrine "Oferta em destaque" da home — pool AMPLO de produtos das lojas
+ * MONETIZADAS (mesma base do feed de afiliados, balanceada por loja), sorteado
+ * SEM loja repetida em sequência (regra do dono 02/07 — nada de parede de uma
+ * marca). O looping em si roda no CLIENTE (FeaturedDealRotator); aqui só
+ * entrega o pool já resolvido.
+ *
+ * Quando o item sorteado tem uma comparação REAL (2+ lojas vendendo a mesma
+ * classe de modelo — ver core/matching), ela vem anexada e o card ativa o
+ * comparador (barras por loja); sem casamento, `comparacao` fica null e o
+ * card mostra só a melhor oferta — nunca finge uma comparação que não existe.
+ */
+export interface DestaqueItem {
+  produto: Produto;
+  comparacao: Comparacao | null;
   historico: Array<{ data: string; preco: number }>;
 }
 
-export async function ofertaDestaque(): Promise<Destaque | null> {
-  const cmps = await listarComparacoes({ limit: 40 });
-  if (!cmps.length) return null;
-  // DINÂMICO: pega os melhores por PromoScore (não sempre o mesmo produto) e
-  // EMBARALHA o topo → alterna a cada revalidação; o usuário sempre vê algo novo.
-  const topo = [...cmps].sort((a, b) => (b.melhorScore ?? 0) - (a.melhorScore ?? 0)).slice(0, 10);
-  for (let i = topo.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = topo[i]!; topo[i] = topo[j]!; topo[j] = t;
-  }
-  // Entre os candidatos, prefere o que tiver histórico (pra a linha do gráfico aparecer).
-  let comparacao = topo[0]!;
-  let pontos: PontoHistorico[] = [];
-  for (const c of topo) {
-    try {
-      const h = await historicoPrecos(c.ofertas[0]!.id);
-      if (h.length > pontos.length) { comparacao = c; pontos = h; }
-      if (pontos.length >= 4) break; // bom o suficiente
-    } catch { /* ignora */ }
-  }
-  const historico = pontos.map((p) => ({
-    data: new Date(p.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-    preco: Number(p.preco),
+export async function ofertasEmDestaque(n = 8): Promise<DestaqueItem[]> {
+  const sb = createPublicClient();
+  const [pool, cmps] = await Promise.all([
+    poolAfiliadosPorLoja(sb),
+    listarComparacoes({ limit: 200 }),
+  ]);
+
+  // Comparações REAIS são raras entre lojas monetizadas hoje (a guilhotina de
+  // não-afiliadas 02-03/07 cortou junto o overlap de catálogo que as gerava —
+  // Kabum×Terabyte×Pichau etc. vendiam o mesmo hardware entre si). Um sorteio
+  // puramente aleatório no pool geral quase nunca pescaria uma (testado: 1 em
+  // 321 candidatos). Por isso GARANTE até metade das vagas pras comparações
+  // que existem; o resto preenche com variedade normal das marcas monetizadas.
+  type Candidato = { lojaSlug: string; produto: Produto; comparacao: Comparacao | null };
+  const comComparacao: Candidato[] = cmps.slice(0, Math.ceil(n / 2)).map((c) => ({
+    lojaSlug: c.ofertas[0]!.lojaSlug, produto: c.ofertas[0]!, comparacao: c,
   }));
-  return { comparacao, historico };
+  const usados = new Set(comComparacao.map((d) => d.produto.id));
+  const semComparacao: Candidato[] = aleatorioSemLojaSeguida(
+    pool.filter((p) => !usados.has(p.id)).map((produto) => ({ lojaSlug: produto.lojaSlug, produto, comparacao: null as Comparacao | null })),
+    n - comComparacao.length,
+  );
+  // Interleave final sobre o conjunto combinado — a regra de "nunca a mesma
+  // loja 2x seguidas" vale igual pros itens com e sem comparação.
+  const escolhidos = aleatorioSemLojaSeguida([...comComparacao, ...semComparacao], n);
+
+  return Promise.all(escolhidos.map(async ({ produto, comparacao }) => {
+    const refId = comparacao ? comparacao.ofertas[0]!.id : produto.id;
+    let historico: DestaqueItem["historico"] = [];
+    try {
+      const pts = await historicoPrecos(refId, 30);
+      historico = pts.map((p) => ({
+        data: new Date(p.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        preco: Number(p.preco),
+      }));
+    } catch { /* segue sem gráfico */ }
+    return { produto, comparacao, historico };
+  }));
 }
 
 export async function obterProduto(id: string): Promise<Produto | null> {

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertaDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { ProdutoCard } from "@/components/produto-card";
 import { NewsCarousel } from "@/components/news-carousel";
-import { FeaturedDeal } from "@/components/featured-deal";
+import { FeaturedDealRotator } from "@/components/featured-deal-rotator";
 import { ParceirosFeed } from "@/components/parceiros-feed";
 import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
@@ -34,9 +34,11 @@ export default async function Home() {
   let destaques: Produto[] = [];
   try { destaques = aleatorioSemLojaSeguida(await listarOfertas({ limit: 60 }), 12); } catch {}
 
-  // Oferta em destaque (card com gráfico real) — a melhor comparação do momento.
-  let destaque: Awaited<ReturnType<typeof ofertaDestaque>> = null;
-  try { destaque = await ofertaDestaque(); } catch {}
+  // Oferta em destaque — pool de vários produtos das marcas monetizadas; gira
+  // em LOOP no cliente (FeaturedDealRotator). Comparador só ativa quando o
+  // item sorteado tem comparação REAL entre lojas (regra do dono 02/07).
+  let itensDestaque: Awaited<ReturnType<typeof ofertasEmDestaque>> = [];
+  try { itensDestaque = await ofertasEmDestaque(8); } catch {}
 
   // Vitrines em destaque — Beleza, Perfumes, Gadgets e Fit. Achados RECENTES da
   // vertical, sorteados SEM loja repetida em sequência (regra do dono): loja nova
@@ -90,10 +92,10 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* OFERTA EM DESTAQUE (real, com gráfico) — no mobile vem ANTES do texto */}
-          <div className="order-1 min-w-0 animate-fade-up [animation-delay:.1s] lg:order-2">
-            {destaque ? <FeaturedDeal d={destaque} /> : (
-            <div className="ring-glow card-grad rounded-3xl border border-line p-5">
+          {/* OFERTA EM DESTAQUE (real, em loop) — no mobile vem ANTES do texto */}
+          <div className="order-1 min-w-0 lg:order-2">
+            {itensDestaque.length ? <FeaturedDealRotator itens={itensDestaque} /> : (
+            <div className="ring-glow card-grad animate-fade-up rounded-3xl border border-line p-5 [animation-delay:.1s]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Exemplo ilustrativo</div>
                 <span className="rounded-md bg-bg-soft px-1.5 py-0.5 text-[10px] text-muted">demonstração</span>
