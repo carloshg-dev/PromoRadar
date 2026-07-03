@@ -9,7 +9,6 @@ const DIRETOS = [
   { href: "/ofertas", label: "Ofertas" },
   { href: "/comparar", label: "Comparador" },
   { href: "/cupons", label: "Cupons" },
-  { href: "/noticias", label: "Notícias" },
 ] as const;
 
 /** Menu mobile: links diretos + verticais em accordion (mesma fonte do desktop). */

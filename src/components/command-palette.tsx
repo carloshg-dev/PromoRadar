@@ -8,7 +8,7 @@ interface Hit { id: string; titulo: string; loja_nome: string; preco_atual: numb
 
 const ATALHOS = [
   { label: "Melhores ofertas", href: "/ofertas", icon: <Flame className="h-4 w-4" /> },
-  { label: "Categorias", href: "/#categorias", icon: <Tag className="h-4 w-4" /> },
+  { label: "Categorias", href: "/ofertas", icon: <Tag className="h-4 w-4" /> },
   { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="h-4 w-4" /> },
 ];
 

@@ -32,7 +32,7 @@ export default async function Categoria({ params, searchParams }: {
 
   return (
     <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
-      <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Categorias", href: "/#categorias" }, { label: nome }]} />
+      <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Categorias", href: "/ofertas" }, { label: nome }]} />
       <TrackView tipo="ver_categoria" categoriaSlug={params.slug} origem="categoria" />
       <h1 className="mt-3 text-2xl font-bold">{nome}</h1>
       {total > 0 && (
