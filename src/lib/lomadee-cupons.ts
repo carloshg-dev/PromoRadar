@@ -9,6 +9,7 @@ import { lomadeeLogoUrl } from "@/core/lomadee-parceiros";
  */
 
 const BASE = "https://api.lomadee.com.br";
+const MAX_POR_LOJA = 4; // teto de cupons por loja (evita "parede" de uma marca só)
 
 export interface CupomLomadee {
   id: string;
@@ -19,6 +20,8 @@ export interface CupomLomadee {
   link: string;
   terminaEm: string | null;
   destaque: boolean;
+  /** cupom curado à mão (fora da Lomadee, ex. Awin) — some no topo. */
+  curado?: boolean;
 }
 
 interface CampanhaApi {
@@ -83,15 +86,24 @@ export async function listarCupons(max = 60): Promise<CupomLomadee[]> {
   }
 
   // destaque primeiro; entre iguais, cupom COM código; depois quem vence antes.
-  return cupons
-    .sort((a, b) => {
-      const d = (b.destaque ? 1 : 0) - (a.destaque ? 1 : 0);
-      if (d !== 0) return d;
-      const cod = (b.codigo ? 1 : 0) - (a.codigo ? 1 : 0);
-      if (cod !== 0) return cod;
-      const fa = a.terminaEm ? Date.parse(a.terminaEm) : Infinity;
-      const fb = b.terminaEm ? Date.parse(b.terminaEm) : Infinity;
-      return fa - fb;
-    })
-    .slice(0, max);
+  const ordenado = cupons.sort((a, b) => {
+    const d = (b.destaque ? 1 : 0) - (a.destaque ? 1 : 0);
+    if (d !== 0) return d;
+    const cod = (b.codigo ? 1 : 0) - (a.codigo ? 1 : 0);
+    if (cod !== 0) return cod;
+    const fa = a.terminaEm ? Date.parse(a.terminaEm) : Infinity;
+    const fb = b.terminaEm ? Date.parse(b.terminaEm) : Infinity;
+    return fa - fb;
+  });
+
+  // TETO POR LOJA (mesma filosofia da vitrine — nada de parede de uma marca):
+  // "Lojas REDE" sozinha traz ~metade das campanhas; sem teto ela tomava a página.
+  const cont = new Map<string, number>();
+  const balanceado = ordenado.filter((c) => {
+    const n = cont.get(c.marca) ?? 0;
+    if (n >= MAX_POR_LOJA) return false;
+    cont.set(c.marca, n + 1);
+    return true;
+  });
+  return balanceado.slice(0, max);
 }

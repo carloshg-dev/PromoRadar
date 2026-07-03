@@ -1,4 +1,5 @@
 import { listarCupons } from "@/lib/lomadee-cupons";
+import { cuponsCurados } from "@/lib/cupons-curados";
 import { CupomCard } from "@/components/cupom-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -13,8 +14,9 @@ export const metadata = {
 export const revalidate = 3600; // cupons mudam ao longo do dia; 1h de cache basta
 
 export default async function Cupons() {
-  let cupons: Awaited<ReturnType<typeof listarCupons>> = [];
-  try { cupons = await listarCupons(60); } catch { cupons = []; }
+  // Curados à mão (Awin etc.) SEMPRE primeiro; Lomadee (automático) em seguida.
+  let cupons = cuponsCurados();
+  try { cupons = [...cupons, ...(await listarCupons(60))]; } catch { /* mantém curados */ }
 
   return (
     <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
