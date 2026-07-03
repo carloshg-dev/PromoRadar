@@ -132,13 +132,18 @@ export default async function Home() {
       {/* OFERTAS MERCADO LIVRE — showcase curado (meli.la) com foto + título REAIS resolvidos do destino */}
       <OfertasMercadoLivre />
 
-      {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato) */}
-      <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
-        href="/categoria/maquiagem" hrefLabel="ver beleza" produtos={beleza} />
-      <VitrineVertical titulo="Perfumes" Icon={SprayCan} accentText="text-parfum-2" accentGrad="from-parfum to-fit"
-        href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumes} />
-      <VitrineVertical titulo="Gadgets" Icon={Headphones} accentText="text-gadget-2" accentGrad="from-gadget to-cyan"
-        href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgets} />
+      {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato).
+          id="categorias" é a ÂNCORA do link "Categorias" (command palette ⌘K +
+          breadcrumb de /categoria) — sumiu numa reforma e o clique caía no topo
+          (carrossel). scroll-mt compensa o navbar fixo. */}
+      <section id="categorias" className="scroll-mt-24">
+        <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
+          href="/categoria/maquiagem" hrefLabel="ver beleza" produtos={beleza} />
+        <VitrineVertical titulo="Perfumes" Icon={SprayCan} accentText="text-parfum-2" accentGrad="from-parfum to-fit"
+          href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumes} />
+        <VitrineVertical titulo="Gadgets" Icon={Headphones} accentText="text-gadget-2" accentGrad="from-gadget to-cyan"
+          href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgets} />
+      </section>
 
       {/* DESTAQUES — melhores ofertas do momento, mantidas abaixo do feed */}
       <section className="pb-16">
