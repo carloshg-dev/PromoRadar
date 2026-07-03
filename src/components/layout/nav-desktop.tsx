@@ -78,6 +78,7 @@ export function NavDesktop() {
         </div>
       ))}
 
+      <Link href="/cupons" className={linkBase}>Cupons</Link>
       <Link href="/noticias" className={linkBase}>Notícias</Link>
     </nav>
   );

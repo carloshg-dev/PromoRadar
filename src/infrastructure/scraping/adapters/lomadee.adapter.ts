@@ -1,115 +1,236 @@
 import { StoreAdapter, type AdapterContext } from "@/infrastructure/scraping/core/adapter";
-import type { RawProduct, CategoriaSlug } from "@/core/domain/types";
+import type { RawProduct } from "@/core/domain/types";
+import { contemTermoProibido } from "@/core/blacklist-nicho";
+import { decodeHtmlEntities } from "@/lib/utils";
+import { LOMADEE_PARCEIROS, lomadeeLogoUrl, type LomadeeParceiro } from "@/core/lomadee-parceiros";
+import { coletarVtex } from "@/infrastructure/scraping/core/vtex";
 
 /**
- * Lomadee — rede de afiliados (API oficial). Alimenta o FEED "Achados dos
- * parceiros" da home. DADO + DINHEIRO no mesmo lugar:
- *   • GET  /affiliate/products?search=TERMO   → catálogo (preço + imagem + seller)
- *   • POST /affiliate/shortener/url           → gera o LINK DE AFILIADO (lmdee.link)
+ * Lomadee MULTI-LOJA — v2 (02/07/2026). O princípio "dado × dinheiro" completo:
+ *   • DADO: catálogo raspado direto da loja parceira (Shopify/VTEX/WooCommerce —
+ *     APIs públicas de cada plataforma, com foto + preço reais);
+ *   • DINHEIRO: cada URL de produto é CUNHADA no encurtador oficial
+ *     (POST /affiliate/shortener/url → lmdee.link com o canal do dono).
  *
- * Decisão (21/06): a busca da Lomadee é fuzzy e NÃO filtra por marca, então não
- * forçamos categoria (isso reintroduziria a mistura que corrigimos). Todos os
- * itens vão pro BUCKET NEUTRO `ofertas-parceiros` → aparecem SOLTOS no feed de
- * afiliados, sem poluir as verticais/comparador. Volume amplo em beleza,
- * perfumes e eletrônicos (o foco do dono). Rate limit 60/min → throttle.
+ * Cada parceiro vira uma LOJA própria no banco (identidade por item — mesma
+ * fundação multi-loja da Awin). Fonte única: src/core/lomadee-parceiros.ts.
+ *
+ * AUTO-COMPLIANCE: só coleta marca presente em /affiliate/brands (pausada SOME
+ * da lista) e com canal Comparador liberado (shortUrls preenchido) — a lição
+ * Época/Terabyte em código. Rate limit 60/min → throttle no encurtador.
+ *
+ * (v1 search-based aposentada: busca fuzzy sem filtro de marca = achados
+ * genéricos com preço que envelhece; catálogo de loja real é coletável 1x/dia.)
  */
 
 const BASE = "https://api.lomadee.com.br";
-const CAT_NEUTRA: CategoriaSlug = "ofertas-parceiros";
-const MAX_POR_BUSCA = 18;   // teto por termo (1 link/req → cabe no rate limit)
-const THROTTLE_MS = 1100;   // 60/min no shortener
+const THROTTLE_MS = 1100;  // 60/min no encurtador
+const MAX_POR_LOJA = 150;
+const MAX_TOTAL = 400;
 
-/** Termos amplos p/ dar VOLUME ao feed (beleza, perfume, eletrônicos, casa). */
-const TERMOS: readonly string[] = [
-  "perfume importado", "perfume feminino", "perfume masculino", "perfume arabe",
-  "maquiagem", "batom", "base facial", "paleta de sombras",
-  "skincare facial", "protetor solar", "shampoo", "creme hidratante",
-  "fone de ouvido bluetooth", "smartwatch", "caixa de som bluetooth", "power bank",
-  "geladeira", "fogao", "air fryer", "robo aspirador", "cafeteira", "liquidificador",
-];
+interface MarcaLomadee {
+  id: string;
+  name: string;
+  network?: { active?: boolean };
+  channels?: Array<{ shortUrls?: string[] }>;
+}
 
-interface LmdProduct {
-  id?: string;
-  organizationId?: string;
-  name?: string;
-  url?: string;
-  available?: boolean;
-  images?: Array<{ url?: string }>;
-  options?: Array<{ seller?: string; pricing?: Array<{ price?: number; listPrice?: number }> }>;
+interface Candidato {
+  titulo: string;
+  urlProduto: string;
+  imagemUrl: string | null;
+  precoAtual: number;
+  precoOriginal: number | null;
+  marca: string | null;
+  categoriaSlug: RawProduct["categoriaSlug"];
+  skuBase: string;
 }
 
 export class LomadeeAdapter extends StoreAdapter {
   readonly key = "lomadee" as const;
-  readonly nome = "Lomadee";
+  readonly nome = "Lomadee"; // fallback — cada item carrega a própria loja
 
   async coletar(ctx: AdapterContext): Promise<RawProduct[]> {
-    const apiKey = process.env.LOMADEE_API_KEY;
-    if (!apiKey) { ctx.log("warn", "Lomadee sem LOMADEE_API_KEY — pulando."); return []; }
-    const headers = { "x-api-key": apiKey };
+    const KEY = process.env.LOMADEE_API_KEY;
+    if (!KEY) { ctx.log("warn", "Lomadee sem LOMADEE_API_KEY — pulando."); return []; }
+
+    // 1) Marcas da conta (paginado) — o guard de pausa/canal mora aqui.
+    const marcas = await this.listarMarcas(KEY, ctx);
+    if (!marcas.length) return [];
 
     const out: RawProduct[] = [];
-    const vistos = new Set<string>();
-    for (const termo of TERMOS) {
-      try {
-        const data = await this.fetchJson<{ data?: LmdProduct[] }>(
-          `${BASE}/affiliate/products?search=${encodeURIComponent(termo)}&limit=100`,
-          { headers },
-        );
-        const produtos = data.data ?? [];
-        let n = 0;
-        for (const p of produtos) {
-          if (n >= MAX_POR_BUSCA) break;
-          if (!p.id || !p.url || !p.organizationId || vistos.has(p.id)) continue;
-          if (p.available === false) continue;
-          const nome = p.name ?? "";
-          if (nome.length < 6) continue;
-
-          const opt = p.options?.[0];
-          const preco = opt?.pricing?.[0]?.price;
-          if (typeof preco !== "number" || preco <= 0) continue;
-          const imagem = p.images?.[0]?.url ?? null;
-          if (!imagem) continue; // feed é visual: sem foto não entra
-
-          const link = await this.encurtar(p.url, p.organizationId, headers);
-          if (!link) continue;
-
-          const lista = opt?.pricing?.[0]?.listPrice;
-          vistos.add(p.id);
-          n++;
-          out.push({
-            skuLoja: `lmd-${p.id}`,
-            titulo: nome.slice(0, 500),
-            url: link,
-            imagemUrl: imagem,
-            marca: opt?.seller ?? "Lomadee",
-            categoriaSlug: CAT_NEUTRA,
-            precoAtual: preco,
-            precoOriginal: typeof lista === "number" && lista > preco ? lista : null,
-            emEstoque: true,
-          });
-          await this.sleep(THROTTLE_MS); // respeita 60/min do shortener
-        }
-        ctx.log("info", `Lomadee "${termo}": ${n} itens (c/ link afiliado)`);
-      } catch (e) {
-        ctx.log("warn", `Lomadee "${termo}" falhou: ${(e as Error).message}`);
+    for (const parceiro of LOMADEE_PARCEIROS) {
+      if (out.length >= MAX_TOTAL) break;
+      const marca = marcas.find((m) => parceiro.matchMarca.test(m.name));
+      const canalOk = marca?.network?.active && (marca.channels?.[0]?.shortUrls?.length ?? 0) > 0;
+      if (!marca || !canalOk) {
+        ctx.log("warn", `Lomadee ${parceiro.nome}: fora da lista ou canal Comparador bloqueado — PULANDO (compliance).`);
+        continue;
       }
+
+      // 2) DADO: catálogo da loja (API pública da plataforma dela).
+      let candidatos: Candidato[] = [];
+      try {
+        candidatos = await this.catalogoDaLoja(parceiro, ctx);
+      } catch (e) {
+        ctx.log("warn", `Lomadee ${parceiro.slug}: catálogo falhou: ${(e as Error).message}`);
+        continue;
+      }
+      const cap = Math.min(parceiro.maxProdutos ?? MAX_POR_LOJA, MAX_TOTAL - out.length);
+      candidatos = candidatos
+        .filter((c) => c.titulo && c.urlProduto && c.imagemUrl && c.precoAtual > 0)
+        .filter((c) => !contemTermoProibido(c.titulo))
+        .filter((c) => !(parceiro.excluir?.test(c.titulo)))
+        .slice(0, cap);
+
+      // 3) DINHEIRO: cunha o link de afiliado por produto (throttle 60/min).
+      const loja = {
+        slug: parceiro.slug,
+        nome: parceiro.nome,
+        baseUrl: parceiro.baseUrl,
+        logoUrl: lomadeeLogoUrl(marca.id),
+      };
+      let cunhados = 0, semLink = 0;
+      for (const c of candidatos) {
+        const short = await this.cunharLink(KEY, c.urlProduto, marca.id);
+        await this.sleep(THROTTLE_MS);
+        if (!short) { semLink++; continue; } // sem link monetizado o produto NÃO entra
+        cunhados++;
+        out.push({
+          skuLoja: `lmd-${parceiro.slug}-${c.skuBase}`.slice(0, 120),
+          // WooCommerce devolve entidades HTML no nome (&#038; &#8211;) → decodifica
+          titulo: decodeHtmlEntities(c.titulo).slice(0, 500),
+          url: short,
+          imagemUrl: c.imagemUrl,
+          marca: c.marca ?? parceiro.nome,
+          categoriaSlug: c.categoriaSlug,
+          precoAtual: c.precoAtual,
+          precoOriginal: c.precoOriginal,
+          emEstoque: true,
+          loja,
+        });
+      }
+      ctx.log("info", `Lomadee ${parceiro.nome}: ${cunhados} produtos cunhados${semLink ? ` (${semLink} sem link — fora)` : ""}`);
     }
-    ctx.log("info", `Lomadee: ${out.length} itens no feed de parceiros`);
+
+    ctx.log("info", `Lomadee: ${out.length} produtos no total`);
     return out;
   }
 
-  /** Gera o link de afiliado (lmdee.link). null se falhar. */
-  private async encurtar(url: string, organizationId: string, headers: Record<string, string>): Promise<string | null> {
+  private async listarMarcas(key: string, ctx: AdapterContext): Promise<MarcaLomadee[]> {
+    const all: MarcaLomadee[] = [];
     try {
-      const r = await this.fetchJson<unknown>(`${BASE}/affiliate/shortener/url`, {
+      for (let page = 1; page <= 7; page++) {
+        const r = await fetch(`${BASE}/affiliate/brands?limit=100&page=${page}`, { headers: { "x-api-key": key } });
+        if (!r.ok) { ctx.log("warn", `Lomadee brands: HTTP ${r.status}`); break; }
+        const j = (await r.json()) as { data?: MarcaLomadee[] };
+        const data = j.data ?? [];
+        all.push(...data);
+        if (!data.length) break;
+      }
+    } catch (e) { ctx.log("warn", `Lomadee brands falhou: ${(e as Error).message}`); }
+    return all;
+  }
+
+  private async cunharLink(key: string, url: string, organizationId: string): Promise<string | null> {
+    try {
+      const r = await fetch(`${BASE}/affiliate/shortener/url`, {
         method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
+        headers: { "x-api-key": key, "Content-Type": "application/json" },
         body: JSON.stringify({ url, organizationId, type: "Custom" }),
       });
-      const m = JSON.stringify(r).match(/https:\/\/lmdee\.link\/[A-Za-z0-9]+/);
-      return m?.[0] ?? null;
-    } catch {
-      return null;
+      if (r.status !== 201) return null;
+      const j = (await r.json()) as Array<{ shortUrls?: string[] }>;
+      return j?.[0]?.shortUrls?.[0] ?? null;
+    } catch { return null; }
+  }
+
+  private async catalogoDaLoja(p: LomadeeParceiro, ctx: AdapterContext): Promise<Candidato[]> {
+    if (p.plataforma === "shopify") return this.catalogoShopify(p);
+    if (p.plataforma === "woo") return this.catalogoWoo(p);
+    return this.catalogoVtex(p, ctx);
+  }
+
+  /** Shopify: /products.json público (título, handle, variants c/ preço, imagens). */
+  private async catalogoShopify(p: LomadeeParceiro): Promise<Candidato[]> {
+    interface ShopifyProduct {
+      id: number; title?: string; handle?: string; vendor?: string;
+      images?: Array<{ src?: string }>;
+      variants?: Array<{ price?: string; compare_at_price?: string | null; available?: boolean }>;
     }
+    const j = await this.fetchJson<{ products?: ShopifyProduct[] }>(`${p.baseUrl}/products.json?limit=250`);
+    return (j.products ?? []).map((prod) => {
+      const precos = (prod.variants ?? [])
+        .map((v) => Number(v.price))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const cheios = (prod.variants ?? [])
+        .map((v) => Number(v.compare_at_price))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const preco = precos.length ? Math.min(...precos) : NaN;
+      const cheio = cheios.length ? Math.max(...cheios) : NaN;
+      return {
+        titulo: prod.title ?? "",
+        urlProduto: `${p.baseUrl}/products/${prod.handle}`,
+        imagemUrl: prod.images?.[0]?.src ?? null,
+        precoAtual: preco,
+        precoOriginal: Number.isFinite(cheio) && cheio > preco ? cheio : null,
+        marca: prod.vendor || p.nome,
+        categoriaSlug: p.categoria,
+        skuBase: String(prod.id),
+      };
+    }).filter((c) => Number.isFinite(c.precoAtual));
+  }
+
+  /** WooCommerce: Store API pública (/wp-json/wc/store/v1/products). */
+  private async catalogoWoo(p: LomadeeParceiro): Promise<Candidato[]> {
+    interface WooProduct {
+      id: number; name?: string; permalink?: string;
+      short_description?: string;
+      is_in_stock?: boolean;
+      images?: Array<{ src?: string }>;
+      prices?: { price?: string; regular_price?: string; currency_minor_unit?: number };
+    }
+    const out: Candidato[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const lote = await this.fetchJson<WooProduct[]>(`${p.baseUrl}/wp-json/wc/store/v1/products?per_page=100&page=${page}`);
+      if (!Array.isArray(lote) || !lote.length) break;
+      for (const prod of lote) {
+        if (prod.is_in_stock === false) continue;
+        // kits B2B/atacado escondem o aviso na descrição — filtra nos dois campos
+        if (p.excluir?.test(`${prod.name ?? ""} ${prod.short_description ?? ""}`)) continue;
+        const divisor = 10 ** (prod.prices?.currency_minor_unit ?? 2);
+        const preco = Number(prod.prices?.price) / divisor;
+        const cheio = Number(prod.prices?.regular_price) / divisor;
+        if (!Number.isFinite(preco) || preco <= 0) continue;
+        out.push({
+          titulo: prod.name ?? "",
+          urlProduto: prod.permalink ?? "",
+          imagemUrl: prod.images?.[0]?.src ?? null,
+          precoAtual: preco,
+          precoOriginal: Number.isFinite(cheio) && cheio > preco ? cheio : null,
+          marca: p.nome,
+          categoriaSlug: p.categoria,
+          skuBase: String(prod.id),
+        });
+      }
+      if (lote.length < 100) break;
+    }
+    return out;
+  }
+
+  /** VTEX: reusa o coletor genérico (busca por termo → categoria certa). */
+  private async catalogoVtex(p: LomadeeParceiro, ctx: AdapterContext): Promise<Candidato[]> {
+    const buscas = (p.buscasVtex ?? [{ termo: p.nome, slug: p.categoria }]).map((b) => ({ termo: b.termo, slug: b.slug }));
+    const itens = await coletarVtex(p.baseUrl, buscas, { marca: p.nome, porTermo: 40, log: ctx.log });
+    return itens.map((i) => ({
+      titulo: i.titulo,
+      urlProduto: i.url,
+      imagemUrl: i.imagemUrl ?? null,
+      precoAtual: i.precoAtual,
+      precoOriginal: i.precoOriginal ?? null,
+      marca: i.marca ?? p.nome,
+      categoriaSlug: i.categoriaSlug,
+      skuBase: i.skuLoja,
+    }));
   }
 }

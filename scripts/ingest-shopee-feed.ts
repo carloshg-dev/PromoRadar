@@ -11,6 +11,7 @@ import csv from "csv-parser";
 import { config } from "dotenv";
 import { contemTermoProibido } from "../src/core/blacklist-nicho";
 import { linkShopeeAfiliado, shopeeAffiliateId } from "../src/core/shopee-afiliado";
+import { traduzirTitulo } from "../src/core/traducao-titulos";
 
 config({ path: ".env.local" });
 
@@ -386,6 +387,10 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
     return null;
   }
 
+  // REGRA DO DONO (02/07): título em português — o glossário roda DEPOIS da
+  // blacklist (que tem termos em inglês) e antes de qualquer uso do título.
+  const tituloPt = traduzirTitulo(titulo);
+
   const precoAtual = parseMoney(pick(row, ["sale_price", "price", "Preco", "Preco atual"]));
   if (!isPositiveNumber(precoAtual)) {
     stats.precoInvalido += 1;
@@ -434,7 +439,7 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
   return {
     itemId,
     skuLoja: `shopee-${itemId}`,
-    titulo,
+    titulo: tituloPt,
     precoAtual,
     precoOriginal,
     descontoPct,

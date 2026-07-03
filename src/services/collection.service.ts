@@ -14,6 +14,7 @@ import { computePromoScore } from "@/core/promo-score/promo-score";
 import { notificarColeta, notificarAfiliacao } from "@/infrastructure/notify/owner";
 import { redeAfiliada } from "@/lib/afiliados";
 import { degolada, PISO_GUILHOTINA } from "@/core/guilhotina";
+import { traduzirTitulo } from "@/core/traducao-titulos";
 import { avisarPromocoesNovas, type DealNovo } from "@/infrastructure/notify/promo-feed";
 import type { AdapterKey, RawProduct } from "@/core/domain/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -73,6 +74,8 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       }
 
       for (const item of itens) {
+        // REGRA DO DONO (02/07): título em português, qualquer loja (glossário).
+        item.titulo = traduzirTitulo(item.titulo);
         // Guilhotina: oferta abaixo do piso (R$20) é isca/erro de feed → descartada.
         if (degolada(item.precoAtual)) {
           stats.descartados++;

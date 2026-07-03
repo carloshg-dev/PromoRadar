@@ -8,6 +8,7 @@ import { VERTICAIS } from "@/lib/navigation";
 const DIRETOS = [
   { href: "/ofertas", label: "Ofertas" },
   { href: "/comparar", label: "Comparador" },
+  { href: "/cupons", label: "Cupons" },
   { href: "/noticias", label: "Notícias" },
 ] as const;
 
