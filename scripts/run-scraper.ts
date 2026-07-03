@@ -10,17 +10,10 @@ config({ path: ".env.local" });
 import { executarColeta } from "@/services/collection.service";
 import type { AdapterKey } from "@/core/domain/types";
 
+// GUILHOTINA 02/07: só lojas monetizadas (ver registry.ts).
 const ALIAS: Record<string, AdapterKey> = {
-  kabum: "kabum", ml: "mercadolivre", mercadolivre: "mercadolivre",
-  pichau: "pichau", terabyte: "terabyte", amazon: "amazon", amz: "amazon",
-  growth: "growth", soldiers: "soldiers",
-  maxtitanium: "maxtitanium", max: "maxtitanium",
-  integralmedica: "integralmedica", integral: "integralmedica",
-  darklab: "darklab", dark: "darklab",
-  havan: "havan",
-  americanas: "americanas", amz_br: "americanas",
-  ferramentasgerais: "ferramentasgerais", fg: "ferramentasgerais",
-  lojadomecanico: "lojadomecanico", mecanico: "lojadomecanico",
+  ml: "mercadolivre", mercadolivre: "mercadolivre",
+  amazon: "amazon", amz: "amazon",
   lomadee: "lomadee",
   awin: "awin", aliexpress: "awin",
 };

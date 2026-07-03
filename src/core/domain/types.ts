@@ -21,11 +21,12 @@ export type CategoriaSlug =
   // bucket NEUTRO p/ o feed de afiliados (Lomadee solto — fora das verticais/comparador)
   | "ofertas-parceiros";
 
-export type AdapterKey =
-  | "kabum" | "pichau" | "terabyte" | "mercadolivre" | "amazon"
-  | "growth" | "soldiers" | "maxtitanium" | "integralmedica" | "darklab"
-  | "havan" | "americanas" | "ferramentasgerais"
-  | "lojadomecanico" | "lomadee" | "awin";
+// GUILHOTINA 02/07/2026: só adapters de loja MONETIZADA. Os 12 não-afiliados
+// (kabum, pichau, terabyte, growth, soldiers, maxtitanium, integralmedica,
+// darklab, havan, americanas, ferramentasgerais, lojadomecanico) foram
+// desativados — arquivos preservados em adapters/; reativação = devolver a
+// key aqui + registry + scrape.yml (ver comentário no registry).
+export type AdapterKey = "mercadolivre" | "amazon" | "lomadee" | "awin";
 
 /** Item normalizado que todo adapter de scraping deve produzir. */
 export interface RawProduct {

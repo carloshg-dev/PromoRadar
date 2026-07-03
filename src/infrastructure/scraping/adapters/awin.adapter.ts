@@ -130,7 +130,10 @@ export class AwinAdapter extends StoreAdapter {
             const row = parseCsvLinha(linhas[r]!);
             const nome = row[iNome]?.trim();
             const link = row[iLink]?.trim();
-            const img = (row[iImg]?.trim() || (iImg2 >= 0 ? row[iImg2]?.trim() : "")) || "";
+            // Imagem DIRETA do lojista primeiro: o proxy da Awin (productserve)
+            // devolve GIF-placeholder quando o CDN de origem o bloqueia (caso
+            // real: Extra e Ponto Frio = vitrine cega). O CDN aceita browsers.
+            const img = ((iImg2 >= 0 ? row[iImg2]?.trim() : "") || row[iImg]?.trim()) || "";
             // Moeda fora do mapa → descarta (melhor sem produto do que com preço errado).
             const moeda = (iCur >= 0 ? row[iCur]?.trim().toUpperCase() : "") || "BRL";
             const fx = TAXAS_FX[moeda];

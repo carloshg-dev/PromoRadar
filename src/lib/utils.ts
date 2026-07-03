@@ -66,6 +66,13 @@ const CORES_LOJA: Record<string, string> = {
   spicy: "#CC092F",
   // Fit (anunciante Awin)
   sanavita: "#6CB33F",
+  // Parceiros Lomadee
+  sieno: "#C9A227", // dourado perfumaria
+  "sieno perfumes": "#C9A227",
+  biobran: "#1B9E4B", // verde saúde
+  "bio bran": "#1B9E4B",
+  casadofitness: "#F97316", // laranja fitness
+  "casa do fitness": "#F97316",
 };
 
 export function corLoja(lojaSlugOuNome: string | null | undefined): string {

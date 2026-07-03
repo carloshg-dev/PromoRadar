@@ -6,9 +6,11 @@ name: Coleta (jobs paralelos + cadência 4x/dia)
 # com seu timeout, e cada um avisa no Telegram/Discord ao terminar.
 #
 # Cadência:
-#   • RÁPIDA (HTTP/API, custo zero) — roda em TODA disparada (4x/dia): kabum, ML,
-#     suplementos JSON, VTEX (Americanas/FG). Pega promoção-relâmpago.
-#     (Época REMOVIDA 02/07/2026: pausada na Lomadee + fora da Awin = sem monetização.)
+#   • RÁPIDA (HTTP/API, custo zero) — roda em TODA disparada (4x/dia): ML.
+#   GUILHOTINA 02/07/2026 (dono): "chega de tráfego de graça" — 12 adapters
+#   não-afiliados desativados (kabum/terabyte/pichau/americanas/fg/mecanico/
+#   havan/growth/soldiers/max/integral/darklab). Reativação: ver registry.ts.
+#   (Época REMOVIDA: pausada na Lomadee + fora da Awin = sem monetização.)
 #   • FIRECRAWL (browser) — só 1x/dia (06:00 BRT), dividido em 2 jobs p/ caber no tempo.
 #   Schedules: 06:00 BRT = completa (rápida + firecrawl); 00/12/18 BRT = só rápida.
 
@@ -43,6 +45,7 @@ env:
   ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
   ML_POR_CATEGORIA: "50"
   AWIN_DATAFEED_URL: ${{ secrets.AWIN_DATAFEED_URL }}
+  LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }} # ⚠️ criar o secret no repo (já está no .env.local/Vercel)
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
 
 jobs:
@@ -55,10 +58,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape kabum mercadolivre soldiers integralmedica darklab americanas ferramentasgerais
+      - run: npm run scrape mercadolivre
 
   firecrawl-tech:
-    name: Firecrawl tech (Terabyte/Amazon/Pichau)
+    name: Firecrawl (Amazon)
     if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -69,10 +72,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape terabyte amazon pichau
+      - run: npm run scrape amazon
 
   firecrawl-extra:
-    name: Firecrawl extra (Havan/Growth/Max/Mecânico) + Awin (multi-loja)
+    name: Awin + Lomadee (multi-loja)
     if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -83,7 +86,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape havan growth maxtitanium lojadomecanico awin
+      - run: npm run scrape awin lomadee
 
   digest:
     name: Resumo diário do site

@@ -15,11 +15,8 @@ export const metadata = { title: "Dashboard" };
 export const revalidate = 30;
 
 /** Lojas disponíveis p/ coleta manual (espelha o VALID da rota /api/scrape). */
-const ADAPTERS_UI = [
-  "kabum", "mercadolivre", "pichau", "terabyte", "amazon", "growth", "soldiers",
-  "maxtitanium", "integralmedica", "darklab", "havan", "americanas",
-  "ferramentasgerais", "lojadomecanico", "awin",
-] as const;
+// GUILHOTINA 02/07: só lojas monetizadas (ver registry.ts).
+const ADAPTERS_UI = ["mercadolivre", "amazon", "lomadee", "awin"] as const;
 
 interface MembroEquipe { email: string | null; role: Papel }
 

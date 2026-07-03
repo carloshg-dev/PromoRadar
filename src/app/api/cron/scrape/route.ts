@@ -8,11 +8,11 @@ export const maxDuration = 300;
 
 /**
  * Cron (10:00 e 20:00 UTC = 07:00 e 17:00 BRT). Coleta as fontes RÁPIDAS, que
- * cabem no limite de 60s do serverless (Hobby): notícias (RSS) + Kabum (API) +
- * Mercado Livre (API de catálogo). Tudo HTTP/API, sem browser/Firecrawl.
+ * cabem no limite de 60s do serverless (Hobby): notícias (RSS) + Mercado Livre
+ * (API de catálogo — dono é afiliado oficial). Tudo HTTP/API, sem Firecrawl.
  *
- * As lojas de BROWSER (Terabyte/Amazon/Pichau) NÃO entram aqui — elas estouram
- * os 60s. Rodam 1x/dia no GitHub Actions (via Firecrawl), ver `.github/workflows`.
+ * GUILHOTINA 02/07: Kabum saiu daqui (não-afiliada; ver registry.ts). Amazon
+ * (browser) segue 1x/dia no GitHub Actions.
  */
 export async function GET(req: NextRequest) {
   // Falha FECHADO: sem CRON_SECRET configurado, ninguém entra. E só via
@@ -28,9 +28,9 @@ export async function GET(req: NextRequest) {
   let noticias = null;
   try { noticias = await coletarNoticias(); } catch { /* notícias não bloqueiam */ }
 
-  // Kabum + ML raso (20/categoria, cabe nos 60s) 2x/dia para frescor; o mergulho
-  // fundo do ML (50/categoria) roda 1x/dia no GitHub Actions. Upsert deduplica.
-  const keys: AdapterKey[] = ["kabum", "mercadolivre"];
+  // ML raso (20/categoria, cabe nos 60s) 2x/dia para frescor; o mergulho fundo
+  // do ML (50/categoria) roda 1x/dia no GitHub Actions. Upsert deduplica.
+  const keys: AdapterKey[] = ["mercadolivre"];
   try {
     const ofertas = await executarColeta(keys);
     return NextResponse.json({ ok: true, keys, ofertas, noticias });
