@@ -17,6 +17,7 @@ export const TERMOS_PROIBIDOS: readonly string[] = [
   "om3 sc to sc", "sc to sc", "sc/upc", "sc/apc",
   "4pon epon olt", "epon olt", "epon", "olt", "onu", "ftth", "gpon",
   "carrier-grade", "carrier grade", "pon splitter", "patch panel",
+  "patchcord", "patch cord", "pigtail",
 ];
 
 function normalizar(s: string): string {
