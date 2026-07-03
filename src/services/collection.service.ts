@@ -128,10 +128,15 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   await avisarPromocoesNovas(novosDeals); // feed PÚBLICO de ofertas (chaves próprias; no-op se não configurado)
 
   // "Lista real de afiliação": por loja, quanto MONETIZA (afiliado) vs ainda não.
+  // SÓ lojas ativas (a guilhotina desativa loja + oculta produto; sem o filtro,
+  // as 13 lojas desligadas em 02-03/07 continuavam aparecendo como "potencial"
+  // toda coleta) e SÓ produtos em_estoque (senão a contagem é o total histórico
+  // acumulado — nunca cai mesmo com stale-sweep, já que a linha não é deletada).
   try {
-    const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome");
+    const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
     const linhas = await Promise.all((ls ?? []).map(async (l) => {
-      const { count } = await sb.from("produtos").select("id", { count: "exact", head: true }).eq("loja_id", l.id as string);
+      const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })
+        .eq("loja_id", l.id as string).eq("em_estoque", true);
       return { loja: (l.nome as string) || (l.adapter_key as string), rede: redeAfiliada(l.adapter_key as string), produtos: count ?? 0 };
     }));
     await notificarAfiliacao(linhas);
