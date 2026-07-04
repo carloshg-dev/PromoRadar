@@ -21,11 +21,12 @@ import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
  *   o maior vira o "De". parseMoeda aceita "999.00" e "799,00" no mesmo feed.
  */
 
-// Tetos por rodada — env-configuráveis p/ escalar o volume SEM derrubar o
-// egress do Supabase free. Padrões subiram (500→900/anunciante, 4500→7000
-// total) agora que o feed é lido paginando as linhas do CSV; o dono afina via
-// AWIN_MAX_TOTAL / AWIN_MAX_POR_ANUNCIANTE conforme o egress permitir.
-const MAX_TOTAL = Number(process.env.AWIN_MAX_TOTAL) || 7000;
+// Tetos por rodada — env-configuráveis p/ escalar SEM estourar (a) o egress do
+// Supabase free e (b) o TIMEOUT de 45 min do job (cada produto = round-trips ao
+// banco cross-region). 5000 ≈ 25-30 min, margem segura; subir além disso exige
+// job próprio ou timeout maior (o 7000 estourou os 45 min em 03/07). O dono
+// afina via AWIN_MAX_TOTAL / AWIN_MAX_POR_ANUNCIANTE.
+const MAX_TOTAL = Number(process.env.AWIN_MAX_TOTAL) || 5000;
 const MAX_FEEDS_PADRAO = Number(process.env.AWIN_MAX_FEEDS) || 3;
 const MAX_POR_ANUNCIANTE = Number(process.env.AWIN_MAX_POR_ANUNCIANTE) || 900;
 

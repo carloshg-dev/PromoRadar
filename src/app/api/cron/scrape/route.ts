@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executarColeta } from "@/services/collection.service";
 import { coletarNoticias } from "@/infrastructure/news/news.service";
-import type { AdapterKey } from "@/core/domain/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 /**
- * Cron (10:00 e 20:00 UTC = 07:00 e 17:00 BRT). Coleta as fontes RÁPIDAS, que
- * cabem no limite de 60s do serverless (Hobby): notícias (RSS) + Mercado Livre
- * (API de catálogo — dono é afiliado oficial). Tudo HTTP/API, sem Firecrawl.
+ * Cron (10:00 e 20:00 UTC = 07:00 e 17:00 BRT) — atualiza as NOTÍCIAS (RSS).
  *
- * GUILHOTINA 02/07: Kabum saiu daqui (não-afiliada; ver registry.ts). Amazon
- * (browser) segue 1x/dia no GitHub Actions.
+ * A coleta de PRODUTOS saiu daqui: o ML (única fonte HTTP rápida que restava)
+ * foi silenciado em 04/07 — a API oficial dele responde 401 "access not
+ * granted" (bloqueada por política de tráfego). As lojas monetizadas rodam
+ * 1x/dia no GitHub Actions (Awin/Lomadee/Carrefour/Amazon). Se um dia o ML
+ * voltar via Firecrawl, religar a coleta aqui.
  */
 export async function GET(req: NextRequest) {
   // Falha FECHADO: sem CRON_SECRET configurado, ninguém entra. E só via
@@ -24,17 +23,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Notícias primeiro (rápido): garante atualização mesmo se a coleta demorar.
-  let noticias = null;
-  try { noticias = await coletarNoticias(); } catch { /* notícias não bloqueiam */ }
-
-  // ML raso (20/categoria, cabe nos 60s) 2x/dia para frescor; o mergulho fundo
-  // do ML (50/categoria) roda 1x/dia no GitHub Actions. Upsert deduplica.
-  const keys: AdapterKey[] = ["mercadolivre"];
   try {
-    const ofertas = await executarColeta(keys);
-    return NextResponse.json({ ok: true, keys, ofertas, noticias });
+    const noticias = await coletarNoticias();
+    return NextResponse.json({ ok: true, noticias });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: (e as Error).message, noticias }, { status: 500 });
+    return NextResponse.json({ ok: false, error: (e as Error).message }, { status: 500 });
   }
 }

@@ -1,30 +1,21 @@
-name: Coleta (jobs paralelos + cadência 4x/dia)
+name: Coleta (jobs paralelos, 1x/dia)
 
-# Por que JOBS SEPARADOS: a coleta inteira num job só estourava o timeout (Firecrawl
-# é lento + salvar milhares de itens com a latência GitHub↔Supabase). Resultado: o job
-# morria em "running", sem salvar tudo e SEM AVISAR. Agora cada grupo é um job próprio,
-# com seu timeout, e cada um avisa no Telegram/Discord ao terminar.
+# Por que JOBS SEPARADOS: a coleta inteira num job só estoura o timeout de 45 min
+# (latência GitHub↔Supabase por produto + throttle do encurtador Lomadee). Cada
+# grupo é um job próprio, roda em PARALELO, com seu timeout, e avisa no Discord.
 #
-# Cadência:
-#   • RÁPIDA (HTTP/API, custo zero) — roda em TODA disparada (4x/dia): ML.
-#   GUILHOTINA 02/07/2026 (dono): "chega de tráfego de graça" — 12 adapters
-#   não-afiliados desativados (kabum/terabyte/pichau/americanas/fg/mecanico/
-#   havan/growth/soldiers/max/integral/darklab). Reativação: ver registry.ts.
-#   (Época REMOVIDA: pausada na Lomadee + fora da Awin = sem monetização.)
-#   • FIRECRAWL (browser) — só 1x/dia (06:00 BRT), dividido em 2 jobs p/ caber no tempo.
-#   Schedules: 06:00 BRT = completa (rápida + firecrawl); 00/12/18 BRT = só rápida.
+# HISTÓRICO: em 03/07 o job "awin+lomadee+carrefour" junto bateu 45 min e foi
+# CANCELADO (paginação profunda + tetos maiores). Separado em 2: Awin sozinho
+# (pesado no upsert) e Lomadee+Carrefour (throttle do encurtador). ML SAIU: a
+# API oficial foi bloqueada (401) — silenciado até migrar p/ Firecrawl.
+#
+# Firecrawl: só o Amazon usa (browser). Awin/Lomadee/Carrefour = HTTP das APIs
+# das próprias plataformas (Shopify/VTEX/CSV) — não gastam crédito Firecrawl.
 
 on:
   schedule:
-    - cron: "0 9 * * *"        # 06:00 BRT — COMPLETA (rápida + firecrawl)
-    - cron: "0 3,15,21 * * *"  # 00:00 / 12:00 / 18:00 BRT — só RÁPIDA
-  workflow_dispatch:
-    inputs:
-      modo:
-        description: "completa (inclui Firecrawl) ou rapida (só HTTP)"
-        type: choice
-        options: [completa, rapida]
-        default: completa
+    - cron: "0 9 * * *" # 06:00 BRT — coleta diária completa
+  workflow_dispatch: {}
 
 concurrency:
   group: coleta
@@ -41,32 +32,18 @@ env:
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   DISCORD_DEALS_WEBHOOK_URL: ${{ secrets.DISCORD_DEALS_WEBHOOK_URL }}
   TELEGRAM_FEED_CHAT_ID: ${{ secrets.TELEGRAM_FEED_CHAT_ID }}
-  ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
-  ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
-  ML_POR_CATEGORIA: "50"
   AWIN_DATAFEED_URL: ${{ secrets.AWIN_DATAFEED_URL }}
-  LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }} # ⚠️ criar o secret no repo (já está no .env.local/Vercel)
+  LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }}
+  LOMADEE_SOURCE_ID: ${{ secrets.LOMADEE_SOURCE_ID }} # trava de comissão (canal 66222f2a); só valida, não injeta na API
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
 
 jobs:
-  rapida:
-    name: Rápida (HTTP/API)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "22", cache: npm }
-      - run: npm ci
-      - run: npm run scrape mercadolivre
-
-  firecrawl-tech:
-    name: Firecrawl (Amazon)
-    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
+  amazon:
+    name: Amazon (Firecrawl)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      SCRAPE_VIA_FIRECRAWL: "1"
+      SCRAPE_VIA_FIRECRAWL: "1" # ÚNICO job que gasta crédito Firecrawl
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -74,23 +51,30 @@ jobs:
       - run: npm ci
       - run: npm run scrape amazon
 
-  firecrawl-extra:
-    name: Awin + Lomadee (multi-loja)
-    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
+  awin:
+    name: Awin (feed multi-loja)
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      SCRAPE_VIA_FIRECRAWL: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape awin lomadee carrefour
+      - run: npm run scrape awin
+
+  lomadee-carrefour:
+    name: Lomadee + Carrefour
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npm run scrape lomadee carrefour
 
   digest:
     name: Resumo diário do site
-    if: ${{ github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.modo == 'completa') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
