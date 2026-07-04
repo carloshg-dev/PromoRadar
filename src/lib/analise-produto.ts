@@ -1,5 +1,7 @@
 import type { CategoriaSlug } from "@/core/domain/types";
 import { decodeHtmlEntities } from "@/lib/utils";
+import { coletarViaFirecrawl, firecrawlConfigurado } from "@/infrastructure/scraping/core/firecrawl-fetch";
+import { createPublicClient } from "@/infrastructure/supabase/client";
 
 /**
  * "Cadastro inteligente" (painel v4.0 Fatia 2) — cola a URL, o servidor tenta
@@ -223,6 +225,58 @@ function nomeMarca(brand: JsonLdProduct["brand"]): string | null {
   return null;
 }
 
+interface CamposProduto {
+  titulo: string | null;
+  imagemUrl: string | null;
+  preco: number | null;
+  marca: string | null;
+  descricao: string | null;
+}
+const CAMPOS_VAZIOS: CamposProduto = { titulo: null, imagemUrl: null, preco: null, marca: null, descricao: null };
+
+/** Extrai título/imagem/preço/marca/descrição de um HTML (JSON-LD > OG > <title>). */
+function extrairCampos(html: string): CamposProduto {
+  const jsonLd = extrairJsonLdProduct(html);
+  const og = extrairOg(html);
+  return {
+    titulo: limpar(jsonLd?.name) ?? og.title ?? extrairTagTitle(html),
+    imagemUrl: normalizarImagem(jsonLd?.image) ?? og.image,
+    preco: parsePreco(primeiroPreco(jsonLd?.offers) ?? og.precoAmount),
+    marca: nomeMarca(jsonLd?.brand),
+    descricao: (limpar(jsonLd?.description) ?? og.description)?.slice(0, 300) ?? null,
+  };
+}
+const semDados = (c: CamposProduto) => !c.titulo && !c.imagemUrl && c.preco == null;
+
+/** itemid de uma URL Shopee (/product/{shopid}/{itemid} ou -i.{shopid}.{itemid}). */
+function shopeeItemId(url: string): string | null {
+  return url.match(/\/product\/\d+\/(\d+)/)?.[1] ?? url.match(/-i\.\d+\.(\d+)/)?.[1] ?? null;
+}
+
+/**
+ * A Shopee resiste a TODA raspagem externa (Cloudflare + SPA + API com anti-bot).
+ * MAS já temos ~8k produtos dela no banco — se o link colado for de um produto que
+ * coletamos, devolvemos os dados do NOSSO catálogo (instantâneo, grátis, confiável).
+ */
+async function buscarShopeeNoBanco(url: string): Promise<CamposProduto | null> {
+  const itemid = shopeeItemId(url);
+  if (!itemid) return null;
+  try {
+    const sb = createPublicClient();
+    const { data } = await sb.from("produtos")
+      .select("titulo,imagem_url,preco_atual,marca")
+      .eq("sku_loja", `shopee-${itemid}`).limit(1).maybeSingle();
+    if (!data) return null;
+    return {
+      titulo: (data.titulo as string) ?? null,
+      imagemUrl: (data.imagem_url as string) ?? null,
+      preco: (data.preco_atual as number) ?? null,
+      marca: (data.marca as string) ?? null,
+      descricao: null,
+    };
+  } catch { return null; }
+}
+
 export interface SugestaoProduto {
   loja: LojaDetectada;
   titulo: string | null;
@@ -242,7 +296,11 @@ export async function analisarUrl(urlOriginal: string): Promise<SugestaoProduto>
   const avisos: string[] = [];
   const alvo = urlParaAnalise(urlOriginal);
 
-  let html = "";
+  let mlOpaco = false;
+  let campos: CamposProduto = CAMPOS_VAZIOS;
+  let urlFinal = alvo; // URL depois dos redirects (resolve o short link s.shopee.com.br)
+
+  // 1) FETCH SIMPLES (rápido, grátis). Resolve a maioria (Amazon, Carrefour…).
   try {
     const resp = await fetch(alvo, {
       headers: {
@@ -252,53 +310,50 @@ export async function analisarUrl(urlOriginal: string): Promise<SugestaoProduto>
       redirect: "follow",
       signal: AbortSignal.timeout(9000),
     });
-    // Awin tem outro formato de link (pclick.php?p=...) que não expõe o destino na
-    // URL (diferente do cread.php?...&ued=) — só dá pra saber a loja seguindo o
-    // redirect de verdade. Se a 1ª tentativa caiu em "Curadoria", tenta de novo com
-    // a URL final (depois de todos os redirects).
-    if (loja.slug === "curadoria" && resp.url && resp.url !== alvo) {
-      loja = lojaDaUrl(resp.url);
+    if (resp.url) urlFinal = resp.url;
+    // Deeplink Awin pclick.php não expõe o destino na URL — só seguindo o redirect.
+    if (loja.slug === "curadoria" && resp.url && resp.url !== alvo) loja = lojaDaUrl(resp.url);
+    // ML com link opaco (sem MLB no destino) não tem página de produto pra ler.
+    if (loja.slug === "mercadolivre" && !/MLB-?\d{6,}/i.test(resp.url)) mlOpaco = true;
+    else if (resp.ok) campos = extrairCampos(await resp.text());
+  } catch { /* bloqueio/timeout → tenta os fallbacks abaixo */ }
+
+  // 2) FALLBACKS quando o fetch simples não trouxe NADA (e não é ML opaco):
+  if (semDados(campos) && !mlOpaco) {
+    if (loja.slug === "shopee") {
+      // Shopee bloqueia TUDO (testado: Cloudflare + SPA + IA + API) → usa o NOSSO banco.
+      const doBanco = await buscarShopeeNoBanco(urlFinal);
+      if (doBanco) { campos = doBanco; avisos.push("Preenchido pelo nosso catálogo Shopee (a Shopee bloqueia leitura externa de links avulsos)."); }
+    } else if (firecrawlConfigurado()) {
+      // Outras lojas (Cloudflare, página só-JS…): Firecrawl fura o anti-bot.
+      // Inserção manual é PONTUAL → custo em crédito ~zero.
+      try {
+        const [pagina] = await coletarViaFirecrawl([urlFinal], { esperaPosCarga: 4000 });
+        if (pagina?.html) campos = extrairCampos(pagina.html);
+      } catch { /* Firecrawl indisponível — segue com o aviso manual */ }
     }
-    if (!resp.ok) {
-      avisos.push(`O site respondeu ${resp.status} — não deu pra ler a página automaticamente. Preencha os campos à mão.`);
-    } else {
-      if (loja.slug === "mercadolivre" && !/MLB-?\d{6,}/i.test(resp.url)) {
-        avisos.push("Esse link do Mercado Livre não abre direto no produto (link de afiliado opaco) — preencha os campos à mão.");
-      } else {
-        html = await resp.text();
-      }
-    }
-  } catch {
-    avisos.push("Não consegui abrir esse link a partir do servidor (bloqueio do site ou demorou demais). Preencha os campos à mão.");
   }
 
-  if (!html) {
-    return { loja, titulo: null, imagemUrl: null, preco: null, marca: null, descricao: null, categoria: null, slug: null, palavrasChave: [], avisos };
+  // 3) AVISOS finais (só depois de esgotar fetch + Firecrawl → nunca aviso à toa).
+  if (mlOpaco) avisos.push("Esse link do Mercado Livre é opaco (não abre no produto) — preencha os campos à mão.");
+  if (semDados(campos)) {
+    if (!mlOpaco) avisos.push("Não consegui ler a página automaticamente (nem via Firecrawl) — preencha os campos à mão.");
+    return { loja, ...CAMPOS_VAZIOS, categoria: null, slug: null, palavrasChave: [], avisos };
   }
-
-  const jsonLd = extrairJsonLdProduct(html);
-  const og = extrairOg(html);
-
-  const titulo = limpar(jsonLd?.name) ?? og.title ?? extrairTagTitle(html);
-  const imagemUrl = normalizarImagem(jsonLd?.image) ?? og.image;
-  const preco = parsePreco(primeiroPreco(jsonLd?.offers) ?? og.precoAmount);
-  const marca = nomeMarca(jsonLd?.brand);
-  const descricao = (limpar(jsonLd?.description) ?? og.description)?.slice(0, 300) ?? null;
-
-  if (!titulo) avisos.push("Não achei o título automaticamente — digite você.");
-  if (!imagemUrl) avisos.push("Não achei uma foto automaticamente — cole a URL da imagem se tiver.");
-  if (preco == null) avisos.push("Não achei o preço automaticamente — essa loja pode não expor o preço em texto simples.");
+  if (!campos.titulo) avisos.push("Não achei o título automaticamente — digite você.");
+  if (!campos.imagemUrl) avisos.push("Não achei uma foto automaticamente — cole a URL da imagem se tiver.");
+  if (campos.preco == null) avisos.push("Não achei o preço automaticamente — essa loja pode não expor o preço em texto simples.");
 
   return {
     loja,
-    titulo,
-    imagemUrl,
-    preco,
-    marca,
-    descricao,
-    categoria: titulo ? classificarCategoria(titulo, descricao) : null,
-    slug: titulo ? slugify(titulo) : null,
-    palavrasChave: titulo ? extrairPalavrasChave(titulo) : [],
+    titulo: campos.titulo,
+    imagemUrl: campos.imagemUrl,
+    preco: campos.preco,
+    marca: campos.marca,
+    descricao: campos.descricao,
+    categoria: campos.titulo ? classificarCategoria(campos.titulo, campos.descricao) : null,
+    slug: campos.titulo ? slugify(campos.titulo) : null,
+    palavrasChave: campos.titulo ? extrairPalavrasChave(campos.titulo) : [],
     avisos,
   };
 }
