@@ -47,7 +47,13 @@ export class AmazonAdapter extends StoreAdapter {
   readonly nome = "Amazon";
 
   async coletar(ctx: AdapterContext): Promise<RawProduct[]> {
-    const urls = BUSCAS.map((b) => `${SITE}/s?k=${encodeURIComponent(b.q)}`);
+    // TETO DE PÁGINAS (Firecrawl): a Amazon é o ÚNICO adapter que gasta crédito
+    // Firecrawl — 1 chamada por busca. AMAZON_MAX_BUSCAS limita quantas categorias
+    // raspar por rodada (default: todas). Baixar isso corta o consumo direto.
+    const limite = Math.max(1, Math.min(BUSCAS.length, Number(process.env.AMAZON_MAX_BUSCAS) || BUSCAS.length));
+    const buscas = BUSCAS.slice(0, limite);
+    const urls = buscas.map((b) => `${SITE}/s?k=${encodeURIComponent(b.q)}`);
+    ctx.log("info", `Amazon: ${buscas.length}/${BUSCAS.length} buscas (${buscas.length} chamadas Firecrawl)`);
 
     let paginas;
     try {
@@ -59,8 +65,8 @@ export class AmazonAdapter extends StoreAdapter {
 
     const out: RawProduct[] = [];
     const vistos = new Set<string>();
-    for (let i = 0; i < BUSCAS.length; i++) {
-      const b = BUSCAS[i]!;
+    for (let i = 0; i < buscas.length; i++) {
+      const b = buscas[i]!;
       const pagina = paginas[i];
       if (!pagina?.html) {
         ctx.log("warn", `Amazon ${b.slug}: sem HTML${pagina?.erro ? ` (${pagina.erro})` : ""}.`);

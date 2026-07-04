@@ -17,6 +17,16 @@ const CONCORRENCIA = 3;      // equilíbrio entre velocidade e rate-limit do fre
 const TENTATIVAS = 3;        // o free limita req/min → re-tenta com backoff
 
 /**
+ * CACHE do Firecrawl (`maxAge`, em ms) — é o "re-raspar só o que não foi visto
+ * há X horas": se o Firecrawl já raspou a página dentro dessa janela, devolve a
+ * versão em CACHE (instantânea + custo reduzido) em vez de raspar de novo. A
+ * coleta diária (24h de intervalo > 12h) sempre pega FRESCO; disparos repetidos
+ * (testes, re-dispatch) dentro da janela voltam do cache, blindando a cota.
+ * Ajuste por FIRECRAWL_MAX_AGE_H (0 = sempre fresco, desliga o cache).
+ */
+const CACHE_MS = Math.max(0, Number(process.env.FIRECRAWL_MAX_AGE_H ?? 12)) * 3_600_000;
+
+/**
  * Chaves do Firecrawl. Suporta VÁRIAS separadas por vírgula em FIRECRAWL_API_KEY
  * (ex: "fc-aaa,fc-bbb") → failover automático quando uma esgota a cota. Use
  * contas reais distintas (ex: a sua + a do dono); múltiplas contas só pra burlar
@@ -90,6 +100,8 @@ async function scrapeUma(url: string, esperaPosCarga: number): Promise<PaginaCol
     // precisam de mais tempo de render; as leves passam esperaPosCarga baixo.
     url, formats: ["html"], onlyMainContent: false,
     waitFor: Math.min(esperaPosCarga, 8000), timeout: 60000, location: { country: "BR" },
+    // Cache do Firecrawl: página raspada há < CACHE_MS volta do cache (barato).
+    ...(CACHE_MS > 0 ? { maxAge: CACHE_MS } : {}),
   });
   const html = data?.success ? (data.data?.html ?? data.data?.rawHtml ?? null) : null;
   return html ? { url, html } : { url, html: null, erro: `firecrawl ${erro || "sem html"}` };
