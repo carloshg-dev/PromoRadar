@@ -1,25 +1,23 @@
 "use client";
-import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Produto } from "@/core/domain/types";
 import { ProdutoCard } from "@/components/produto-card";
+import { useCarrossel } from "@/components/use-carrossel";
 import { Sparkles, SprayCan, ArrowRight } from "lucide-react";
 
 const ICONES = { parceiros: Sparkles, beleza: SprayCan } as const;
 
 /**
- * Esteira de produtos de afiliado — rola SOZINHA (rAF no scrollLeft) mas é um
- * container de scroll de verdade (o usuário arrasta). Pausa no toque/hover.
- * Lista duplicada → loop sem emenda. Respeita prefers-reduced-motion.
- *
- * Reutilizável: `direcao="reverso"` rola no sentido OPOSTO (usado no 2º carrossel
- * de Beleza/Perfumes, logo abaixo do principal, pra dar movimento cruzado).
+ * Esteira de produtos de afiliado — rola SOZINHA mas é ARRASTÁVEL (mouse + touch,
+ * ver useCarrossel). Pausa no hover/arrasto. Trilha duplicada → loop sem emenda.
+ * `direcao="reverso"` rola no sentido oposto (2º carrossel de Beleza).
  */
 export function ParceirosFeed({
   produtos,
   titulo = "Achados dos parceiros",
   subtitulo = "Ofertas com link direto à loja — arraste pra ver mais. Atualiza a cada coleta.",
   verTudoHref = "/ofertas",
+  verTudoLabel = "Ver todas as ofertas",
   direcao = "normal",
   variante = "parceiros",
 }: {
@@ -27,60 +25,12 @@ export function ParceirosFeed({
   titulo?: string;
   subtitulo?: string;
   verTudoHref?: string;
+  verTudoLabel?: string;
   direcao?: "normal" | "reverso";
-  /** string (não a função do ícone): componente-função não cruza a fronteira server→client */
   variante?: "parceiros" | "beleza";
 }) {
+  const ref = useCarrossel(direcao);
   const Icon = ICONES[variante];
-  const ref = useRef<HTMLDivElement>(null);
-  const pausado = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const reverso = direcao === "reverso";
-
-    // Acumulador FLOAT próprio (não lê scrollLeft de volta, que arredonda e trava
-    // o passo de 0.5px). Reverso começa no MEIO e diminui → conteúdo anda pra
-    // DIREITA (itens entram pela esquerda), oposto ao de cima. Wrap sem emenda.
-    let raf = 0;
-    let pos = 0;
-    let iniciado = false;
-    const passo = () => {
-      const meta = el.scrollWidth / 2; // metade = 1 cópia
-      if (meta > 0) {
-        if (!iniciado) { pos = reverso ? meta : 0; iniciado = true; }
-        if (!pausado.current) {
-          pos += reverso ? -0.5 : 0.5;
-          if (pos >= meta) pos -= meta;
-          else if (pos < 0) pos += meta;
-          el.scrollLeft = pos;
-        }
-      }
-      raf = requestAnimationFrame(passo);
-    };
-    raf = requestAnimationFrame(passo);
-
-    const pause = () => { pausado.current = true; };
-    // ao soltar o arraste, retoma de onde o usuário deixou (sincroniza o acumulador)
-    const resume = () => { pausado.current = false; pos = el.scrollLeft; };
-    el.addEventListener("pointerenter", pause);
-    el.addEventListener("pointerdown", pause);
-    el.addEventListener("pointerup", resume);
-    el.addEventListener("pointerleave", resume);
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("touchend", resume, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("pointerenter", pause);
-      el.removeEventListener("pointerdown", pause);
-      el.removeEventListener("pointerup", resume);
-      el.removeEventListener("pointerleave", resume);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("touchend", resume);
-    };
-  }, [direcao]);
 
   if (!produtos.length) return null;
   const trilho = [...produtos, ...produtos]; // duplica p/ o loop contínuo
@@ -103,12 +53,20 @@ export function ParceirosFeed({
       </div>
 
       <div ref={ref}
-        className="flex gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        className="flex select-none gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {trilho.map((p, i) => (
           <div key={`${p.id}-${i}`} className="w-[230px] shrink-0 sm:w-[260px]">
             <ProdutoCard p={p} />
           </div>
         ))}
+      </div>
+
+      {/* ROTA DE FUGA — botão "Ver Tudo" visível em TODAS as telas (o do topo some no mobile) */}
+      <div className="mt-3 flex justify-center">
+        <Link href={verTudoHref}
+          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-soft/60 px-4 py-2 text-xs font-semibold text-zinc-200 transition hover:border-brand hover:bg-brand/10 hover:text-white">
+          {verTudoLabel} <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </section>
   );

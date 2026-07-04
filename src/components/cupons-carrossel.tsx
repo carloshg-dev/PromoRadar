@@ -1,52 +1,18 @@
 "use client";
-import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Ticket, ArrowRight } from "lucide-react";
 import { corLoja } from "@/lib/utils";
+import { useCarrossel } from "@/components/use-carrossel";
 import type { CupomLomadee } from "@/lib/lomadee-cupons";
 
 /**
  * Carrossel HORIZONTAL de cupons em destaque — topo da home, logo abaixo do
  * carrossel de produtos. Enxuto: tickets compactos (logo + marca + código +
- * "Usar"). Rola sozinho (rAF no scrollLeft), pausa no toque/hover, arrastável,
- * loop sem emenda (lista duplicada). Respeita prefers-reduced-motion.
+ * "Usar"). Auto-rola E é ARRASTÁVEL (mouse + touch, ver useCarrossel), pausa no
+ * hover/arrasto, loop sem emenda (lista duplicada). Respeita reduced-motion.
  */
 export function CuponsCarrossel({ cupons }: { cupons: CupomLomadee[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const pausado = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0;
-    const passo = () => {
-      if (!pausado.current) {
-        el.scrollLeft += 0.4;
-        const meta = el.scrollWidth / 2;
-        if (meta > 0 && el.scrollLeft >= meta) el.scrollLeft -= meta;
-      }
-      raf = requestAnimationFrame(passo);
-    };
-    raf = requestAnimationFrame(passo);
-    const pause = () => { pausado.current = true; };
-    const resume = () => { pausado.current = false; };
-    el.addEventListener("pointerenter", pause);
-    el.addEventListener("pointerdown", pause);
-    el.addEventListener("pointerup", resume);
-    el.addEventListener("pointerleave", resume);
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("touchend", resume, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("pointerenter", pause);
-      el.removeEventListener("pointerdown", pause);
-      el.removeEventListener("pointerup", resume);
-      el.removeEventListener("pointerleave", resume);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("touchend", resume);
-    };
-  }, []);
+  const ref = useCarrossel("normal", 0.4);
 
   if (cupons.length < 2) return null;
   const trilho = [...cupons, ...cupons];
@@ -63,7 +29,7 @@ export function CuponsCarrossel({ cupons }: { cupons: CupomLomadee[] }) {
       </div>
 
       <div ref={ref}
-        className="flex gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        className="flex select-none gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {trilho.map((c, i) => {
           const cor = corLoja(c.marca);
           return (
