@@ -86,7 +86,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - run: npm run scrape awin lomadee
+      - run: npm run scrape awin lomadee carrefour
 
   digest:
     name: Resumo diário do site

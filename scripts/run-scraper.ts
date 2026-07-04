@@ -16,6 +16,7 @@ const ALIAS: Record<string, AdapterKey> = {
   amazon: "amazon", amz: "amazon",
   lomadee: "lomadee",
   awin: "awin", aliexpress: "awin",
+  carrefour: "carrefour",
 };
 
 async function main() {

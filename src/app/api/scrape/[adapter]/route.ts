@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 // GUILHOTINA 02/07: só lojas monetizadas (ver registry.ts).
-const VALID: AdapterKey[] = ["mercadolivre", "amazon", "lomadee", "awin"];
+const VALID: AdapterKey[] = ["mercadolivre", "amazon", "lomadee", "awin", "carrefour"];
 
 /**
  * Coleta manual de um adapter. Restrito: staff com permissão de coleta
