@@ -145,9 +145,53 @@ async function poolAfiliadosPorLoja(sb: ReturnType<typeof createPublicClient>): 
  * monetiza. Pool balanceado POR LOJA + aleatório SEM a mesma loja em sequência
  * (regra do dono 02/07).
  */
+/**
+ * BANDA DE PREÇO do carrossel "Achados dos parceiros" (regra do dono 03/07):
+ * SÓ produtos de R$9 a R$120 rodam ali — o carrossel superior é de "achados"
+ * de impulso, não de item caro (bolsa de R$1.999 assustava o usuário). É um
+ * TETO RÍGIDO: nada acima de R$120 entra (sem fallback pra caro). Env-tunável.
+ */
+const VITRINE_PRECO_MIN = Number(process.env.VITRINE_PRECO_MIN) || 9;
+const VITRINE_PRECO_MAX = Number(process.env.VITRINE_PRECO_MAX) || 120;
+
+/**
+ * Ordena o carrossel de achados: filtra pra banda R$9–R$120, embaralha (frescor:
+ * não estagna nos mesmos itens), prioriza maior %desconto (achado = desconto
+ * real primeiro; sem desconto fica variado no fim) e intercala SEM repetir loja
+ * em sequência (anti-parede-de-marca). Sem fallback pra fora da banda — se
+ * sobrar pouco, mostra menos (o loop do carrossel duplica a lista e roda igual).
+ */
+function vitrinePorDescontoEValor(pool: Produto[], n: number): Produto[] {
+  const naBanda = pool.filter((p) => {
+    const v = p.precoAtual ?? 0;
+    return v >= VITRINE_PRECO_MIN && v <= VITRINE_PRECO_MAX;
+  });
+  const base = embaralhar(naBanda);
+  const baldes = new Map<string, Produto[]>();
+  for (const p of base) {
+    const b = baldes.get(p.lojaSlug);
+    if (b) b.push(p); else baldes.set(p.lojaSlug, [p]);
+  }
+  // cada balde: maior %desconto no topo (sort estável preserva o embaralho nos empates)
+  for (const fila of baldes.values()) fila.sort((a, b) => (b.descontoPct ?? 0) - (a.descontoPct ?? 0));
+
+  const out: Produto[] = [];
+  let ultima = "";
+  while (out.length < n) {
+    const cheias = [...baldes.entries()].filter(([, f]) => f.length);
+    if (!cheias.length) break;
+    const cand = cheias.filter(([slug]) => slug !== ultima);
+    const escolha = (cand.length ? cand : cheias)
+      .sort((a, b) => (b[1][0]!.descontoPct ?? 0) - (a[1][0]!.descontoPct ?? 0))[0]!;
+    out.push(escolha[1].shift()!);
+    ultima = escolha[0];
+  }
+  return out;
+}
+
 export async function listarAfiliados(limit = 24): Promise<Produto[]> {
   const sb = createPublicClient();
-  return aleatorioSemLojaSeguida(await poolAfiliadosPorLoja(sb), limit);
+  return vitrinePorDescontoEValor(await poolAfiliadosPorLoja(sb), limit);
 }
 
 /**

@@ -6,7 +6,10 @@ import { ProdutoCard } from "@/components/produto-card";
 import { NewsCarousel } from "@/components/news-carousel";
 import { FeaturedDealRotator } from "@/components/featured-deal-rotator";
 import { ParceirosFeed } from "@/components/parceiros-feed";
+import { CuponsCarrossel } from "@/components/cupons-carrossel";
 import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
+import { listarCupons } from "@/lib/lomadee-cupons";
+import { cuponsCurados } from "@/lib/cupons-curados";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
 import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
 import { VitrineVertical } from "@/components/vitrine-vertical";
@@ -28,6 +31,10 @@ export default async function Home() {
 
   let produtosRodizio: ProdutoRodizio[] = [];
   try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
+
+  // Cupons em destaque (carrossel no topo): curados à mão primeiro + Lomadee.
+  let cuponsDestaque: Awaited<ReturnType<typeof listarCupons>> = cuponsCurados();
+  try { cuponsDestaque = [...cuponsDestaque, ...(await listarCupons(14))]; } catch { /* mantém curados */ }
 
   // Destaques: pool top-60 (monetizado primeiro) apresentado ALEATÓRIO sem loja
   // repetida em sequência (REGRA DO DONO 02/07 — nada de parede de uma marca).
@@ -64,6 +71,9 @@ export default async function Home() {
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática */}
       <ParceirosFeed produtos={afiliados} />
+
+      {/* CUPONS EM DESTAQUE — carrossel enxuto logo abaixo do de produtos */}
+      <CuponsCarrossel cupons={cuponsDestaque} />
 
       <SeasonalHomeHero produtosRodizio={produtosRodizio} />
 

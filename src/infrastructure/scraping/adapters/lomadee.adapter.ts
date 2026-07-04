@@ -25,8 +25,20 @@ import { coletarVtex } from "@/infrastructure/scraping/core/vtex";
 
 const BASE = "https://api.lomadee.com.br";
 const THROTTLE_MS = 1100;  // 60/min no encurtador
-const MAX_POR_LOJA = 150;
-const MAX_TOTAL = 400;
+const MAX_POR_LOJA = Number(process.env.LOMADEE_MAX_POR_LOJA) || 250;
+const MAX_TOTAL = Number(process.env.LOMADEE_MAX_TOTAL) || 600;
+
+/**
+ * LOMADEE_SOURCE_ID = canal PriceComparator do PromoDetec (66222f2a-…). ATENÇÃO:
+ * a API do encurtador NÃO aceita esse id como parâmetro — testado ao vivo,
+ * `sourceId`/`channelId`/`source` no body retornam HTTP 400 "property should
+ * not exist" (validação estrita). Injetar quebraria a geração de TODO link →
+ * prateleira vazia. O canal JÁ vem embutido automaticamente em cada shortUrl
+ * (a API key escopa conta+canal). Então usamos o env como GUARDA: valida que
+ * cada link cunhado caiu no canal certo e ALERTA se divergir — tripwire de
+ * comissão, sem risco de quebrar o dinheiro. Ver também src/lib/lomadee-cupons.
+ */
+const CANAL_ESPERADO = process.env.LOMADEE_SOURCE_ID?.trim() || null;
 
 interface MarcaLomadee {
   id: string;
@@ -90,17 +102,19 @@ export class LomadeeAdapter extends StoreAdapter {
         baseUrl: parceiro.baseUrl,
         logoUrl: lomadeeLogoUrl(marca.id),
       };
-      let cunhados = 0, semLink = 0;
+      let cunhados = 0, semLink = 0, foraDoCanal = 0;
       for (const c of candidatos) {
-        const short = await this.cunharLink(KEY, c.urlProduto, marca.id);
+        const r = await this.cunharLink(KEY, c.urlProduto, marca.id);
         await this.sleep(THROTTLE_MS);
-        if (!short) { semLink++; continue; } // sem link monetizado o produto NÃO entra
+        if (!r) { semLink++; continue; } // sem link monetizado o produto NÃO entra
+        // GUARDA de comissão: o link deve cair no canal do PromoDetec (LOMADEE_SOURCE_ID).
+        if (CANAL_ESPERADO && r.canal && r.canal !== CANAL_ESPERADO) foraDoCanal++;
         cunhados++;
         out.push({
           skuLoja: `lmd-${parceiro.slug}-${c.skuBase}`.slice(0, 120),
           // WooCommerce devolve entidades HTML no nome (&#038; &#8211;) → decodifica
           titulo: decodeHtmlEntities(c.titulo).slice(0, 500),
-          url: short,
+          url: r.url,
           imagemUrl: c.imagemUrl,
           marca: c.marca ?? parceiro.nome,
           categoriaSlug: c.categoriaSlug,
@@ -110,6 +124,7 @@ export class LomadeeAdapter extends StoreAdapter {
           loja,
         });
       }
+      if (foraDoCanal) ctx.log("warn", `Lomadee ${parceiro.slug}: ${foraDoCanal} link(s) FORA do canal esperado (${CANAL_ESPERADO}) — comissão pode não atribuir!`);
       ctx.log("info", `Lomadee ${parceiro.nome}: ${cunhados} produtos cunhados${semLink ? ` (${semLink} sem link — fora)` : ""}`);
     }
 
@@ -132,7 +147,9 @@ export class LomadeeAdapter extends StoreAdapter {
     return all;
   }
 
-  private async cunharLink(key: string, url: string, organizationId: string): Promise<string | null> {
+  /** Cunha o link de afiliado; devolve a shortUrl + o canal em que caiu (p/ a
+   *  guarda de comissão). O body NÃO leva sourceId: a API rejeita (400). */
+  private async cunharLink(key: string, url: string, organizationId: string): Promise<{ url: string; canal: string | null } | null> {
     try {
       const r = await fetch(`${BASE}/affiliate/shortener/url`, {
         method: "POST",
@@ -140,8 +157,10 @@ export class LomadeeAdapter extends StoreAdapter {
         body: JSON.stringify({ url, organizationId, type: "Custom" }),
       });
       if (r.status !== 201) return null;
-      const j = (await r.json()) as Array<{ shortUrls?: string[] }>;
-      return j?.[0]?.shortUrls?.[0] ?? null;
+      const j = (await r.json()) as Array<{ shortUrls?: string[]; availableChannel?: { id?: string } }>;
+      const short = j?.[0]?.shortUrls?.[0];
+      if (!short) return null;
+      return { url: short, canal: j?.[0]?.availableChannel?.id ?? null };
     } catch { return null; }
   }
 
@@ -151,34 +170,40 @@ export class LomadeeAdapter extends StoreAdapter {
     return this.catalogoVtex(p, ctx);
   }
 
-  /** Shopify: /products.json público (título, handle, variants c/ preço, imagens). */
+  /** Shopify: /products.json público, PAGINADO (?limit=250&page=N) até acabar. */
   private async catalogoShopify(p: LomadeeParceiro): Promise<Candidato[]> {
     interface ShopifyProduct {
       id: number; title?: string; handle?: string; vendor?: string;
       images?: Array<{ src?: string }>;
       variants?: Array<{ price?: string; compare_at_price?: string | null; available?: boolean }>;
     }
-    const j = await this.fetchJson<{ products?: ShopifyProduct[] }>(`${p.baseUrl}/products.json?limit=250`);
-    return (j.products ?? []).map((prod) => {
-      const precos = (prod.variants ?? [])
-        .map((v) => Number(v.price))
-        .filter((n) => Number.isFinite(n) && n > 0);
-      const cheios = (prod.variants ?? [])
-        .map((v) => Number(v.compare_at_price))
-        .filter((n) => Number.isFinite(n) && n > 0);
-      const preco = precos.length ? Math.min(...precos) : NaN;
-      const cheio = cheios.length ? Math.max(...cheios) : NaN;
-      return {
-        titulo: prod.title ?? "",
-        urlProduto: `${p.baseUrl}/products/${prod.handle}`,
-        imagemUrl: prod.images?.[0]?.src ?? null,
-        precoAtual: preco,
-        precoOriginal: Number.isFinite(cheio) && cheio > preco ? cheio : null,
-        marca: prod.vendor || p.nome,
-        categoriaSlug: p.categoria,
-        skuBase: String(prod.id),
-      };
-    }).filter((c) => Number.isFinite(c.precoAtual));
+    const out: Candidato[] = [];
+    const cap = p.maxProdutos ?? MAX_POR_LOJA;
+    for (let page = 1; page <= 20 && out.length < cap; page++) {
+      const j = await this.fetchJson<{ products?: ShopifyProduct[] }>(`${p.baseUrl}/products.json?limit=250&page=${page}`);
+      const lote = j.products ?? [];
+      if (!lote.length) break;
+      for (const prod of lote) {
+        const precos = (prod.variants ?? []).map((v) => Number(v.price)).filter((n) => Number.isFinite(n) && n > 0);
+        const cheios = (prod.variants ?? []).map((v) => Number(v.compare_at_price)).filter((n) => Number.isFinite(n) && n > 0);
+        const preco = precos.length ? Math.min(...precos) : NaN;
+        if (!Number.isFinite(preco)) continue;
+        const cheio = cheios.length ? Math.max(...cheios) : NaN;
+        out.push({
+          titulo: prod.title ?? "",
+          urlProduto: `${p.baseUrl}/products/${prod.handle}`,
+          imagemUrl: prod.images?.[0]?.src ?? null,
+          precoAtual: preco,
+          precoOriginal: Number.isFinite(cheio) && cheio > preco ? cheio : null,
+          marca: prod.vendor || p.nome,
+          categoriaSlug: p.categoria,
+          skuBase: String(prod.id),
+        });
+      }
+      if (lote.length < 250) break; // última página
+      await this.sleep(300);
+    }
+    return out;
   }
 
   /** WooCommerce: Store API pública (/wp-json/wc/store/v1/products). */
@@ -191,7 +216,8 @@ export class LomadeeAdapter extends StoreAdapter {
       prices?: { price?: string; regular_price?: string; currency_minor_unit?: number };
     }
     const out: Candidato[] = [];
-    for (let page = 1; page <= 3; page++) {
+    const capPaginas = Math.ceil((p.maxProdutos ?? MAX_POR_LOJA) / 100);
+    for (let page = 1; page <= Math.min(20, capPaginas) ; page++) {
       const lote = await this.fetchJson<WooProduct[]>(`${p.baseUrl}/wp-json/wc/store/v1/products?per_page=100&page=${page}`);
       if (!Array.isArray(lote) || !lote.length) break;
       for (const prod of lote) {
@@ -221,7 +247,7 @@ export class LomadeeAdapter extends StoreAdapter {
   /** VTEX: reusa o coletor genérico (busca por termo → categoria certa). */
   private async catalogoVtex(p: LomadeeParceiro, ctx: AdapterContext): Promise<Candidato[]> {
     const buscas = (p.buscasVtex ?? [{ termo: p.nome, slug: p.categoria }]).map((b) => ({ termo: b.termo, slug: b.slug }));
-    const itens = await coletarVtex(p.baseUrl, buscas, { marca: p.nome, porTermo: 40, log: ctx.log });
+    const itens = await coletarVtex(p.baseUrl, buscas, { marca: p.nome, porTermo: 50, paginasPorTermo: 3, log: ctx.log });
     return itens.map((i) => ({
       titulo: i.titulo,
       urlProduto: i.url,

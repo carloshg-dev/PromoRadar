@@ -28,6 +28,14 @@ const PDP = "https://www.mercadolivre.com.br/p";
  */
 const POR_CATEGORIA = Math.min(50, Math.max(5, Number(process.env.ML_POR_CATEGORIA) || 20));
 
+/**
+ * Páginas por busca (paginação por `offset` na API de catálogo). Antes o robô
+ * puxava só a 1ª página e parava — feed "estagnado nos mesmos produtos". Padrão
+ * 1 (cabe nos ~60s do serverless); o GitHub Actions sobe via ML_PAGINAS (ex: 3
+ * = 3× o volume por categoria). A API de catálogo aceita offset até ~1000.
+ */
+const PAGINAS = Math.min(10, Math.max(1, Number(process.env.ML_PAGINAS) || 1));
+
 interface BuscaML { q: string; slug: CategoriaSlug; limit?: number }
 
 const BUSCAS: ReadonlyArray<BuscaML> = [
@@ -127,40 +135,59 @@ export class MercadoLivreAdapter extends StoreAdapter {
 
     const out: RawProduct[] = [];
     const buscas = POR_CATEGORIA >= 50 ? [...BUSCAS, ...BUSCAS_FIT, ...BUSCAS_ELETRO_FERR, ...BUSCAS_GADGET_PERFUME] : BUSCAS;
+    const vistos = new Set<string>();
     for (const b of buscas) {
-      try {
-        const lim = b.limit ?? POR_CATEGORIA;
-        const url = `${SEARCH}?site_id=MLB&status=active&q=${encodeURIComponent(b.q)}&limit=${lim}`;
-        const data = await this.fetchJson<{ results?: CatalogProduct[] }>(url, { headers });
-        const produtos = data.results ?? [];
-        let comPreco = 0;
+      const lim = b.limit ?? POR_CATEGORIA;
+      let comPreco = 0, total = 0;
+      for (let pg = 0; pg < PAGINAS; pg++) {
+        try {
+          const offset = pg * lim;
+          const url = `${SEARCH}?site_id=MLB&status=active&q=${encodeURIComponent(b.q)}&limit=${lim}&offset=${offset}`;
+          const data = await this.fetchJson<{ results?: CatalogProduct[] }>(url, { headers });
+          const produtos = data.results ?? [];
+          if (!produtos.length) break;
+          total += produtos.length;
 
-        for (const p of produtos) {
-          if (!p.id || !p.name) continue;
-          const preco = await this.menorPreco(p.id, headers);
-          if (!preco) continue;
-          comPreco++;
+          for (const p of produtos) {
+            if (!p.id || !p.name) continue;
+            const catId = p.catalog_product_id ?? p.id;
+            if (vistos.has(catId)) continue; // paginação pode repetir entre offsets
+            const preco = await this.menorPreco(p.id, headers);
+            if (!preco) continue;
+            vistos.add(catId);
+            comPreco++;
 
-          const catId = p.catalog_product_id ?? p.id;
-          const img = p.pictures?.[0]?.secure_url ?? p.pictures?.[0]?.url ?? null;
-          out.push({
-            skuLoja: catId,
-            titulo: p.name.slice(0, 500),
-            url: `${PDP}/${catId}`,
-            imagemUrl: img,
-            marca: marcaDe(p),
-            categoriaSlug: b.slug,
-            precoAtual: preco.precoAtual,
-            precoOriginal: preco.precoOriginal,
-            emEstoque: true,
-          });
-          await this.sleep(120); // ritmo entre chamadas de /items
+            const img = p.pictures?.[0]?.secure_url ?? p.pictures?.[0]?.url ?? null;
+            out.push({
+              skuLoja: catId,
+              titulo: p.name.slice(0, 500),
+              url: `${PDP}/${catId}`,
+              imagemUrl: img,
+              marca: marcaDe(p),
+              categoriaSlug: b.slug,
+              precoAtual: preco.precoAtual,
+              precoOriginal: preco.precoOriginal,
+              emEstoque: true,
+            });
+            await this.sleep(120); // ritmo entre chamadas de /items
+          }
+          if (produtos.length < lim) break; // última página da busca
+          await this.sleep(400);
+        } catch (e) {
+          const msg = (e as Error).message;
+          // 401 "access not granted" = a API oficial do ML foi bloqueada por
+          // política de tráfego (confirmado 03/07). Não adianta insistir nas
+          // outras ~20 buscas — aborta com UMA mensagem clara. Fix real =
+          // migrar o ML p/ raspagem via Firecrawl (a API não volta).
+          if (/HTTP 401/.test(msg)) {
+            ctx.log("warn", "ML API BLOQUEADA (401 access not granted) — API oficial restringida por política de tráfego. Migrar ML p/ Firecrawl. Coleta ML abortada.");
+            return out;
+          }
+          ctx.log("warn", `ML "${b.q}" p${pg} falhou: ${msg}`);
+          break;
         }
-        ctx.log("info", `ML ${b.slug}: ${comPreco}/${produtos.length} com preço ativo`);
-        await this.sleep(400);
-      } catch (e) {
-        ctx.log("warn", `ML "${b.q}" falhou: ${(e as Error).message}`);
       }
+      ctx.log("info", `ML ${b.slug}: ${comPreco}/${total} com preço ativo`);
     }
     ctx.log("info", `Mercado Livre: ${out.length} itens coletados`);
     return out;

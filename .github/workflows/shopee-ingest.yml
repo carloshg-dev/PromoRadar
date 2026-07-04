@@ -21,7 +21,7 @@ jobs:
       SHOPEE_FEED_URL: ${{ secrets.SHOPEE_FEED_URL }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      PISO_PRECO_BRL: "20"
+      PISO_PRECO_BRL: "9" # piso baixado 20→9 (03/07): coletar achados baratos p/ o carrossel R$9–R$120
       SHOPEE_TOP_N: "400"
       SHOPEE_AFFILIATE_ID: "18318451097" # ID de afiliado do dono (publico — vai na URL). Sem isso, links salvos ficam SEM comissao.
     steps:

@@ -76,6 +76,13 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       for (const item of itens) {
         // REGRA DO DONO (02/07): título em português, qualquer loja (glossário).
         item.titulo = traduzirTitulo(item.titulo);
+        // FILTRO DE QUALIDADE (regra do dono 03/07): vitrine cega não vende —
+        // produto SEM IMAGEM é descartado central (vale p/ TODOS os adapters).
+        // (O "muito barato" é a guilhotina abaixo, piso R$20 via PISO_PRECO_BRL.)
+        if (!item.imagemUrl || !/^https?:\/\//i.test(item.imagemUrl)) {
+          stats.descartados++;
+          continue;
+        }
         // Guilhotina: oferta abaixo do piso (R$20) é isca/erro de feed → descartada.
         if (degolada(item.precoAtual)) {
           stats.descartados++;

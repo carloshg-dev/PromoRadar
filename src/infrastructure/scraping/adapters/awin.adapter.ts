@@ -21,9 +21,13 @@ import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
  *   o maior vira o "De". parseMoeda aceita "999.00" e "799,00" no mesmo feed.
  */
 
-const MAX_TOTAL = 4500;         // teto geral por rodada (egress do free tier)
-const MAX_FEEDS_PADRAO = 2;     // feeds por anunciante (AliExpress sobe via config)
-const MAX_POR_ANUNCIANTE = 500; // produtos por anunciante (idem)
+// Tetos por rodada — env-configuráveis p/ escalar o volume SEM derrubar o
+// egress do Supabase free. Padrões subiram (500→900/anunciante, 4500→7000
+// total) agora que o feed é lido paginando as linhas do CSV; o dono afina via
+// AWIN_MAX_TOTAL / AWIN_MAX_POR_ANUNCIANTE conforme o egress permitir.
+const MAX_TOTAL = Number(process.env.AWIN_MAX_TOTAL) || 7000;
+const MAX_FEEDS_PADRAO = Number(process.env.AWIN_MAX_FEEDS) || 3;
+const MAX_POR_ANUNCIANTE = Number(process.env.AWIN_MAX_POR_ANUNCIANTE) || 900;
 
 /** Câmbio p/ feeds que não vêm em real (a AliExpress costuma vir em USD). Sem isto,
  *  "US$ 3" virava "R$ 3" na vitrine (bug real). Configurável por env; default conservador. */

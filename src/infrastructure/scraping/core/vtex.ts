@@ -42,8 +42,10 @@ interface VtexProduct {
 export interface ColetaVtexOpts {
   /** marca fixa da loja (ex: Ferramentas Gerais). Se ausente, usa o brand/seller do produto. */
   marca?: string;
-  /** itens por termo (VTEX devolve em ranges; máx 50). Default 40. */
+  /** itens por PÁGINA de cada termo (VTEX devolve em ranges; máx 50). Default 40. */
   porTermo?: number;
+  /** nº de páginas por termo (paginação por range _from/_to). Default 1. */
+  paginasPorTermo?: number;
   log: (nivel: "info" | "warn" | "error", msg: string) => void;
 }
 
@@ -56,46 +58,54 @@ export async function coletarVtex(
   const vistos = new Set<string>();
   const porTermo = opts.porTermo ?? 40;
 
+  const paginas = Math.max(1, opts.paginasPorTermo ?? 1);
   for (const b of buscas) {
-    try {
-      const url = `${site}/api/catalog_system/pub/products/search?ft=${encodeURIComponent(b.termo)}&_from=0&_to=${porTermo - 1}`;
-      const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
-      // VTEX responde 200 ou 206 (range parcial) — ambos OK.
-      if (!res.ok && res.status !== 206) { opts.log("warn", `${site} ${b.slug}: HTTP ${res.status}`); continue; }
-      const produtos = (await res.json()) as VtexProduct[];
-      if (!Array.isArray(produtos)) { opts.log("warn", `${site} ${b.slug}: resposta inesperada`); continue; }
+    let nTermo = 0;
+    for (let pg = 0; pg < paginas; pg++) {
+      const from = pg * porTermo;
+      const to = from + porTermo - 1;
+      try {
+        const url = `${site}/api/catalog_system/pub/products/search?ft=${encodeURIComponent(b.termo)}&_from=${from}&_to=${to}`;
+        const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
+        // VTEX responde 200 ou 206 (range parcial) — ambos OK. 416 = passou do fim.
+        if (res.status === 416) break;
+        if (!res.ok && res.status !== 206) { opts.log("warn", `${site} ${b.slug} p${pg}: HTTP ${res.status}`); break; }
+        const produtos = (await res.json()) as VtexProduct[];
+        if (!Array.isArray(produtos) || !produtos.length) break;
 
-      let n = 0;
-      for (const p of produtos) {
-        if (!p.productName || !p.linkText || vistos.has(p.linkText)) continue;
-        if (b.valida && !b.valida.test(p.productName)) continue;
-        if (PECA_ACESSORIO.test(p.productName)) continue; // peça/acessório, não o produto
+        for (const p of produtos) {
+          if (!p.productName || !p.linkText || vistos.has(p.linkText)) continue;
+          if (b.valida && !b.valida.test(p.productName)) continue;
+          if (PECA_ACESSORIO.test(p.productName)) continue; // peça/acessório, não o produto
 
-        const seller = p.items?.[0]?.sellers?.[0];
-        const offer = seller?.commertialOffer;
-        const preco = offer?.Price;
-        if (typeof preco !== "number" || preco <= 0) continue;
-        const lista = typeof offer?.ListPrice === "number" ? offer.ListPrice : null;
+          const seller = p.items?.[0]?.sellers?.[0];
+          const offer = seller?.commertialOffer;
+          const preco = offer?.Price;
+          if (typeof preco !== "number" || preco <= 0) continue;
+          const lista = typeof offer?.ListPrice === "number" ? offer.ListPrice : null;
 
-        vistos.add(p.linkText);
-        n++;
-        out.push({
-          skuLoja: (p.productId ?? p.linkText).slice(0, 120),
-          titulo: p.productName.slice(0, 500),
-          url: `${site}/${p.linkText}/p`,
-          imagemUrl: p.items?.[0]?.images?.[0]?.imageUrl ?? null,
-          marca: opts.marca ?? p.brand ?? seller?.sellerName ?? null,
-          categoriaSlug: b.slug,
-          precoAtual: preco,
-          precoOriginal: lista != null && lista > preco ? lista : null,
-          emEstoque: offer?.IsAvailable !== false,
-        });
+          vistos.add(p.linkText);
+          nTermo++;
+          out.push({
+            skuLoja: (p.productId ?? p.linkText).slice(0, 120),
+            titulo: p.productName.slice(0, 500),
+            url: `${site}/${p.linkText}/p`,
+            imagemUrl: p.items?.[0]?.images?.[0]?.imageUrl ?? null,
+            marca: opts.marca ?? p.brand ?? seller?.sellerName ?? null,
+            categoriaSlug: b.slug,
+            precoAtual: preco,
+            precoOriginal: lista != null && lista > preco ? lista : null,
+            emEstoque: offer?.IsAvailable !== false,
+          });
+        }
+        if (produtos.length < porTermo) break; // última página do termo
+        await new Promise((r) => setTimeout(r, 250));
+      } catch (e) {
+        opts.log("warn", `${site} ${b.slug} p${pg} falhou: ${(e as Error).message}`);
+        break;
       }
-      opts.log("info", `${site.replace(/^https?:\/\/(www\.)?/, "")} ${b.slug}: ${n} itens`);
-      await new Promise((r) => setTimeout(r, 250));
-    } catch (e) {
-      opts.log("warn", `${site} ${b.slug} falhou: ${(e as Error).message}`);
     }
+    opts.log("info", `${site.replace(/^https?:\/\/(www\.)?/, "")} ${b.slug}: ${nTermo} itens`);
   }
   return out;
 }

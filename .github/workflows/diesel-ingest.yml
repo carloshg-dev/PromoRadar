@@ -21,7 +21,7 @@ jobs:
       AWIN_DATAFEED_URL: ${{ secrets.AWIN_DATAFEED_URL }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      PISO_PRECO_BRL: "20"
+      PISO_PRECO_BRL: "9" # piso baixado 20→9 (03/07): coletar achados baratos p/ o carrossel R$9–R$120
       AWIN_FX_USD: "5.4"
     steps:
       - uses: actions/checkout@v4
