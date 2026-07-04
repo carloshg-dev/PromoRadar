@@ -41,18 +41,21 @@ export function ParceirosFeed({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const reverso = direcao === "reverso";
 
+    // Acumulador FLOAT próprio (não lê scrollLeft de volta, que arredonda e trava
+    // o passo de 0.5px). Reverso começa no MEIO e diminui → conteúdo anda pra
+    // DIREITA (itens entram pela esquerda), oposto ao de cima. Wrap sem emenda.
     let raf = 0;
+    let pos = 0;
+    let iniciado = false;
     const passo = () => {
-      if (!pausado.current) {
-        const meta = el.scrollWidth / 2; // metade = 1 cópia → loop sem emenda
-        if (meta > 0) {
-          if (reverso) {
-            el.scrollLeft -= 0.5;
-            if (el.scrollLeft <= 0) el.scrollLeft += meta; // volta pro meio
-          } else {
-            el.scrollLeft += 0.5;
-            if (el.scrollLeft >= meta) el.scrollLeft -= meta;
-          }
+      const meta = el.scrollWidth / 2; // metade = 1 cópia
+      if (meta > 0) {
+        if (!iniciado) { pos = reverso ? meta : 0; iniciado = true; }
+        if (!pausado.current) {
+          pos += reverso ? -0.5 : 0.5;
+          if (pos >= meta) pos -= meta;
+          else if (pos < 0) pos += meta;
+          el.scrollLeft = pos;
         }
       }
       raf = requestAnimationFrame(passo);
@@ -60,7 +63,8 @@ export function ParceirosFeed({
     raf = requestAnimationFrame(passo);
 
     const pause = () => { pausado.current = true; };
-    const resume = () => { pausado.current = false; };
+    // ao soltar o arraste, retoma de onde o usuário deixou (sincroniza o acumulador)
+    const resume = () => { pausado.current = false; pos = el.scrollLeft; };
     el.addEventListener("pointerenter", pause);
     el.addEventListener("pointerdown", pause);
     el.addEventListener("pointerup", resume);
