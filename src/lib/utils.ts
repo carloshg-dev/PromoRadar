@@ -71,8 +71,7 @@ const CORES_LOJA: Record<string, string> = {
   "sieno perfumes": "#C9A227",
   biobran: "#1B9E4B", // verde saúde
   "bio bran": "#1B9E4B",
-  casadofitness: "#F97316", // laranja fitness
-  "casa do fitness": "#F97316",
+  nutribullet: "#8BC34A", // verde-lima nutrição (substituiu a Casa do Fitness)
 };
 
 export function corLoja(lojaSlugOuNome: string | null | undefined): string {

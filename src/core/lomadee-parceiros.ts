@@ -38,23 +38,18 @@ export const LOMADEE_PARCEIROS: LomadeeParceiro[] = [
     categoria: "perfumes-importados",
   },
   {
-    matchMarca: /casa do fitness/i,
-    slug: "casadofitness",
-    nome: "Casa do Fitness",
-    baseUrl: "https://www.casadofitness.com.br",
-    plataforma: "vtex",
+    // SUBSTITUIU a Casa do Fitness (04/07): aquela era VTEX cloud-bloqueada (403 no
+    // Actions + intelligent-search vazia). A NutriBullet é Shopify (products.json
+    // aberto, ~88 produtos com foto+preço) — coleta limpa na nuvem. Não é whey/
+    // creatina, é linha de nutrição (liquidificadores/extratores), mas é volume fit
+    // REAL e monetizado. Das marcas fit da Lomadee, a única open-platform viável.
+    matchMarca: /nutribullet/i,
+    slug: "nutribullet",
+    nome: "NutriBullet",
+    baseUrl: "https://www.nutribulletbrasil.com.br",
+    plataforma: "shopify",
     categoria: "fit-outros",
-    // ⚠️ CLOUD-BLOQUEADA: a API de catálogo VTEX da Casa do Fitness responde 403
-    // ao IP de datacenter do GitHub Actions (só passa em IP residencial), e a
-    // intelligent-search dela vem VAZIA (0 produtos, não indexada). Logo, a coleta
-    // na nuvem NÃO consegue raspá-la — os produtos existentes ficam congelados.
-    // Termos enxutos só p/ não spammar 403 no log. Crescer exige Firecrawl (custo)
-    // ou trocar por outra marca fit de plataforma aberta. Ver [[afiliados-monetizacao]].
-    buscasVtex: [
-      { termo: "whey", slug: "whey-protein" },
-      { termo: "creatina", slug: "creatina" },
-      { termo: "suplemento", slug: "fit-outros" },
-    ],
+    maxProdutos: 100,
   },
   {
     matchMarca: /bio ?bran/i,
