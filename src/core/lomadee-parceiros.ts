@@ -44,30 +44,16 @@ export const LOMADEE_PARCEIROS: LomadeeParceiro[] = [
     baseUrl: "https://www.casadofitness.com.br",
     plataforma: "vtex",
     categoria: "fit-outros",
-    maxProdutos: 200,
-    // termos AMPLOS p/ capturar o catálogo inteiro (~122 produtos, teto real da loja)
+    // ⚠️ CLOUD-BLOQUEADA: a API de catálogo VTEX da Casa do Fitness responde 403
+    // ao IP de datacenter do GitHub Actions (só passa em IP residencial), e a
+    // intelligent-search dela vem VAZIA (0 produtos, não indexada). Logo, a coleta
+    // na nuvem NÃO consegue raspá-la — os produtos existentes ficam congelados.
+    // Termos enxutos só p/ não spammar 403 no log. Crescer exige Firecrawl (custo)
+    // ou trocar por outra marca fit de plataforma aberta. Ver [[afiliados-monetizacao]].
     buscasVtex: [
       { termo: "whey", slug: "whey-protein" },
       { termo: "creatina", slug: "creatina" },
-      { termo: "pre treino", slug: "pre-treino" },
-      { termo: "bcaa", slug: "fit-outros" },
-      { termo: "glutamina", slug: "fit-outros" },
-      { termo: "termogenico", slug: "fit-outros" },
-      { termo: "hipercalorico", slug: "fit-outros" },
-      { termo: "albumina", slug: "fit-outros" },
-      { termo: "multivitaminico", slug: "fit-outros" },
       { termo: "suplemento", slug: "fit-outros" },
-      { termo: "halter", slug: "fit-outros" },
-      { termo: "anilha", slug: "fit-outros" },
-      { termo: "barra", slug: "fit-outros" },
-      { termo: "banco", slug: "fit-outros" },
-      { termo: "esteira", slug: "fit-outros" },
-      { termo: "bike", slug: "fit-outros" },
-      { termo: "kettlebell", slug: "fit-outros" },
-      { termo: "corda", slug: "fit-outros" },
-      { termo: "caneleira", slug: "fit-outros" },
-      { termo: "luva", slug: "fit-outros" },
-      { termo: "academia", slug: "fit-outros" },
     ],
   },
   {
