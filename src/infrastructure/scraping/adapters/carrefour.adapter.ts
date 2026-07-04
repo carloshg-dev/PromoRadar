@@ -17,8 +17,10 @@ import { contemTermoProibido } from "@/core/blacklist-nicho";
 
 const SITE = "https://www.carrefour.com.br";
 const IS = `${SITE}/api/io/_v/api/intelligent-search/product_search/trade-policy/1`;
-const POR_QUERY = Math.min(50, Number(process.env.CARREFOUR_POR_QUERY) || 40);
-const PAGINAS = Math.max(1, Number(process.env.CARREFOUR_PAGINAS) || 2);
+const POR_QUERY = Math.min(50, Number(process.env.CARREFOUR_POR_QUERY) || 48);
+// Carrefour tem 168k produtos — NÃO é limitado pelo catálogo (só pelo nosso teto).
+// 4 páginas × 48 × 12 buscas → ~200+ após o filtro `valida` (era 94 com 2 pág).
+const PAGINAS = Math.max(1, Number(process.env.CARREFOUR_PAGINAS) || 4);
 
 interface Busca { query: string; slug: CategoriaSlug; valida?: RegExp }
 
@@ -36,6 +38,18 @@ const BUSCAS: readonly Busca[] = [
   { query: "smartwatch", slug: "smartwatch", valida: /smartwatch|smart watch|rel[óo]gio/i },
   { query: "caixa de som bluetooth", slug: "caixa-de-som", valida: /caixa de som|speaker|soundbar/i },
   { query: "power bank", slug: "power-bank", valida: /power ?bank|carregador port/i },
+  // Eletroportáteis / linha branca — mais volume de eletro (bucket neutro qdo
+  // não há vertical própria; Carrefour tem 168k produtos, o teto é nosso).
+  { query: "air fryer", slug: "ofertas-parceiros", valida: /air ?fryer|fritadeira/i },
+  { query: "aspirador de po", slug: "ofertas-parceiros", valida: /aspirador/i },
+  { query: "cafeteira", slug: "ofertas-parceiros", valida: /cafeteira|café|nespresso/i },
+  { query: "liquidificador", slug: "ofertas-parceiros", valida: /liquidificador/i },
+  { query: "ventilador", slug: "ofertas-parceiros", valida: /ventilador|climatizador/i },
+  { query: "cooktop", slug: "fogoes", valida: /cooktop/i },
+  { query: "freezer", slug: "geladeiras", valida: /freezer|frigobar|geladeira/i },
+  { query: "tablet", slug: "ofertas-parceiros", valida: /tablet|ipad/i },
+  { query: "batedeira", slug: "ofertas-parceiros", valida: /batedeira/i },
+  { query: "purificador de agua", slug: "ofertas-parceiros", valida: /purificador|bebedouro/i },
 ];
 
 interface CarProduct {
