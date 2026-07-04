@@ -3,16 +3,35 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Produto } from "@/core/domain/types";
 import { ProdutoCard } from "@/components/produto-card";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, SprayCan, ArrowRight } from "lucide-react";
+
+const ICONES = { parceiros: Sparkles, beleza: SprayCan } as const;
 
 /**
- * Feed "Achados dos parceiros" — topo da home. Só produtos de afiliado (Amazon +
- * Lomadee). É um carrossel que ROLA SOZINHO (rAF mexendo no scrollLeft) MAS é um
- * container de scroll de verdade → o usuário pode ARRASTAR com o dedo/mouse. O
- * auto-scroll pausa ao tocar/passar o mouse e volta ao soltar. Lista duplicada
- * p/ loop sem emenda. Respeita "prefers-reduced-motion".
+ * Esteira de produtos de afiliado — rola SOZINHA (rAF no scrollLeft) mas é um
+ * container de scroll de verdade (o usuário arrasta). Pausa no toque/hover.
+ * Lista duplicada → loop sem emenda. Respeita prefers-reduced-motion.
+ *
+ * Reutilizável: `direcao="reverso"` rola no sentido OPOSTO (usado no 2º carrossel
+ * de Beleza/Perfumes, logo abaixo do principal, pra dar movimento cruzado).
  */
-export function ParceirosFeed({ produtos }: { produtos: Produto[] }) {
+export function ParceirosFeed({
+  produtos,
+  titulo = "Achados dos parceiros",
+  subtitulo = "Ofertas com link direto à loja — arraste pra ver mais. Atualiza a cada coleta.",
+  verTudoHref = "/ofertas",
+  direcao = "normal",
+  variante = "parceiros",
+}: {
+  produtos: Produto[];
+  titulo?: string;
+  subtitulo?: string;
+  verTudoHref?: string;
+  direcao?: "normal" | "reverso";
+  /** string (não a função do ícone): componente-função não cruza a fronteira server→client */
+  variante?: "parceiros" | "beleza";
+}) {
+  const Icon = ICONES[variante];
   const ref = useRef<HTMLDivElement>(null);
   const pausado = useRef(false);
 
@@ -20,13 +39,21 @@ export function ParceirosFeed({ produtos }: { produtos: Produto[] }) {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const reverso = direcao === "reverso";
 
     let raf = 0;
     const passo = () => {
       if (!pausado.current) {
-        el.scrollLeft += 0.5; // velocidade calma (~30px/s)
         const meta = el.scrollWidth / 2; // metade = 1 cópia → loop sem emenda
-        if (meta > 0 && el.scrollLeft >= meta) el.scrollLeft -= meta;
+        if (meta > 0) {
+          if (reverso) {
+            el.scrollLeft -= 0.5;
+            if (el.scrollLeft <= 0) el.scrollLeft += meta; // volta pro meio
+          } else {
+            el.scrollLeft += 0.5;
+            if (el.scrollLeft >= meta) el.scrollLeft -= meta;
+          }
+        }
       }
       raf = requestAnimationFrame(passo);
     };
@@ -49,7 +76,7 @@ export function ParceirosFeed({ produtos }: { produtos: Produto[] }) {
       el.removeEventListener("touchstart", pause);
       el.removeEventListener("touchend", resume);
     };
-  }, []);
+  }, [direcao]);
 
   if (!produtos.length) return null;
   const trilho = [...produtos, ...produtos]; // duplica p/ o loop contínuo
@@ -60,13 +87,13 @@ export function ParceirosFeed({ produtos }: { produtos: Produto[] }) {
         <div>
           <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-brand to-cyan text-white">
-              <Sparkles className="h-4 w-4" />
+              <Icon className="h-4 w-4" />
             </span>
-            Achados dos parceiros
+            {titulo}
           </h2>
-          <p className="mt-0.5 text-xs text-muted">Ofertas com link direto à loja — arraste pra ver mais. Atualiza a cada coleta.</p>
+          <p className="mt-0.5 text-xs text-muted">{subtitulo}</p>
         </div>
-        <Link href="/ofertas" className="hidden shrink-0 items-center gap-1 text-xs text-brand-2 hover:underline sm:flex">
+        <Link href={verTudoHref} className="hidden shrink-0 items-center gap-1 text-xs text-brand-2 hover:underline sm:flex">
           ver tudo <ArrowRight className="h-3 w-3" />
         </Link>
       </div>

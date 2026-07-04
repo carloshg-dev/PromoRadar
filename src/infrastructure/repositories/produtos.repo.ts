@@ -119,25 +119,40 @@ export function aleatorioSemLojaSeguida<T extends { lojaSlug: string }>(produtos
  * (bug real: coleta Awin salvou a Olympikus por último → só Olympikus no ar).
  */
 const POOL_POR_LOJA = 24;
-async function poolAfiliadosPorLoja(sb: ReturnType<typeof createPublicClient>): Promise<Produto[]> {
+async function poolAfiliadosPorLoja(
+  sb: ReturnType<typeof createPublicClient>,
+  categorias?: string[],
+): Promise<Produto[]> {
   const { data: lojas } = await sb.from("lojas").select("slug,adapter_key").eq("ativo", true);
   const slugs = (lojas ?? [])
     .filter((l) => redeAfiliada(l.adapter_key as string))
     .map((l) => l.slug as string);
   if (!slugs.length) return [];
   const fatias = await Promise.all(slugs.map(async (slug) => {
-    const { data } = await sb
+    let q = sb
       .from("vw_ofertas")
       .select(SELECT)
       .eq("loja_slug", slug)
       .eq("em_estoque", true)
       .not("imagem_url", "is", null)
-      .not("preco_atual", "is", null)
-      .order("atualizado_em", { ascending: false })
-      .limit(POOL_POR_LOJA);
+      .not("preco_atual", "is", null);
+    // fatia por CATEGORIA (ex: carrossel de beleza) → garante variedade de LINHA
+    if (categorias?.length) q = q.in("categoria_slug", categorias);
+    const { data } = await q.order("atualizado_em", { ascending: false }).limit(POOL_POR_LOJA);
     return (data ?? []).map(map);
   }));
   return fatias.flat();
+}
+
+/** Carrossel de Beleza & Perfumes — pool BALANCEADO POR LOJA nas categorias de
+ *  perfume/skincare (garante Sieno, L'Occitane, Shopee, AliExpress… lado a lado)
+ *  + aleatório sem loja repetida em sequência. */
+export async function achadosBelezaCarrossel(n = 24): Promise<Produto[]> {
+  const sb = createPublicClient();
+  const pool = await poolAfiliadosPorLoja(sb, [
+    "perfumes-importados", "perfumes-arabes", "skincare", "cabelos", "maquiagem",
+  ]);
+  return aleatorioSemLojaSeguida(pool, n);
 }
 
 /**

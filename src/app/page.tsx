@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, achadosBelezaCarrossel, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { ProdutoCard } from "@/components/produto-card";
@@ -36,6 +36,11 @@ export default async function Home() {
   let cuponsDestaque: Awaited<ReturnType<typeof listarCupons>> = cuponsCurados();
   try { cuponsDestaque = [...cuponsDestaque, ...(await listarCupons(14))]; } catch { /* mantém curados */ }
 
+  // 2º carrossel (sentido REVERSO): Beleza & Perfumes — perfumes importados/árabes
+  // + skincare/cabelos/maquiagem, variado por loja (L'Occitane, Sieno, Shopee…).
+  let carrosselBeleza: Produto[] = [];
+  try { carrosselBeleza = await achadosBelezaCarrossel(24); } catch {}
+
   // Destaques: pool top-60 (monetizado primeiro) apresentado ALEATÓRIO sem loja
   // repetida em sequência (REGRA DO DONO 02/07 — nada de parede de uma marca).
   let destaques: Produto[] = [];
@@ -71,6 +76,12 @@ export default async function Home() {
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática */}
       <ParceirosFeed produtos={afiliados} />
+
+      {/* BELEZA & PERFUMES — 2º carrossel logo ABAIXO, sentido REVERSO (movimento
+          cruzado): perfumes importados/árabes + skincare/cabelos/maquiagem */}
+      <ParceirosFeed produtos={carrosselBeleza} direcao="reverso" variante="beleza"
+        titulo="Beleza & Perfumes" verTudoHref="/categoria/perfumes-importados"
+        subtitulo="Perfumes importados, skincare e cuidados do rosto e corpo — rodando sem parar." />
 
       {/* CUPONS EM DESTAQUE — carrossel enxuto logo abaixo do de produtos */}
       <CuponsCarrossel cupons={cuponsDestaque} />

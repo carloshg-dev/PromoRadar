@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ShoppingBag, ArrowUpRight, Laptop, Smartphone, Headphones, Watch, Tablet, Speaker, SprayCan, Zap, Gamepad2, Dumbbell, Home, Wrench, Package } from "lucide-react";
 import { ofertasMLAtivas, type OfertaML } from "@/lib/ofertas-mercadolivre";
@@ -41,9 +41,23 @@ function ImagemOferta({ oferta, Icon }: { oferta: OfertaML; Icon: LucideIcon }) 
 export function OfertasMercadoLivre() {
   const ofertas = ofertasMLAtivas();
   const [pagina, setPagina] = useState(1);
+  const pausado = useRef(false);
+  const totalPaginas = Math.ceil(ofertas.length / POR_PAGINA);
+
+  // ROTAÇÃO automática: o ML é uma vitrine CURADA (lista fixa) — sem isso ficava
+  // com "a mesma cara". Avança de página sozinho a cada 5s (pausa no hover;
+  // respeita prefers-reduced-motion). A troca de página anima via `key`+fade.
+  useEffect(() => {
+    if (totalPaginas <= 1) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setInterval(() => {
+      if (!pausado.current) setPagina((p) => (p % totalPaginas) + 1);
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [totalPaginas]);
+
   if (!ofertas.length) return null;
 
-  const totalPaginas = Math.ceil(ofertas.length / POR_PAGINA);
   const inicio = (pagina - 1) * POR_PAGINA;
   const visiveis = ofertas.slice(inicio, inicio + POR_PAGINA);
 
@@ -60,7 +74,10 @@ export function OfertasMercadoLivre() {
         <span className="hidden shrink-0 text-[11px] text-muted sm:block">{ofertas.length} ofertas</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div key={pagina}
+        onMouseEnter={() => { pausado.current = true; }}
+        onMouseLeave={() => { pausado.current = false; }}
+        className="grid animate-fade-up grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {visiveis.map((o, i) => {
           const Icon = ICON[o.cat ?? ""] ?? Package;
           const desconto = o.preco && o.precoDe && o.precoDe > o.preco
