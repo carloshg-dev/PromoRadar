@@ -102,7 +102,7 @@ export async function notificarAfiliacao(linhas: Array<{ loja: string; rede: str
     cor: COR.info,
     campos: [
       { nome: `✅ Monetizadas — ${totAfil} produtos`, valor: afil.length ? afil.map((l) => `• ${l.loja} — ${l.rede} (${l.produtos})`).join("\n") : "—" },
-      { nome: `❌ Sem afiliação ainda — ${totSem} produtos (potencial)`, valor: sem.length ? sem.map((l) => `• ${l.loja} (${l.produtos})`).join("\n") : "—" },
+    
     ],
     rodape: `Ligue cada loja embrulhando o link de saída quando aprovar · ${SITE}`,
   });
