@@ -33,7 +33,15 @@ export async function listarLojasVitrine(): Promise<LojaVitrine[]> {
     adapterKey: l.adapter_key as string,
     rede: redeAfiliada(l.adapter_key as string),
   }));
+  // Lojas VIP: ordem fixa no topo (Instagram → home → logo de cara)
+  const ORDEM_VIP = ["shopee", "amazon", "aliexpress", "mercado-livre"];
   return lojas.sort((a, b) => {
+    const ia = ORDEM_VIP.indexOf(a.slug);
+    const ib = ORDEM_VIP.indexOf(b.slug);
+    const pa = ia === -1 ? 999 : ia;
+    const pb = ib === -1 ? 999 : ib;
+    if (pa !== pb) return pa - pb;
+    // empate: monetizadas antes → alfabético
     const m = (b.rede ? 1 : 0) - (a.rede ? 1 : 0);
     return m !== 0 ? m : a.nome.localeCompare(b.nome, "pt-BR");
   });

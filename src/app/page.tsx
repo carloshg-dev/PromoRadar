@@ -13,6 +13,7 @@ import { cuponsCurados } from "@/lib/cupons-curados";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
 import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
 import { VitrineVertical } from "@/components/vitrine-vertical";
+import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -74,6 +75,11 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
+      {/* LOJAS PARCEIRAS — primeiro elemento visível na home.
+          Quem chega pelo Instagram (Shopee, Amazon…) vê a logo de cara
+          e confirma que está no lugar certo. */}
+      <BarraLojas baseHref="/ofertas" />
+
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática */}
       <ParceirosFeed produtos={afiliados} />
 

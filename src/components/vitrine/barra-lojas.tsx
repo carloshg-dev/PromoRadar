@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarLojasVitrine, type LojaVitrine } from "@/infrastructure/repositories/lojas.repo";
 import { corLoja } from "@/lib/utils";
+import { DragScroll } from "@/components/ui/drag-scroll";
 
 /**
  * BARRA DE LOJAS (Opção 1 aprovada pelo dono) — pílulas grandes com a logo e a
@@ -43,7 +44,7 @@ export async function BarraLojas({ baseHref, ativa, params = {} }: {
   return (
     <div className="mt-4">
       <div className="label-mono text-[11px] text-muted">Lojas parceiras</div>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <DragScroll className="mt-2 flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
           href={href()}
           className={`flex shrink-0 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition ${
@@ -81,7 +82,7 @@ export async function BarraLojas({ baseHref, ativa, params = {} }: {
             </Link>
           );
         })}
-      </div>
+      </DragScroll>
     </div>
   );
 }
