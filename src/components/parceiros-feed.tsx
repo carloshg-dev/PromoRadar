@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Produto } from "@/core/domain/types";
 import { ProdutoCard } from "@/components/produto-card";
 import { useCarrossel } from "@/components/use-carrossel";
+import { useShuffled } from "@/components/use-shuffled";
 import { Sparkles, SprayCan, ArrowRight } from "lucide-react";
 
 const ICONES = { parceiros: Sparkles, beleza: SprayCan } as const;
@@ -11,9 +12,13 @@ const ICONES = { parceiros: Sparkles, beleza: SprayCan } as const;
  * Esteira de produtos de afiliado — rola SOZINHA mas é ARRASTÁVEL (mouse + touch,
  * ver useCarrossel). Pausa no hover/arrasto. Trilha duplicada → loop sem emenda.
  * `direcao="reverso"` rola no sentido oposto (2º carrossel de Beleza).
+ *
+ * O servidor manda um POOL maior (ex: 60), e o componente embaralha NO CLIENTE
+ * a cada montagem — assim cada F5 mostra produtos diferentes mesmo com ISR cacheado.
  */
 export function ParceirosFeed({
   produtos,
+  exibir = 20,
   titulo = "Achados dos parceiros",
   subtitulo = "Ofertas com link direto à loja — arraste pra ver mais. Atualiza a cada coleta.",
   verTudoHref = "/ofertas",
@@ -22,6 +27,8 @@ export function ParceirosFeed({
   variante = "parceiros",
 }: {
   produtos: Produto[];
+  /** Quantos produtos exibir do pool (o resto é descartado após o shuffle). */
+  exibir?: number;
   titulo?: string;
   subtitulo?: string;
   verTudoHref?: string;
@@ -31,9 +38,10 @@ export function ParceirosFeed({
 }) {
   const ref = useCarrossel(direcao);
   const Icon = ICONES[variante];
+  const shuffled = useShuffled(produtos, exibir);
 
-  if (!produtos.length) return null;
-  const trilho = [...produtos, ...produtos]; // duplica p/ o loop contínuo
+  if (!shuffled.length) return null;
+  const trilho = [...shuffled, ...shuffled]; // duplica p/ o loop contínuo
 
   return (
     <section className="pt-5">

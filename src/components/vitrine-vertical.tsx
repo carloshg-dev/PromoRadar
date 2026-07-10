@@ -2,15 +2,19 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import type { Produto } from "@/core/domain/types";
-import { ProdutoCard } from "@/components/produto-card";
+import { ShuffledGrid } from "@/components/shuffled-grid";
 
 /**
  * Vitrine de uma vertical em destaque na home (Beleza, Gadgets, Perfumes…).
  * Cabeçalho com a cor da vertical + grade de produtos reais. As classes de cor
  * são passadas literais (Tailwind JIT) pelo chamador.
+ *
+ * O servidor manda um POOL maior (ex: 20 produtos) e o ShuffledGrid (client)
+ * embaralha a cada montagem — cada F5 mostra produtos diferentes mesmo com
+ * ISR cacheado (revalidate = 300s).
  */
 export function VitrineVertical({
-  titulo, Icon, accentText, accentGrad, href, hrefLabel, produtos,
+  titulo, Icon, accentText, accentGrad, href, hrefLabel, produtos, exibir = 5,
 }: {
   titulo: string;
   Icon: LucideIcon;
@@ -19,6 +23,8 @@ export function VitrineVertical({
   href: string;
   hrefLabel: string;
   produtos: Produto[];
+  /** Quantos produtos exibir do pool (o resto é descartado após o shuffle). */
+  exibir?: number;
 }) {
   if (!produtos.length) return null;
   return (
@@ -34,9 +40,11 @@ export function VitrineVertical({
           {hrefLabel} <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {produtos.slice(0, 5).map((p) => <ProdutoCard key={p.id} p={p} />)}
-      </div>
+      <ShuffledGrid
+        pool={produtos}
+        exibir={exibir}
+        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      />
     </section>
   );
 }

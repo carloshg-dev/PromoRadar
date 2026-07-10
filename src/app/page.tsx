@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, achadosBelezaCarrossel, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
-import { ProdutoCard } from "@/components/produto-card";
 import { NewsCarousel } from "@/components/news-carousel";
 import { FeaturedDealRotator } from "@/components/featured-deal-rotator";
 import { ParceirosFeed } from "@/components/parceiros-feed";
@@ -13,6 +12,7 @@ import { cuponsCurados } from "@/lib/cupons-curados";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
 import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
 import { VitrineVertical } from "@/components/vitrine-vertical";
+import { DestaquesGrid } from "@/components/destaques-grid";
 import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,11 @@ import {
 export const revalidate = 300;
 
 export default async function Home() {
-  // Feed de AFILIADOS (topo) — só o que monetiza (Amazon + Lomadee), aleatório.
+  // Feed de AFILIADOS (topo) — pool AMPLO (60), o componente client embaralha e
+  // mostra 20 a cada montagem. O ISR cacheia 60 itens por 5 min, mas cada F5
+  // do usuário vê um subconjunto diferente.
   let afiliados: Produto[] = [];
-  try { afiliados = await listarAfiliados(20); } catch {}
+  try { afiliados = await listarAfiliados(60); } catch {}
 
   let produtosRodizio: ProdutoRodizio[] = [];
   try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
@@ -40,14 +42,13 @@ export default async function Home() {
   // 2º carrossel (sentido REVERSO): Beleza & Perfumes — perfumes importados/árabes
   // + skincare/cabelos/maquiagem, variado por loja (L'Occitane, Sieno, Shopee…).
   let carrosselBeleza: Produto[] = [];
-  try { carrosselBeleza = await achadosBelezaCarrossel(24); } catch {}
+  try { carrosselBeleza = await achadosBelezaCarrossel(60); } catch {}
 
-  // Destaques: pool top-120 (monetizado primeiro, embaralhado dentro de cada grupo
-  // por listarOfertas) apresentado ALEATÓRIO sem loja repetida em sequência
-  // (REGRA DO DONO 02/07 — nada de parede de uma marca). O pool maior (120)
-  // garante variedade: a cada F5, os 12 finais saem diferentes.
+  // Destaques: pool top-120 (monetizado primeiro), embaralhado NO CLIENTE
+  // pelo DestaquesGrid (12 exibidos do pool). O ISR cacheia o pool de 120;
+  // o client shuffle garante vitrine diferente a cada F5.
   let destaques: Produto[] = [];
-  try { destaques = aleatorioSemLojaSeguida(await listarOfertas({ limit: 120 }), 12); } catch {}
+  try { destaques = await listarOfertas({ limit: 120 }); } catch {}
 
   // Oferta em destaque — pool de vários produtos das marcas monetizadas; gira
   // em LOOP no cliente (FeaturedDealRotator). Comparador só ativa quando o
@@ -61,10 +62,10 @@ export default async function Home() {
   let beleza: Produto[] = [], perfumes: Produto[] = [], gadgets: Produto[] = [], fit: Produto[] = [];
   try {
     [beleza, perfumes, gadgets, fit] = await Promise.all([
-      achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 5),
-      achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 5),
-      achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 5),
-      achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 5),
+      achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 20),
+      achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 20),
+      achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 20),
+      achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 20),
     ]);
   } catch {}
 
@@ -180,9 +181,7 @@ export default async function Home() {
           <Link href="/ofertas" className="text-xs text-brand-2 hover:underline">ver todas →</Link>
         </div>
         {destaques.length ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-            {destaques.map((p, i) => <ProdutoCard key={p.id} p={p} rank={i + 1} />)}
-          </div>
+          <DestaquesGrid pool={destaques} exibir={12} />
         ) : (
           <EmptyState icon="🛰️" title="Coleta em preparação"
             hint="As ofertas aparecem aqui assim que a primeira coleta rodar. Enquanto isso, explore as categorias pelo menu superior."
