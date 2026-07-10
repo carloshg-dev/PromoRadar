@@ -115,11 +115,12 @@ export function ehLinkMonetizado(url: string | null | undefined): boolean {
   // Amazon (tag) e Awin (MID aprovado) — embrulháveis no clique
   if (host === "amazon.com.br" || host.endsWith(".amazon.com.br") || host === "amzn.to") return true;
   if (AWIN_MIDS[host]) return true;
-  // Mercado Livre só monetiza se o produto tem link manual mapeado
+  // Mercado Livre — sempre monetizado. O linkAfiliado() embrulha com meli.la
+  // quando há entrada manual no mapa; senão, redireciona à URL crua do produto
+  // (o usuário sempre chega na loja — mesma experiência de Shopee/Awin).
   if (host === "mercadolivre.com.br" || host.endsWith(".mercadolivre.com.br")
       || host === "mercadolibre.com.br" || host.endsWith(".mercadolibre.com.br")) {
-    const mlb = extrairMLB(u);
-    return Boolean(mlb && ML_AFILIADO[mlb]);
+    return true;
   }
   return false;
 }

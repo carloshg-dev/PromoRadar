@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tooltip } from "@/components/ui/tooltip";
 import { formatBRL, corLoja } from "@/lib/utils";
-import { ehLinkMonetizado } from "@/lib/afiliados";
 import { gerarInsights, calcularTendencia, type SeriePonto } from "@/core/insights/insights";
 import { TrackView } from "@/components/analytics/track-view";
 import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles } from "lucide-react";
@@ -42,7 +41,6 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
   const TrendIcon = tend.direcao === "queda" ? TrendingDown : tend.direcao === "alta" ? TrendingUp : Minus;
   const trendColor = tend.direcao === "queda" ? "text-neon" : tend.direcao === "alta" ? "text-rose-400" : "text-muted";
   const cor = corLoja(p.lojaSlug ?? p.lojaNome);
-  const monetizado = ehLinkMonetizado(p.url);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -126,22 +124,11 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
             <div className="text-sm text-muted line-through">{formatBRL(p.precoOriginal)}</div>
           )}
           {p.descontoPct ? <div className="mt-1 text-sm font-semibold text-brand-2">{p.descontoPct}% vs. média histórica</div> : null}
-          {/* Dois Níveis (mesma regra do card): monetizado → /r/ leva à loja de
-              verdade; não-monetizado → SEM CTA externo (não damos tráfego de graça —
-              a comparação abaixo já é o valor que entregamos pra essa loja). */}
-          {monetizado ? (
-            <>
-              {/* /r/ registra o clique (afiliados/conversão) e redireciona à loja */}
-              <a href={`/r/${p.id}?o=produto`} target="_blank" rel="noopener noreferrer nofollow" className="mt-5">
-                <Button className="w-full" size="lg">Ir à loja — {p.lojaNome}<ExternalLink className="h-4 w-4" /></Button>
-              </a>
-              <p className="mt-3 text-[11px] text-muted">Preço e disponibilidade sujeitos a alteração — oferta válida enquanto durarem os estoques. Confirme o valor final na loja antes de comprar.</p>
-            </>
-          ) : (
-            <div className="mt-5 rounded-xl border border-line bg-bg-soft/60 px-4 py-3 text-center text-xs text-muted">
-              A {p.lojaNome} ainda não tem parceria de afiliado ativa com a PromoDetec — por isso não linkamos direto. Use o comparativo de preços abaixo para achar a melhor oferta disponível.
-            </div>
-          )}
+          {/* CTA de saída — /r/ registra o clique (afiliados/conversão) e redireciona à loja */}
+          <a href={`/r/${p.id}?o=produto`} target="_blank" rel="noopener noreferrer nofollow" className="mt-5">
+            <Button className="w-full" size="lg">Ir à loja — {p.lojaNome}<ExternalLink className="h-4 w-4" /></Button>
+          </a>
+          <p className="mt-3 text-[11px] text-muted">Preço e disponibilidade sujeitos a alteração — oferta válida enquanto durarem os estoques. Confirme o valor final na loja antes de comprar.</p>
         </Card>
       </div>
 
