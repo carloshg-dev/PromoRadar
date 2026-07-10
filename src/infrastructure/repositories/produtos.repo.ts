@@ -60,11 +60,11 @@ export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
   const produtos = (data ?? []).map(map);
   // MONETIZADO PRIMEIRO: loja que paga comissão vira destaque mesmo com nota menor
   // — promo_score só desempata dentro do mesmo grupo (monetizado × não-monetizado).
-  produtos.sort((a, b) => {
-    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
-    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
-  });
-  return produtos.slice(0, limite);
+  // Dentro de cada grupo, embaralha (Fisher-Yates) pra vitrine variar a cada refresh
+  // sem ORDER BY random() no banco (regra: catálogo infinito e vivo).
+  const monetizados = embaralhar(produtos.filter((p) => ehLinkMonetizado(p.url)));
+  const outros = embaralhar(produtos.filter((p) => !ehLinkMonetizado(p.url)));
+  return [...monetizados, ...outros].slice(0, limite);
 }
 
 /**

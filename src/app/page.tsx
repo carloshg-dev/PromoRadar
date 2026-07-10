@@ -42,10 +42,12 @@ export default async function Home() {
   let carrosselBeleza: Produto[] = [];
   try { carrosselBeleza = await achadosBelezaCarrossel(24); } catch {}
 
-  // Destaques: pool top-60 (monetizado primeiro) apresentado ALEATÓRIO sem loja
-  // repetida em sequência (REGRA DO DONO 02/07 — nada de parede de uma marca).
+  // Destaques: pool top-120 (monetizado primeiro, embaralhado dentro de cada grupo
+  // por listarOfertas) apresentado ALEATÓRIO sem loja repetida em sequência
+  // (REGRA DO DONO 02/07 — nada de parede de uma marca). O pool maior (120)
+  // garante variedade: a cada F5, os 12 finais saem diferentes.
   let destaques: Produto[] = [];
-  try { destaques = aleatorioSemLojaSeguida(await listarOfertas({ limit: 60 }), 12); } catch {}
+  try { destaques = aleatorioSemLojaSeguida(await listarOfertas({ limit: 120 }), 12); } catch {}
 
   // Oferta em destaque — pool de vários produtos das marcas monetizadas; gira
   // em LOOP no cliente (FeaturedDealRotator). Comparador só ativa quando o
