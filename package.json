@@ -17,6 +17,7 @@
     "digest": "tsx scripts/daily-digest.ts"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "@vercel/analytics": "^2.0.1",

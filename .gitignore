@@ -18,3 +18,6 @@ skills-lock.json
 
 # CSVs grandes de feed (Shopee ~210MB) — dados re-baixaveis, fora do git (Claude 29/06)
 feeds/
+
+# Saída da Máquina de Conteúdo (regenerada; não versionar)
+achados-do-dia/
