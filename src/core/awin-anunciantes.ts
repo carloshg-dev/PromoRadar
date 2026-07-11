@@ -34,7 +34,7 @@ export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
   {
     mid: "18879", envKey: "AWIN_MID_AliexpressBR&LATAM", nome: "AliExpress", slug: "aliexpress",
     dominios: ["aliexpress.com", "pt.aliexpress.com"], baseUrl: "https://pt.aliexpress.com",
-    categoria: "ofertas-parceiros", ingestao: "adapter", maxFeeds: 4, maxProdutos: 2000,
+    categoria: "ofertas-parceiros", ingestao: "adapter", maxFeeds: 4, maxProdutos: 1500,
   },
   {
     mid: "78382", envKey: "AWIN_MID_PANASONICBR", nome: "Panasonic", slug: "panasonic",

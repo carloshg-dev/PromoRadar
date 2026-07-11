@@ -26,7 +26,10 @@ import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
 // banco cross-region). 5000 ≈ 25-30 min, margem segura; subir além disso exige
 // job próprio ou timeout maior (o 7000 estourou os 45 min em 03/07). O dono
 // afina via AWIN_MAX_TOTAL / AWIN_MAX_POR_ANUNCIANTE.
-const MAX_TOTAL = Number(process.env.AWIN_MAX_TOTAL) || 5000;
+// 8000 (era 5000): o teto global processado EM ORDEM matava de fome as lojas do
+// fim do array (Dufrio etc.) — a AliExpress sozinha comia 2000. O job Awin tem
+// 90min, cabe. Fix estrutural (fatia justa por loja) fica no roadmap.
+const MAX_TOTAL = Number(process.env.AWIN_MAX_TOTAL) || 8000;
 const MAX_FEEDS_PADRAO = Number(process.env.AWIN_MAX_FEEDS) || 3;
 const MAX_POR_ANUNCIANTE = Number(process.env.AWIN_MAX_POR_ANUNCIANTE) || 900;
 
