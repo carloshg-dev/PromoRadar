@@ -74,7 +74,12 @@ jobs:
       - run: npm run scrape lomadee carrefour kabum
 
   digest:
-    name: Resumo diário do site
+    name: Resumo diário do site + Lista de afiliação
+    # roda por ÚLTIMO: espera os jobs de coleta pra a "Lista real de afiliação" ser
+    # o retrato FINAL (Kabum/Dufrio já dentro). `if: always()` = envia mesmo se um
+    # job de coleta falhar (o resumo/lista não dependem de todos terem sucesso).
+    needs: [amazon, awin, lomadee-carrefour]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

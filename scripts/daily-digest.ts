@@ -9,7 +9,8 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import { createAdminClient } from "@/infrastructure/supabase/admin";
-import { notificarResumoDiario } from "@/infrastructure/notify/owner";
+import { notificarResumoDiario, notificarAfiliacao } from "@/infrastructure/notify/owner";
+import { redeAfiliada } from "@/lib/afiliados";
 
 function topN(rows: Array<Record<string, unknown>>, pred: (e: Record<string, unknown>) => string | null, n: number): Array<[string, number]> {
   const m = new Map<string, number>();
@@ -45,6 +46,18 @@ async function main() {
     topCategorias,
   });
   console.log(`✅ Resumo diário enviado: ${eventos.length} eventos · ${buscas} buscas · ${produtosVistos} views · ${novosUsuarios ?? 0} novos usuários`);
+
+  // 💰 Lista real de afiliação — UMA vez, aqui: o digest roda por ÚLTIMO (via `needs`
+  // no scrape.yml), então o retrato é o FINAL (Kabum/Dufrio já coletados). Antes cada
+  // job enviava a sua, parcial e conflitante.
+  const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
+  const linhas = await Promise.all((ls ?? []).map(async (l) => {
+    const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })
+      .eq("loja_id", l.id as string).eq("em_estoque", true);
+    return { loja: (l.nome as string) || (l.adapter_key as string), rede: redeAfiliada(l.adapter_key as string), produtos: count ?? 0 };
+  }));
+  await notificarAfiliacao(linhas.filter((l) => l.produtos > 0));
+  console.log(`✅ Lista de afiliação enviada: ${linhas.filter((l) => l.produtos > 0 && l.rede).length} lojas monetizadas`);
 }
 
 main().catch((e) => { console.error("❌", e); process.exit(1); });

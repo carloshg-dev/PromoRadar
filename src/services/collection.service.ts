@@ -11,8 +11,7 @@ import { getAdapters } from "@/infrastructure/scraping/registry";
 import type { AdapterContext } from "@/infrastructure/scraping/core/adapter";
 import { conflitaCategoria } from "@/infrastructure/scraping/core/categoria-guard";
 import { computePromoScore } from "@/core/promo-score/promo-score";
-import { notificarColeta, notificarAfiliacao } from "@/infrastructure/notify/owner";
-import { redeAfiliada } from "@/lib/afiliados";
+import { notificarColeta } from "@/infrastructure/notify/owner";
 import { degolada, PISO_GUILHOTINA } from "@/core/guilhotina";
 import { traduzirTitulo } from "@/core/traducao-titulos";
 import { avisarPromocoesNovas, type DealNovo } from "@/infrastructure/notify/promo-feed";
@@ -157,22 +156,21 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   const guilhotinadas: string[] = [];
   try {
     const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
-    const linhas = await Promise.all((ls ?? []).map(async (l) => {
+    for (const l of ls ?? []) {
       const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })
         .eq("loja_id", l.id as string).eq("em_estoque", true);
       const n = count ?? 0;
-      const nome = (l.nome as string) || (l.adapter_key as string);
       if (MIN_VOLUME > 0 && n >= 1 && n < MIN_VOLUME) {
         await sb.from("lojas").update({ ativo: false }).eq("id", l.id as string);
         await sb.from("produtos").update({ em_estoque: false }).eq("loja_id", l.id as string).eq("em_estoque", true);
-        guilhotinadas.push(`${nome} (${n})`);
-        return null; // some do "Lista real de afiliação" também
+        guilhotinadas.push(`${(l.nome as string) || (l.adapter_key as string)} (${n})`);
       }
-      return { loja: nome, rede: redeAfiliada(l.adapter_key as string), produtos: n };
-    }));
+    }
     if (guilhotinadas.length) console.log(`⚔️ Guilhotina de volume (<${MIN_VOLUME}): ${guilhotinadas.join(", ")} DESATIVADAS`);
-    await notificarAfiliacao(linhas.filter((x): x is NonNullable<typeof x> => x !== null), guilhotinadas);
-  } catch { /* avisos nunca derrubam a coleta */ }
+    // A "💰 Lista real de afiliação" agora é enviada UMA vez pelo digest (roda por
+    // último, via `needs`), não por job — evita os retratos parciais/conflitantes
+    // (o job da Amazon enviava a lista sem a Kabum, que ainda estava coletando).
+  } catch { /* a guilhotina nunca derruba a coleta */ }
 
   return result;
 }
