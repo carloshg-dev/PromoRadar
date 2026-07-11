@@ -2,6 +2,59 @@ import { createPublicClient } from "@/infrastructure/supabase/client";
 import type { Produto, CategoriaSlug } from "@/core/domain/types";
 import { assinatura, rotuloClasse } from "@/core/matching/match";
 import { ehLinkMonetizado, redeAfiliada } from "@/lib/afiliados";
+import { scoreConteudo, legendaPersuasiva } from "@/core/curadoria";
+
+export interface AchadoDoDia extends Produto {
+  scoreConteudo: number;
+  legenda: string;
+}
+
+/**
+ * TOP N do dia (Máquina de Conteúdo v4.0). Traz um POOL de candidatos já filtrado
+ * e indexado (em_estoque + imagem + desconto + monetizado), pontua por conteúdo em
+ * memória (scoreConteudo) e escolhe com VARIEDADE de categoria (máx 1 por nicho).
+ * NUNCA carrega os milhares — a query retorna ~120 linhas no pior caso.
+ */
+export async function top5DoDia(n = 5, minDesconto = 15): Promise<AchadoDoDia[]> {
+  const sb = createPublicClient();
+  // Só ORDER BY promo_score + LIMIT (usa índice, rápido — igual listarOfertas).
+  // Filtros de desconto/imagem/estoque vão em MEMÓRIA sobre as ~300 linhas: pôr
+  // as WHERE de coluna computada na view estourava o statement timeout.
+  const { data, error } = await sb.from("vw_ofertas").select(SELECT)
+    .order("promo_score", { ascending: false, nullsFirst: false })
+    .limit(400);
+  if (error) throw error;
+  // FILTRO DE CONTEÚDO (em memória): monetizado (post tem que pagar), com imagem,
+  // preço de conteúdo (≥R$20, sem cacareco) e desconto na BANDA CRÍVEL 20-78% —
+  // corta a âncora falsa da Shopee (90% off) que envenena a seleção.
+  const pool = (data ?? []).map(map).filter((p) =>
+    p.emEstoque && p.imagemUrl && ehLinkMonetizado(p.url) &&
+    (p.precoAtual ?? 0) >= 20 &&
+    (p.descontoPct ?? 0) >= minDesconto && (p.descontoPct ?? 0) <= 78);
+  const ranqueado = pool
+    .map((o) => ({ o, sc: scoreConteudo(o) }))
+    .sort((a, b) => b.sc - a.sc);
+
+  // Seleção: 1 LOJA e 1 CATEGORIA por achado (variedade real; evita 2 "notebooks"
+  // que na verdade são cabo+cooler). Fallback relaxa categoria, depois loja.
+  const escolhidos: Produto[] = [];
+  const lojas = new Set<string>(), cats = new Set<string>();
+  for (const { o } of ranqueado) {
+    if (lojas.has(o.lojaSlug) || cats.has(o.categoriaSlug ?? "?")) continue;
+    lojas.add(o.lojaSlug); cats.add(o.categoriaSlug ?? "?"); escolhidos.push(o);
+    if (escolhidos.length >= n) break;
+  }
+  for (const { o } of ranqueado) { // relaxa categoria, mantém loja distinta
+    if (escolhidos.length >= n) break;
+    if (lojas.has(o.lojaSlug) || escolhidos.includes(o)) continue;
+    lojas.add(o.lojaSlug); escolhidos.push(o);
+  }
+  for (const { o } of ranqueado) { // último recurso: completa
+    if (escolhidos.length >= n) break;
+    if (!escolhidos.includes(o)) escolhidos.push(o);
+  }
+  return escolhidos.map((o) => ({ ...o, scoreConteudo: scoreConteudo(o), legenda: legendaPersuasiva(o) }));
+}
 
 const SELECT = `id,titulo,marca,url,imagem_url,preco_atual,preco_original,desconto_pct,
   promo_score,preco_min_hist,preco_max_hist,preco_avg_hist,em_estoque,atualizado_em,
