@@ -110,6 +110,13 @@ export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
     dominios: ["dufrio.com.br"], baseUrl: "https://www.dufrio.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter", // eletro/linha branca
   },
+  {
+    // APROVADA na Awin 11/07 (era só scraper não-afiliado guilhotinado; agora é
+    // FEED monetizado). Hardware/tech pesado — reforça o comparador. Cor já existe.
+    mid: "2936727", envKey: "AWIN_KABUM", nome: "Kabum", slug: "kabum",
+    dominios: ["kabum.com.br"], baseUrl: "https://www.kabum.com.br",
+    categoria: "ofertas-parceiros", ingestao: "adapter",
+  },
 ];
 
 /** MID efetivo (override do .env quando parseável → fallback público). */
