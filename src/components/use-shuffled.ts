@@ -1,21 +1,29 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+
+function fisherYates<T>(a: readonly T[]): T[] {
+  const r = [...a];
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j]!, r[i]!];
+  }
+  return r;
+}
 
 /**
- * Fisher-Yates shuffle — versão CLIENT-SIDE. Roda no mount (useMemo sem deps
- * estáveis), garantindo que cada visita/F5 do usuário veja uma ordem diferente
- * mesmo quando o HTML do servidor está cacheado pelo ISR (revalidate = 300s).
+ * DINAMISMO DA HOME (F5 vivo) sem matar o Supabase. O servidor manda um POOL
+ * grande (150-200, cacheado por ISR → 1 query a cada 5 min); ESTE hook sorteia
+ * um subconjunto de `n` NO CLIENTE a cada mount. Cada F5 mostra uma vitrine
+ * diferente do mesmo arsenal, sem nenhuma query extra.
  *
- * Recebe o pool completo e devolve `n` itens embaralhados.
+ * Anti-hydration-mismatch: 1º render usa a ordem do servidor (idêntica ao SSR,
+ * sem Math.random no server → sem warning/flash); o embaralho só roda no
+ * useEffect (client), DEPOIS da hidratação.
  */
 export function useShuffled<T>(pool: T[], n: number): T[] {
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- seed aleatória intencional no mount
-  return useMemo(() => {
-    const arr = [...pool];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const t = arr[i]!; arr[i] = arr[j]!; arr[j] = t;
-    }
-    return arr.slice(0, n);
-  }, [pool.length, n]);
+  const [itens, setItens] = useState<T[]>(() => pool.slice(0, n));
+  useEffect(() => {
+    setItens(fisherYates(pool).slice(0, n));
+  }, [pool, n]);
+  return itens;
 }

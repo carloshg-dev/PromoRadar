@@ -26,11 +26,12 @@ import {
 export const revalidate = 300;
 
 export default async function Home() {
-  // Feed de AFILIADOS (topo) — pool AMPLO (60), o componente client embaralha e
-  // mostra 20 a cada montagem. O ISR cacheia 60 itens por 5 min, mas cada F5
-  // do usuário vê um subconjunto diferente.
+  // Feed de AFILIADOS (topo) — pool AMPLO (150, já filtrado por desconto/valor),
+  // o componente client embaralha e mostra 15 a cada montagem. O ISR cacheia os
+  // 150 por 5 min (1 query), mas cada F5 do usuário vê um subconjunto sorteado —
+  // "ilusão de catálogo infinito" sem query extra (regra do dono 04/07).
   let afiliados: Produto[] = [];
-  try { afiliados = await listarAfiliados(60); } catch {}
+  try { afiliados = await listarAfiliados(150); } catch {}
 
   let produtosRodizio: ProdutoRodizio[] = [];
   try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
@@ -83,12 +84,13 @@ export default async function Home() {
           e confirma que está no lugar certo. */}
       <BarraLojas baseHref="/ofertas" />
 
-      {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática */}
-      <ParceirosFeed produtos={afiliados} />
+      {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática.
+          Pool 150 → embaralha e exibe 15 por F5 (vitrine viva). */}
+      <ParceirosFeed produtos={afiliados} exibir={15} />
 
       {/* BELEZA & PERFUMES — 2º carrossel logo ABAIXO, sentido REVERSO (movimento
           cruzado): perfumes importados/árabes + skincare/cabelos/maquiagem */}
-      <ParceirosFeed produtos={carrosselBeleza} direcao="reverso" variante="beleza"
+      <ParceirosFeed produtos={carrosselBeleza} exibir={15} direcao="reverso" variante="beleza"
         titulo="Beleza & Perfumes" verTudoHref="/categoria/perfumes-importados"
         subtitulo="Perfumes importados, skincare e cuidados do rosto e corpo — rodando sem parar." />
 

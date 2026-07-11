@@ -139,14 +139,30 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   // as 13 lojas desligadas em 02-03/07 continuavam aparecendo como "potencial"
   // toda coleta) e SÓ produtos em_estoque (senão a contagem é o total histórico
   // acumulado — nunca cai mesmo com stale-sweep, já que a linha não é deletada).
+  // GUILHOTINA DE VOLUME (regra do dono 04/07): só catálogo de ALTO VOLUME roda.
+  // Loja com 1..(MIN-1) produtos válidos = coletada mas fraca → BLOQUEADA (ativo=
+  // false + produtos ocultados). Loja em 0 = ainda não coletada (marca nova como
+  // Acer/Eudora/Dufrio) → POUPADA, será avaliada quando o feed dela chegar.
+  // GUILHOTINA_MIN_PRODUTOS=0 desliga a regra.
+  const MIN_VOLUME = Number(process.env.GUILHOTINA_MIN_PRODUTOS) || 200;
+  const guilhotinadas: string[] = [];
   try {
     const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
     const linhas = await Promise.all((ls ?? []).map(async (l) => {
       const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })
         .eq("loja_id", l.id as string).eq("em_estoque", true);
-      return { loja: (l.nome as string) || (l.adapter_key as string), rede: redeAfiliada(l.adapter_key as string), produtos: count ?? 0 };
+      const n = count ?? 0;
+      const nome = (l.nome as string) || (l.adapter_key as string);
+      if (MIN_VOLUME > 0 && n >= 1 && n < MIN_VOLUME) {
+        await sb.from("lojas").update({ ativo: false }).eq("id", l.id as string);
+        await sb.from("produtos").update({ em_estoque: false }).eq("loja_id", l.id as string).eq("em_estoque", true);
+        guilhotinadas.push(`${nome} (${n})`);
+        return null; // some do "Lista real de afiliação" também
+      }
+      return { loja: nome, rede: redeAfiliada(l.adapter_key as string), produtos: n };
     }));
-    await notificarAfiliacao(linhas);
+    if (guilhotinadas.length) console.log(`⚔️ Guilhotina de volume (<${MIN_VOLUME}): ${guilhotinadas.join(", ")} DESATIVADAS`);
+    await notificarAfiliacao(linhas.filter((x): x is NonNullable<typeof x> => x !== null));
   } catch { /* avisos nunca derrubam a coleta */ }
 
   return result;

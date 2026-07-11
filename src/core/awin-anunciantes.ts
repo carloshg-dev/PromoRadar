@@ -94,6 +94,22 @@ export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
     dominios: ["olympikus.com.br"], baseUrl: "https://www.olympikus.com.br",
     categoria: "moda", ingestao: "adapter",
   },
+  // Nova leva aprovada (04/07) — a Guilhotina de volume avalia o feed delas na 1ª coleta.
+  {
+    mid: "18878", envKey: "AWIN_Acer_BR", nome: "Acer", slug: "acer",
+    dominios: ["acer.com.br", "store.acer.com.br"], baseUrl: "https://store.acer.com.br",
+    categoria: "notebooks", ingestao: "adapter",
+  },
+  {
+    mid: "17837", envKey: "AWIN_Eudora_BR", nome: "Eudora", slug: "eudora",
+    dominios: ["eudora.com.br"], baseUrl: "https://www.eudora.com.br",
+    categoria: "ofertas-parceiros", ingestao: "adapter", // beleza mista (perfume+make+skin)
+  },
+  {
+    mid: "23524", envKey: "AWIN_Dufrio_BR", nome: "Dufrio", slug: "dufrio",
+    dominios: ["dufrio.com.br"], baseUrl: "https://www.dufrio.com.br",
+    categoria: "ofertas-parceiros", ingestao: "adapter", // eletro/linha branca
+  },
 ];
 
 /** MID efetivo (override do .env quando parseável → fallback público). */

@@ -69,9 +69,10 @@ const CORES_LOJA: Record<string, string> = {
   // Parceiros Lomadee
   sieno: "#C9A227", // dourado perfumaria
   "sieno perfumes": "#C9A227",
-  biobran: "#1B9E4B", // verde saúde
-  "bio bran": "#1B9E4B",
-  nutribullet: "#8BC34A", // verde-lima nutrição (substituiu a Casa do Fitness)
+  // Nova leva Awin (04/07)
+  acer: "#83B81A",    // verde Acer
+  eudora: "#E4007C",  // magenta Eudora
+  dufrio: "#009EE2",  // azul Dufrio
 };
 
 export function corLoja(lojaSlugOuNome: string | null | undefined): string {
