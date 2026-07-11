@@ -5,8 +5,9 @@ name: Ingestao Diesel (Awin)
 # scrape.yml: AWIN_DATAFEED_URL, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).
 # Blindagem: o stale-sweep NAO apaga ofertas manuais (sku 'manual:').
 on:
-  schedule:
-    - cron: "30 9 * * *" # 06:30 BRT
+  # DESATIVADA 11/07: Diesel tem só ~28 produtos (< piso de 200 da guilhotina de
+  # volume). O cron repopulava a loja guilhotinada, criando zumbi visível no site.
+  # Fica só manual (workflow_dispatch) caso a Diesel um dia cresça.
   workflow_dispatch: {}
 
 concurrency:

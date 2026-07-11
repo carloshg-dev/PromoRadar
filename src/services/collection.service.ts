@@ -43,6 +43,13 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   const lojasPorSlug = await mapaLojasPorSlug(sb);
   const categorias = await mapaCategorias(sb);
 
+  // GUILHOTINA STICKY (fix D5 da auditoria): loja já DESATIVADA não é repopulada.
+  // Sem isso, o adapter re-coletava produto (em_estoque=true) numa loja ativo=false
+  // e a guilhotina (que só avalia lojas ATIVAS) nunca re-ocultava → zumbi visível
+  // no site (caso Diesel/Panasonic). Agora o item de loja inativa é descartado.
+  const { data: inativasData } = await sb.from("lojas").select("slug").eq("ativo", false);
+  const inativas = new Set((inativasData ?? []).map((l) => l.slug as string));
+
   const result: CollectionResult = { jobId, coletados: 0, salvos: 0, erros: 0, porAdapter: {} };
   const novosDeals: DealNovo[] = []; // quedas de preço reais p/ avisar usuários (Telegram/Discord)
 
@@ -74,6 +81,8 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       }
 
       for (const item of itens) {
+        // Loja guilhotinada (ativo=false) NÃO repopula — descarta antes de salvar.
+        if (item.loja && inativas.has(item.loja.slug)) { stats.descartados++; continue; }
         // REGRA DO DONO (02/07): título em português, qualquer loja (glossário).
         item.titulo = traduzirTitulo(item.titulo);
         // FILTRO DE QUALIDADE (regra do dono 03/07): vitrine cega não vende —
