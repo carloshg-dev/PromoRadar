@@ -1,0 +1,40 @@
+name: Pipeline de Conteúdo (Achados do dia)
+
+# Curadoria → Render → Publisher, 1x/dia de MANHÃ, DEPOIS da coleta (06:00 BRT).
+# Roda às 12:00 UTC = 09:00 BRT: o banco já foi alimentado pela madrugada.
+# Ponto único (scripts/pipeline-conteudo.ts) — idempotente via tabela `campanhas`.
+# Quando migrar pra Oracle/OpenClaw, é o MESMO comando num cron de lá.
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # 09:00 BRT
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "cura+renderiza mas NÃO publica"
+        type: boolean
+        default: false
+
+concurrency:
+  group: conteudo
+  cancel-in-progress: false
+
+jobs:
+  conteudo:
+    name: Achados do dia → Telegram + Discord
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_FEED_CHAT_ID: ${{ secrets.TELEGRAM_FEED_CHAT_ID }}
+      DISCORD_DEALS_WEBHOOK_URL: ${{ secrets.DISCORD_DEALS_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4 # traz assets/fonts/*.ttf pro render
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - name: Rodar pipeline de conteúdo
+        run: npx tsx scripts/pipeline-conteudo.ts ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
