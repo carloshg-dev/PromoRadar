@@ -90,21 +90,28 @@ export async function notificarColeta(r: CollectionResult): Promise<void> {
   });
 }
 
-/** "Lista real de afiliação" — o que MONETIZA vs o que ainda não, a cada coleta. */
-export async function notificarAfiliacao(linhas: Array<{ loja: string; rede: string | null; produtos: number }>): Promise<void> {
-  if (!linhas.length) return;
+/**
+ * "Lista real de afiliação" — as lojas ATIVAS que monetizam + as guilhotinadas
+ * nesta rodada (cortadas por volume < 200). Reflete o estado real pós-guilhotina.
+ */
+export async function notificarAfiliacao(
+  linhas: Array<{ loja: string; rede: string | null; produtos: number }>,
+  guilhotinadas: string[] = [],
+): Promise<void> {
+  if (!linhas.length && !guilhotinadas.length) return;
   const afil = linhas.filter((l) => l.rede).sort((a, b) => b.produtos - a.produtos);
-  const sem = linhas.filter((l) => !l.rede && l.produtos > 0).sort((a, b) => b.produtos - a.produtos);
   const totAfil = afil.reduce((s, l) => s + l.produtos, 0);
-  const totSem = sem.reduce((s, l) => s + l.produtos, 0);
+  const campos = [
+    { nome: `✅ Monetizadas — ${afil.length} lojas · ${totAfil} produtos`, valor: afil.length ? afil.map((l) => `• ${l.loja} — ${l.rede} (${l.produtos})`).join("\n") : "—" },
+  ];
+  if (guilhotinadas.length) {
+    campos.push({ nome: `⚔️ Guilhotinadas nesta rodada (< 200 produtos)`, valor: guilhotinadas.map((g) => `• ${g}`).join("\n") });
+  }
   await avisar({
     titulo: "💰 Lista real de afiliação",
     cor: COR.info,
-    campos: [
-      { nome: `✅ Monetizadas — ${totAfil} produtos`, valor: afil.length ? afil.map((l) => `• ${l.loja} — ${l.rede} (${l.produtos})`).join("\n") : "—" },
-    
-    ],
-    rodape: `Ligue cada loja embrulhando o link de saída quando aprovar · ${SITE}`,
+    campos,
+    rodape: `Todas já monetizam — deeplink embrulhado no clique (/r/) · ${SITE}`,
   });
 }
 

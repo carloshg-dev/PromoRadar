@@ -171,7 +171,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       return { loja: nome, rede: redeAfiliada(l.adapter_key as string), produtos: n };
     }));
     if (guilhotinadas.length) console.log(`⚔️ Guilhotina de volume (<${MIN_VOLUME}): ${guilhotinadas.join(", ")} DESATIVADAS`);
-    await notificarAfiliacao(linhas.filter((x): x is NonNullable<typeof x> => x !== null));
+    await notificarAfiliacao(linhas.filter((x): x is NonNullable<typeof x> => x !== null), guilhotinadas);
   } catch { /* avisos nunca derrubam a coleta */ }
 
   return result;
