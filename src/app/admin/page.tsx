@@ -12,7 +12,7 @@ import { timeAgo } from "@/lib/utils";
 import { Package, LineChart, Activity, Zap, ShieldCheck, Users, MousePointerClick, Search, Eye, Smartphone } from "lucide-react";
 
 export const metadata = { title: "Dashboard" };
-export const revalidate = 30;
+export const revalidate = 300;
 
 /** Lojas disponíveis p/ coleta manual (espelha o VALID da rota /api/scrape). */
 // GUILHOTINA 02/07: só lojas monetizadas (ver registry.ts).

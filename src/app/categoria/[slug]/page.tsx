@@ -10,7 +10,7 @@ import { nomeCategoria } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export const revalidate = 120;
+export const revalidate = 1800;
 const POR_PAGINA = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

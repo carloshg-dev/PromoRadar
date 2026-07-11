@@ -13,7 +13,7 @@ import Link from "next/link";
 const POR_PAGINA = 60;
 
 export const metadata = { title: "Melhores ofertas" };
-export const revalidate = 120;
+export const revalidate = 1800;
 
 export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string } }) {
   const categoria = searchParams.categoria ?? "all";

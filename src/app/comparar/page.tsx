@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Scale } from "lucide-react";
 
 export const metadata = { title: "Comparador" };
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function Comparar({ searchParams }: { searchParams: { vertical?: string; categoria?: string } }) {
   // Comparador em 2 níveis: vertical (Tech/Mundo Fit/Casa & Eletro) → categoria.

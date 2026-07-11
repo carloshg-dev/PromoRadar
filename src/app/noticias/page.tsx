@@ -5,7 +5,7 @@ import { decodeHtmlEntities, timeAgo } from "@/lib/utils";
 import { Newspaper, ExternalLink } from "lucide-react";
 
 export const metadata = { title: "Notícias de tecnologia" };
-export const revalidate = 600;
+export const revalidate = 1800;
 
 export default async function Noticias() {
   let noticias: Awaited<ReturnType<typeof listarNoticias>> = [];

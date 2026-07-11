@@ -15,7 +15,7 @@ import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, L
 
 // 10 min: preços mudam no máx. 3x/dia e a comparação por classe varre até
 // 2000 linhas — cache mais longo corta ~5x o egress do Supabase free.
-export const revalidate = 600;
+export const revalidate = 1800;
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const p = await obterProduto(params.id).catch(() => null);
