@@ -5,6 +5,7 @@ import { AmazonAdapter } from "@/infrastructure/scraping/adapters/amazon.adapter
 import { LomadeeAdapter } from "@/infrastructure/scraping/adapters/lomadee.adapter";
 import { AwinAdapter } from "@/infrastructure/scraping/adapters/awin.adapter";
 import { CarrefourAdapter } from "@/infrastructure/scraping/adapters/carrefour.adapter";
+import { KabumAdapter } from "@/infrastructure/scraping/adapters/kabum.adapter";
 
 /**
  * GUILHOTINA DOS NÃO-AFILIADOS (decisão do dono, 02/07/2026): "chega de mandar
@@ -27,6 +28,7 @@ export const ADAPTERS: Record<AdapterKey, () => StoreAdapter> = {
   lomadee: () => new LomadeeAdapter(),
   awin: () => new AwinAdapter(),
   carrefour: () => new CarrefourAdapter(),
+  kabum: () => new KabumAdapter(),
 };
 
 export function getAdapters(keys?: AdapterKey[]): StoreAdapter[] {
