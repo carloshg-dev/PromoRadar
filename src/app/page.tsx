@@ -23,7 +23,7 @@ import {
   Palette, SprayCan, Headphones,
 } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 7200;
 
 export default async function Home() {
   // Feed de AFILIADOS (topo) — pool AMPLO (150, já filtrado por desconto/valor),
@@ -31,7 +31,7 @@ export default async function Home() {
   // 150 por 5 min (1 query), mas cada F5 do usuário vê um subconjunto sorteado —
   // "ilusão de catálogo infinito" sem query extra (regra do dono 04/07).
   let afiliados: Produto[] = [];
-  try { afiliados = await listarAfiliados(90); } catch {}
+  try { afiliados = await listarAfiliados(70); } catch {}
 
   let produtosRodizio: ProdutoRodizio[] = [];
   try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
@@ -43,13 +43,13 @@ export default async function Home() {
   // 2º carrossel (sentido REVERSO): Beleza & Perfumes — perfumes importados/árabes
   // + skincare/cabelos/maquiagem, variado por loja (L'Occitane, Sieno, Shopee…).
   let carrosselBeleza: Produto[] = [];
-  try { carrosselBeleza = await achadosBelezaCarrossel(48); } catch {}
+  try { carrosselBeleza = await achadosBelezaCarrossel(40); } catch {}
 
   // Destaques: pool top-120 (monetizado primeiro), embaralhado NO CLIENTE
   // pelo DestaquesGrid (12 exibidos do pool). O ISR cacheia o pool de 120;
   // o client shuffle garante vitrine diferente a cada F5.
   let destaques: Produto[] = [];
-  try { destaques = await listarOfertas({ limit: 90 }); } catch {}
+  try { destaques = await listarOfertas({ limit: 70 }); } catch {}
 
   // Oferta em destaque — pool de vários produtos das marcas monetizadas; gira
   // em LOOP no cliente (FeaturedDealRotator). Comparador só ativa quando o
