@@ -53,7 +53,7 @@ export class KabumAdapter extends StoreAdapter {
     const vistos = new Set<string>();
     const loja = {
       slug: "kabum", nome: "Kabum", baseUrl: SITE,
-      logoUrl: "https://ui.awin.com/images/upload/merchant/profile/2936727.png",
+      logoUrl: "https://ui.awin.com/images/upload/merchant/profile/17729.png",
     };
 
     for (const b of BUSCAS) {

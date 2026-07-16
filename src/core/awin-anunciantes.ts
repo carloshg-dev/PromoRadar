@@ -111,9 +111,13 @@ export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
     categoria: "ofertas-parceiros", ingestao: "adapter", // eletro/linha branca
   },
   {
-    // APROVADA na Awin 11/07 (era só scraper não-afiliado guilhotinado; agora é
-    // FEED monetizado). Hardware/tech pesado — reforça o comparador. Cor já existe.
-    mid: "2936727", envKey: "AWIN_KABUM", nome: "Kabum", slug: "kabum",
+    // APROVADA na Awin 11/07. MID REAL = 17729 (confirmado na API /programmes).
+    // ⚠️ 2936727 NÃO é o mid — é o PUBLISHER ID (awinaffid) da conta; usado como
+    // mid, o deeplink travava na Awin ("erro de redirecionamento" 14/07). envKey
+    // proposital ≠ AWIN_KABUM pra NÃO herdar o override errado do .env.
+    // Sem datafeed na Awin → produtos via kabum.adapter (API interna); o deeplink
+    // do /r/ é quem monetiza o clique.
+    mid: "17729", envKey: "AWIN_MID_KABUM", nome: "Kabum", slug: "kabum",
     dominios: ["kabum.com.br"], baseUrl: "https://www.kabum.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },

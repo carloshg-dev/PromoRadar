@@ -32,9 +32,9 @@ export const REDE_POR_LOJA: Record<string, string> = {
   lomadee: "Lomadee",  // lojas multi-loja (Sieno, Bio Bran, Casa do Fitness…)
   awin: "Awin",        // lojas do feed multi-loja (AliExpress, Panasonic, Extra…)
   carrefour: "Awin",   // scraper VTEX intelligent-search; deeplink Awin mid 17665 no /r/
+  kabum: "Awin",       // scraper API interna; deeplink Awin mid 17729 no /r/ (aprovada 11/07)
   diesel: "Awin",      // cron próprio (scripts/ingest-awin-diesel.js), mesma rede
   shopee: "Shopee Afiliados", // rastreio embutido na coleta (an_18318451097)
-  // kabum: "Awin" → ligar quando sair de "Pending" no painel
 };
 
 /** Rede de afiliado da loja, ou null se ainda não monetiza. */
