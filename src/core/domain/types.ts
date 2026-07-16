@@ -26,7 +26,7 @@ export type CategoriaSlug =
 // darklab, havan, americanas, ferramentasgerais, lojadomecanico) foram
 // desativados — arquivos preservados em adapters/; reativação = devolver a
 // key aqui + registry + scrape.yml (ver comentário no registry).
-export type AdapterKey = "mercadolivre" | "amazon" | "lomadee" | "awin" | "carrefour" | "kabum";
+export type AdapterKey = "mercadolivre" | "amazon" | "lomadee" | "awin" | "carrefour" | "kabum" | "polishop";
 
 /** Item normalizado que todo adapter de scraping deve produzir. */
 export interface RawProduct {
