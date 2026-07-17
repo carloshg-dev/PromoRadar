@@ -34,9 +34,14 @@ jobs:
           # IPv6) e o gzip "passava" → job VERDE com backup de 174 bytes VAZIO
           # (aconteceu em 07/07 e 13/07 — descoberto 17/07). Nunca mais.
           set -o pipefail
+          # stderr do pg_dump suprimido do log (repo público: erro de conexão pode
+          # ecoar fragmentos da URI — mesma lição do db-migrate em 17/07).
           # postgres:17 acompanha a versão do servidor do Supabase (pg_dump não pode ser mais antigo que o servidor)
-          docker run --rm -e SUPABASE_DB_URL postgres:17-alpine \
-            sh -c 'pg_dump --no-owner --no-privileges "$SUPABASE_DB_URL"' | gzip > "backup-$(date +%F).sql.gz"
+          if ! docker run --rm -e SUPABASE_DB_URL postgres:17-alpine \
+            sh -c 'pg_dump --no-owner --no-privileges "$SUPABASE_DB_URL" 2>/dev/null' | gzip > "backup-$(date +%F).sql.gz"; then
+            echo "::error::pg_dump falhou (detalhe suprimido — repo público). Confira o secret SUPABASE_DB_URL (Session Pooler IPv4, senha sem caracteres especiais)."
+            exit 1
+          fi
           ls -lh backup-*.sql.gz
           # dump real do nosso banco tem MB; menos de 50KB = deu errado em silêncio
           TAM=$(stat -c%s backup-*.sql.gz)

@@ -35,5 +35,14 @@ jobs:
             echo "::error::Arquivo não encontrado: ${{ github.event.inputs.arquivo }}"
             exit 1
           fi
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "${{ github.event.inputs.arquivo }}"
+          # stderr do psql NUNCA vai pro log (repo público: erro de conexão pode
+          # ecoar fragmentos da URI/senha — aconteceu em 17/07, logs deletados).
+          if ! psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "${{ github.event.inputs.arquivo }}" 2>/tmp/psql-err.txt; then
+            if grep -qiE "translate host|could not connect|unreachable|authentication" /tmp/psql-err.txt; then
+              echo "::error::Conexão/autenticação falhou — confira o secret SUPABASE_DB_URL (Session Pooler IPv4; senha SEM caracteres especiais, ou percent-encoded)."
+            else
+              echo "::error::psql falhou ao aplicar a migração (detalhe suprimido por segurança — repo público)."
+            fi
+            exit 1
+          fi
           echo "✅ Migração aplicada: ${{ github.event.inputs.arquivo }}"
