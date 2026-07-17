@@ -363,12 +363,16 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   // Páginas rasas: puxa o pool (top por nota) e reordena MONETIZADO PRIMEIRO — a loja que
   // te paga comissão vira destaque, mesmo com nota menor (a nota vira só desempate interno).
   // Assim o gamer que entra na Tech vê Amazon/Shopee/AliExpress no topo, não quem nos rejeitou.
-  // Página funda de lista gigante (raríssimo): ranged puro por nota, sem custo de reordenar.
-  const rasa = de < POOL_ORDENACAO;
-  const { data, error, count } = await q.range(rasa ? 0 : de, rasa ? POOL_ORDENACAO - 1 : de + porPagina - 1);
+  //
+  // EXCEÇÃO — filtro de LOJA ÚNICA (f.loja): todos os produtos são da mesma loja, então o
+  // re-sort "monetizado primeiro" é INÓCUO. Puxar o pool de 1000 linhas nesse caso fazia a
+  // query estourar em loja gigante (Kabum: 2919 produtos → statement timeout no ambiente
+  // publicado → página "Nenhuma oferta"). Vai ranged puro (60 linhas), rápido. Idem página funda.
+  const usarPool = de < POOL_ORDENACAO && !f.loja;
+  const { data, error, count } = await q.range(usarPool ? 0 : de, usarPool ? POOL_ORDENACAO - 1 : de + porPagina - 1);
   if (error) throw error;
   const total = count ?? 0;
-  if (!rasa) return { produtos: (data ?? []).map(map), total };
+  if (!usarPool) return { produtos: (data ?? []).map(map), total };
 
   const pool = (data ?? []).map(map);
   pool.sort((a, b) => {
