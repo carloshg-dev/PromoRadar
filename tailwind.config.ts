@@ -34,6 +34,12 @@ const config: Config = {
       letterSpacing: { tightest: "-0.04em" },
       keyframes: {
         "fade-up": { "0%": { opacity: "0", transform: "translateY(10px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+        "snow-fall": {
+          "0%": { transform: "translateY(-3rem) translateX(0)", opacity: "0" },
+          "10%": { opacity: "1" },
+          "85%": { opacity: ".85" },
+          "100%": { transform: "translateY(105vh) translateX(1.5rem)", opacity: "0" },
+        },
         "lantern-float": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-14px)" },
@@ -45,6 +51,7 @@ const config: Config = {
       },
       animation: {
         "fade-up": "fade-up .5s cubic-bezier(.2,.7,.2,1) both",
+        snow: "snow-fall 11s linear infinite",
         "lantern-float": "lantern-float 4.8s ease-in-out infinite",
         "lantern-aura": "lantern-aura 3.8s ease-in-out infinite",
       },

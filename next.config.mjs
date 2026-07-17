@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**" }
+      { protocol: "https", hostname: "**" },
+      // Fotos legadas da Kabum vêm em HTTP (images1/images6.kabum.com.br) e o
+      // next/image rejeitava, quebrando o render onde caíam (rodízio da home).
+      // Seguro: o next/image PROXIA a imagem pelo nosso servidor (sem mixed content).
+      { protocol: "http", hostname: "**.kabum.com.br" }
     ]
   },
   eslint: { ignoreDuringBuilds: true },
