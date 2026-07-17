@@ -7,7 +7,10 @@ import { publicar } from "@/pipeline/publisher.service";
 /** Pré-voo: a tabela `campanhas` existe? Sem ela o pipeline não roda — mas em vez
  *  de estourar erro vermelho, avisa claro e sai LIMPO (o dono roda db/campanhas.sql). */
 async function tabelaCampanhasExiste(): Promise<boolean> {
-  const { error } = await createAdminClient().from("campanhas").select("id", { head: true, count: "exact" });
+  // SELECT com CORPO (nunca HEAD): HEAD em tabela inexistente volta 404 SEM corpo
+  // e o supabase-js não sinaliza erro — foi o falso-positivo que mascarou a
+  // ausência da tabela por 3 dias (descoberto 17/07).
+  const { error } = await createAdminClient().from("campanhas").select("id").limit(1);
   if (error && /schema cache|does not exist|not find the table/i.test(error.message)) return false;
   return true;
 }

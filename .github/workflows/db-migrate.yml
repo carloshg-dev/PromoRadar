@@ -1,0 +1,39 @@
+name: DB Migrate (rodar SQL do repo)
+
+# Executa um arquivo db/*.sql no Supabase via psql (mesmo secret do backup.yml).
+# Uso: Actions → DB Migrate → Run workflow → informe o arquivo (default campanhas).
+# Idempotente se o SQL for (os nossos usam IF NOT EXISTS). Ferramenta permanente
+# p/ migrações sem depender de rodar à mão no SQL Editor.
+
+on:
+  workflow_dispatch:
+    inputs:
+      arquivo:
+        description: "Arquivo SQL (relativo à raiz do repo)"
+        default: "db/campanhas.sql"
+        required: true
+
+concurrency:
+  group: db-migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rodar migração
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Falta o secret SUPABASE_DB_URL (string 'Session pooler' do Supabase)."
+            exit 1
+          fi
+          if [ ! -f "${{ github.event.inputs.arquivo }}" ]; then
+            echo "::error::Arquivo não encontrado: ${{ github.event.inputs.arquivo }}"
+            exit 1
+          fi
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "${{ github.event.inputs.arquivo }}"
+          echo "✅ Migração aplicada: ${{ github.event.inputs.arquivo }}"
