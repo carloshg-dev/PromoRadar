@@ -92,6 +92,15 @@ export async function listarPorStatus(status: StatusCampanha, limite = 20): Prom
   return (data ?? []).map(map);
 }
 
+/** Painel admin: campanhas recentes de TODOS os status, mais novas primeiro. */
+export async function listarCampanhasRecentes(limite = 40): Promise<Campanha[]> {
+  const sb = createAdminClient();
+  const { data, error } = await sb.from("campanhas").select("*")
+    .order("criado_em", { ascending: false }).limit(limite);
+  if (error) throw error;
+  return (data ?? []).map(map);
+}
+
 /** Anti-repetição: o produto já teve campanha nos últimos `dias`? */
 export async function produtoTeveCampanhaRecente(produtoId: string, dias = 7): Promise<boolean> {
   const sb = createAdminClient();
