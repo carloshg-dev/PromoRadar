@@ -41,18 +41,32 @@ export async function publicar(dryRun = false): Promise<{ ok: number; falhas: nu
   const prontas = await listarPorStatus("READY", 10);
   let ok = 0, falhas = 0;
 
+  // Canais realmente CONFIGURADOS (env presente). Sem nenhum → campanhas ficam
+  // READY (não viram PUBLISHED fantasma queimando o anti-repeat de 7 dias).
+  const configurados = [
+    process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_FEED_CHAT_ID ? "telegram" : null,
+    process.env.DISCORD_DEALS_WEBHOOK_URL ? "discord" : null,
+  ].filter(Boolean) as string[];
+  if (!configurados.length && !dryRun) {
+    console.warn("[publisher] nenhum canal configurado (TELEGRAM_FEED_CHAT_ID / DISCORD_DEALS_WEBHOOK_URL) — campanhas ficam READY.");
+    return { ok: 0, falhas: 0 };
+  }
+
   for (const c of prontas) {
     const png = c.imagens.feed;
     if (!png) { await atualizarCampanha(c.id, "FAILED", { erro: "sem imagem feed" }); falhas++; continue; }
     try {
       if (dryRun) {
-        console.log(`[dry-run] publicaria campanha ${c.id} em [${c.plataformas.join(", ")}]`);
-      } else {
-        const alvos = (c.plataformas.length ? c.plataformas : ["telegram", "discord"]).filter((p) => CANAIS[p]);
-        const res = await Promise.allSettled(alvos.map((p) => CANAIS[p]!(png, c.legenda ?? "")));
-        if (res.length && res.every((r) => r.status === "rejected")) {
-          throw new Error(res.map((r) => (r as PromiseRejectedResult).reason?.message).join(" | "));
-        }
+        // dry-run: mostra o que faria e NÃO muda o status (fica READY p/ o post real)
+        console.log(`[dry-run] publicaria campanha ${c.id} em [${(c.plataformas.length ? c.plataformas : configurados).join(", ")}] — status permanece READY`);
+        ok++;
+        continue;
+      }
+      const alvos = (c.plataformas.length ? c.plataformas : configurados).filter((p) => configurados.includes(p));
+      if (!alvos.length) continue; // nenhuma plataforma desta campanha está configurada → deixa READY
+      const res = await Promise.allSettled(alvos.map((p) => CANAIS[p]!(png, c.legenda ?? "")));
+      if (res.every((r) => r.status === "rejected")) {
+        throw new Error(res.map((r) => (r as PromiseRejectedResult).reason?.message).join(" | "));
       }
       await atualizarCampanha(c.id, "PUBLISHED", { publicadoEm: new Date().toISOString() });
       ok++;
