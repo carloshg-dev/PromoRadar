@@ -3,7 +3,6 @@ import Link from "next/link";
 import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
-import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { CommandPalette } from "@/components/command-palette";
@@ -89,7 +88,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </span>
         </footer>
         <CookieConsent />
-        <Analytics />
       </body>
     </html>
   );

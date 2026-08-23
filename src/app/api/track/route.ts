@@ -5,6 +5,16 @@ export const dynamic = "force-dynamic";
 
 const TIPOS = new Set(["busca", "ver_produto", "abrir_comparacao", "ver_categoria"]);
 
+function geoHeader(req: NextRequest, cloudflareName: string, vercelName: string): string | null {
+  const raw = req.headers.get(cloudflareName) ?? req.headers.get(vercelName);
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw).slice(0, 120);
+  } catch {
+    return raw.slice(0, 120);
+  }
+}
+
 /** Detecta dispositivo e navegador a partir do user-agent (grosso, suficiente p/ analytics). */
 function uaInfo(ua: string): { dispositivo: string; navegador: string; bot: boolean } {
   const bot = /bot|crawl|spider|preview|lighthouse|headless|monitor/i.test(ua);
@@ -52,8 +62,8 @@ export async function POST(req: NextRequest) {
       referer,
       dispositivo,
       navegador,
-      cidade: req.headers.get("x-vercel-ip-city") ?? null,
-      pais: req.headers.get("x-vercel-ip-country") ?? null,
+      cidade: geoHeader(req, "cf-ipcity", "x-vercel-ip-city"),
+      pais: geoHeader(req, "cf-ipcountry", "x-vercel-ip-country"),
     });
   } catch { /* analytics nunca quebra a navegação */ }
 

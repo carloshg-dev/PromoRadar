@@ -7,12 +7,17 @@ out
 *.log
 .DS_Store
 .vercel
+.wrangler/
+.open-next/
+.npm-cache/
+cloudflare-env.d.ts
 next-env.d.ts
 /legacy/**/node_modules
 
 # ferramentas de skills de IA (instaladas localmente, não fazem parte do app)
 .agents/
 .claude/
+.codex/
 skills-lock.json
 *.tsbuildinfo
 

@@ -1,0 +1,30 @@
+name: Coleta de Noticias
+
+# Substitui o antigo Vercel Cron. Mantem a coleta leve fora da Vercel e usa
+# apenas GitHub Actions + Supabase, igual aos demais motores de dados.
+on:
+  schedule:
+    - cron: "0 10 * * *" # 07:00 BRT
+    - cron: "0 20 * * *" # 17:00 BRT
+  workflow_dispatch: {}
+
+concurrency:
+  group: news
+  cancel-in-progress: false
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run news
