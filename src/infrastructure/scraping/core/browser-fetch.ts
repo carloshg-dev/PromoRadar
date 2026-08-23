@@ -32,6 +32,17 @@ function emDesafio(titulo: string): boolean {
   return /momento|moment/i.test(titulo);
 }
 
+type Chromium = typeof import("playwright")["chromium"];
+
+async function carregarChromium(): Promise<Chromium | null> {
+  try {
+    const modulo = await import("playwright");
+    return modulo.chromium ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export interface PaginaColetada {
   url: string;
   html: string | null;
@@ -80,10 +91,8 @@ export async function coletarPaginas(
 
   // Import dinâmico: mantém o Playwright fora do bundle das funções serverless
   // e permite degradar onde o browser não existe (cai p/ Firecrawl se houver chave).
-  let chromium;
-  try {
-    ({ chromium } = await import("playwright"));
-  } catch {
+  const chromium = await carregarChromium();
+  if (!chromium) {
     if (firecrawlConfigurado()) {
       log("info", "Playwright indisponível; usando Firecrawl.");
       return coletarViaFirecrawl(urls, opts);
@@ -172,10 +181,8 @@ export async function coletarJson(urls: string[], opts: ColetaOpts = {}): Promis
     return out;
   }
 
-  let chromium;
-  try {
-    ({ chromium } = await import("playwright"));
-  } catch {
+  const chromium = await carregarChromium();
+  if (!chromium) {
     if (firecrawlConfigurado()) {
       log("info", "Playwright indisponível; JSON via Firecrawl.");
       const out: Array<unknown | null> = [];

@@ -1,3 +1,9 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
+const cloudflareBuild = process.env.OPENNEXT_CLOUDFLARE === "1";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -14,7 +20,28 @@ const nextConfig = {
   // Playwright é usado só pela coleta via browser (local/runner), por import
   // dinâmico. Mantém-no fora do bundle das funções serverless.
   experimental: {
-    serverComponentsExternalPackages: ["playwright", "playwright-core"]
+    serverComponentsExternalPackages: cloudflareBuild ? [] : ["playwright", "playwright-core"],
+    ...(cloudflareBuild
+      ? {
+          outputFileTracingExcludes: {
+            "*": ["./node_modules/playwright/**", "./node_modules/playwright-core/**"],
+          },
+        }
+      : {}),
+  },
+  webpack(config, { isServer }) {
+    if (isServer && cloudflareBuild) {
+      const disabled = path.join(
+        rootDir,
+        "src/infrastructure/scraping/core/playwright-disabled.ts",
+      );
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "playwright$": disabled,
+        "playwright-core$": disabled,
+      };
+    }
+    return config;
   }
 };
 export default nextConfig;
