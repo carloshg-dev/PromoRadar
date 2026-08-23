@@ -17,8 +17,8 @@ const nextConfig = {
     ]
   },
   eslint: { ignoreDuringBuilds: true },
-  // Playwright é usado só pela coleta via browser (local/runner), por import
-  // dinâmico. Mantém-no fora do bundle das funções serverless.
+  // Playwright é usado só pela coleta Node (local/runner). No build Cloudflare,
+  // o loader inteiro é substituído antes de o OpenNext percorrer o bundle.
   experimental: {
     serverComponentsExternalPackages: cloudflareBuild ? [] : ["playwright", "playwright-core"],
     ...(cloudflareBuild
@@ -29,17 +29,18 @@ const nextConfig = {
         }
       : {}),
   },
-  webpack(config, { isServer }) {
+  webpack(config, { isServer, webpack }) {
     if (isServer && cloudflareBuild) {
       const disabled = path.join(
         rootDir,
         "src/infrastructure/scraping/core/playwright-disabled.ts",
       );
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "playwright$": disabled,
-        "playwright-core$": disabled,
-      };
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /playwright-loader$/,
+          disabled,
+        ),
+      );
     }
     return config;
   }

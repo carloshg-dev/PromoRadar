@@ -11,17 +11,17 @@
  *     CONTEXTO NOVO por página (cookies cf limpos a cada vez) + intervalo educado.
  *   • É preciso ESPERAR o desafio limpar (o título deixa de ser "…momento…").
  *
- * Restrição de ambiente: Chromium NÃO roda no cron serverless da Vercel (sem
- * binário de browser). Estes adapters rodam LOCALMENTE ou em um runner próprio
- * (ex: GitHub Actions, VPS) via `npm run scrape`. Em produção serverless o
- * import dinâmico do Playwright falha e o adapter degrada para `[]` (o
- * collection.service isola a falha sem derrubar os demais).
+ * Restrição de ambiente: Chromium NÃO roda no Worker serverless (sem binário de
+ * browser). Estes adapters rodam LOCALMENTE ou em um runner próprio (ex: GitHub
+ * Actions, VPS) via `npm run scrape`. No Cloudflare, o carregador Node é trocado
+ * por um stub e a coleta degrada para Firecrawl quando configurado.
  *
- * O `playwright` é uma devDependency: capacidade de coleta local, não de runtime
- * de produção. O import é dinâmico para não entrar no bundle das funções Vercel.
+ * O `playwright` é uma devDependency: capacidade de coleta Node, não de runtime
+ * de produção. O módulo playwright-loader isola essa fronteira de execução.
  */
 
 import { coletarViaFirecrawl, coletarJsonViaFirecrawl, extrairJson, firecrawlConfigurado } from "@/infrastructure/scraping/core/firecrawl-fetch";
+import { carregarChromium } from "./playwright-loader";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
@@ -30,17 +30,6 @@ const UA =
 /** Título/markup típico de página ainda presa no desafio do Cloudflare. */
 function emDesafio(titulo: string): boolean {
   return /momento|moment/i.test(titulo);
-}
-
-type Chromium = typeof import("playwright")["chromium"];
-
-async function carregarChromium(): Promise<Chromium | null> {
-  try {
-    const modulo = await import("playwright");
-    return modulo.chromium ?? null;
-  } catch {
-    return null;
-  }
 }
 
 export interface PaginaColetada {
@@ -89,8 +78,8 @@ export async function coletarPaginas(
     return coletarViaFirecrawl(urls, opts);
   }
 
-  // Import dinâmico: mantém o Playwright fora do bundle das funções serverless
-  // e permite degradar onde o browser não existe (cai p/ Firecrawl se houver chave).
+  // O loader é substituído no build Cloudflare e permite degradar onde o browser
+  // não existe (cai p/ Firecrawl se houver chave).
   const chromium = await carregarChromium();
   if (!chromium) {
     if (firecrawlConfigurado()) {
