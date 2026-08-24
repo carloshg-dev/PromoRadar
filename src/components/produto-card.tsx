@@ -93,7 +93,7 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
                 <Trophy className="h-3 w-3" /> Menor preço histórico
               </span>
             ) : <span />}
-            <span className="label-mono text-[10px] text-muted">{timeAgo(p.atualizadoEm)}</span>
+            <span suppressHydrationWarning className="label-mono text-[10px] text-muted">{timeAgo(p.atualizadoEm)}</span>
           </div>
 
           {/* CTA — modelo "Dois Níveis":

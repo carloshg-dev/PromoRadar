@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executarColeta } from "@/services/collection.service";
+import {
+  coletaDisponivelNesteRuntime,
+  executarColeta,
+} from "@/services/collection-runtime";
 import { papelAtual, podeColetar } from "@/infrastructure/auth/roles";
 import type { AdapterKey } from "@/core/domain/types";
 
@@ -25,6 +28,14 @@ export async function POST(req: NextRequest, ctx: { params: { adapter: string } 
   const key = ctx.params.adapter as AdapterKey;
   if (!VALID.includes(key)) {
     return NextResponse.json({ error: "adapter inválido" }, { status: 400 });
+  }
+  if (!coletaDisponivelNesteRuntime) {
+    return NextResponse.json(
+      {
+        error: "A coleta manual roda no GitHub Actions; o Worker serve apenas a aplicação.",
+      },
+      { status: 503 },
+    );
   }
   try {
     const r = await executarColeta([key]);

@@ -70,8 +70,59 @@ jobs:
       - name: Build OpenNext Cloudflare Worker
         run: npm run cf:build
 
+      - name: Diagnosticar composicao do Worker
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const metaPath = ".open-next/server-functions/default/handler.mjs.meta.json";
+
+          if (!fs.existsSync(metaPath)) {
+            console.warn(`Metafile nao encontrado: ${metaPath}`);
+            process.exit(0);
+          }
+
+          const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+          const totals = new Map();
+          for (const output of Object.values(meta.outputs ?? {})) {
+            for (const [input, info] of Object.entries(output.inputs ?? {})) {
+              totals.set(input, (totals.get(input) ?? 0) + (info.bytesInOutput ?? 0));
+            }
+          }
+
+          console.log("Maiores entradas do Worker (KiB):");
+          [...totals.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 25)
+            .forEach(([input, bytes]) => {
+              console.log(`${(bytes / 1024).toFixed(1).padStart(9)}  ${input}`);
+            });
+          NODE
+
       - name: Validar pacote Cloudflare sem publicar
-        run: npx wrangler deploy --dry-run --outdir .wrangler/dry-run
+        shell: bash
+        run: |
+          set -o pipefail
+          npx wrangler deploy --dry-run --outdir .wrangler/dry-run 2>&1 | tee "$RUNNER_TEMP/wrangler-dry-run.log"
+          node <<'NODE'
+          const fs = require("node:fs");
+          const log = fs.readFileSync(`${process.env.RUNNER_TEMP}/wrangler-dry-run.log`, "utf8");
+          const match = log.match(/gzip:\s*([\d.]+)\s*(B|KiB|MiB)/i);
+          if (!match) {
+            console.error("Nao foi possivel medir o tamanho gzip informado pelo Wrangler.");
+            process.exit(1);
+          }
+
+          const value = Number(match[1]);
+          const unit = match[2].toLowerCase();
+          const bytes = unit === "mib" ? value * 1024 * 1024 : unit === "kib" ? value * 1024 : value;
+          const freeLimit = 3 * 1024 * 1024;
+          console.log(`Worker gzip: ${(bytes / 1024).toFixed(2)} KiB de 3072 KiB (plano Free).`);
+          if (bytes > freeLimit) {
+            console.error("Bundle acima do limite gratuito; deploy real bloqueado antes da API Cloudflare.");
+            process.exit(1);
+          }
+          NODE
 
       - name: Preparar bindings secretos de runtime
         if: ${{ github.event.inputs.deploy == 'true' }}

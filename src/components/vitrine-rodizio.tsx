@@ -119,7 +119,7 @@ function LanternProductCard({
               <Trophy className="h-3 w-3" /> -{discount}%
             </span>
           ) : (
-            <span className="mt-1 text-[10px] text-zinc-300/65">{timeAgo(product.atualizadoEm)}</span>
+            <span suppressHydrationWarning className="mt-1 text-[10px] text-zinc-300/65">{timeAgo(product.atualizadoEm)}</span>
           )}
           <span className="mt-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--lantern-accent)] bg-black/24 px-3 py-1 text-[10px] font-extrabold text-white transition group-hover:bg-white group-hover:text-slate-950">
             Oferta
