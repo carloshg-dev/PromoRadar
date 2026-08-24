@@ -7,7 +7,7 @@ import { PriceChart } from "@/components/price-chart";
 import { StorePriceBars } from "@/components/store-price-bars";
 import { formatBRL, corLoja } from "@/lib/utils";
 import { temaSazonal } from "@/lib/seasonal";
-import { Sparkles, ImageOff, TrendingDown, ArrowUpRight, LineChart as LineChartIcon } from "lucide-react";
+import { BadgePercent, Sparkles, ImageOff, TrendingDown, ArrowUpRight, LineChart as LineChartIcon } from "lucide-react";
 
 const INTERVAL_MS = 6500;
 
@@ -45,7 +45,12 @@ export function FeaturedDealRotator({ itens }: { itens: DestaqueItem[] }) {
       style={tema ? { boxShadow: `0 0 0 1.5px ${tema.corHex}77, 0 10px 44px -14px ${tema.corHex}88` } : undefined}>
       <div className="mb-4 flex items-center justify-between">
         <span className="label-mono inline-flex items-center gap-1.5 text-[11px] text-neon">
-          <Sparkles className="h-3.5 w-3.5" /> Oferta em destaque {tema && <span aria-hidden title={tema.frase}>{tema.emoji}</span>}
+          <Sparkles className="h-3.5 w-3.5" /> Oferta em destaque
+          {tema && (
+            <span title={tema.frase} aria-label={tema.selo}>
+              <BadgePercent className="h-3.5 w-3.5" style={{ color: tema.corHex }} />
+            </span>
+          )}
         </span>
         <Link href={c ? "/comparar" : "/ofertas"} className="text-xs text-brand-2 hover:underline">ver todas →</Link>
       </div>

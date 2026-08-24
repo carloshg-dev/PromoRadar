@@ -3,11 +3,11 @@ import type { Produto } from "@/core/domain/types";
 import { formatBRL, timeAgo, corLoja } from "@/lib/utils";
 import { temaSazonal } from "@/lib/seasonal";
 import { ehLinkMonetizado } from "@/lib/afiliados";
-import { Trophy, ImageOff, ArrowUpRight, Scale } from "lucide-react";
+import { BadgePercent, Trophy, ImageOff, ArrowUpRight, Scale } from "lucide-react";
 
 export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
   const cor = corLoja(p.lojaSlug ?? p.lojaNome);
-  const tema = temaSazonal(); // micro-badge sazonal (Copa/Arraiá/etc.)
+  const tema = temaSazonal();
   // Modelo "Dois Níveis": só a loja monetizada ganha CTA de saída (não damos clique de graça).
   const monetizado = ehLinkMonetizado(p.url);
 
@@ -51,9 +51,11 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
         )}
         {/* micro-badge sazonal (só quando não há rank, p/ não poluir) */}
         {tema && !(rank != null && rank <= 3) && (
-          <span aria-hidden title={tema.frase}
-            className="absolute bottom-2 right-2 z-10 grid h-5 w-5 place-items-center rounded-md bg-bg/80 text-[11px] backdrop-blur"
-            style={{ border: `1px solid ${tema.corHex}66` }}>{tema.emoji}</span>
+          <span title={tema.frase} aria-label={tema.selo}
+            className="absolute bottom-2 right-2 z-10 grid h-6 w-6 place-items-center rounded-md bg-bg/90 backdrop-blur"
+            style={{ border: `1px solid ${tema.corHex}66`, color: tema.corHex }}>
+            <BadgePercent className="h-3.5 w-3.5" />
+          </span>
         )}
       </div>
 
