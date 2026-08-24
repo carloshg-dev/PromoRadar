@@ -25,57 +25,64 @@ import {
 
 export const revalidate = 7200;
 
+const HOME_DATA_TIMEOUT_MS = 8_000;
+
+async function carregarComPrazo<T>(
+  carregar: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const prazo = new Promise<T>((resolve) => {
+      timeout = setTimeout(() => resolve(fallback), HOME_DATA_TIMEOUT_MS);
+    });
+
+    return await Promise.race([carregar(), prazo]);
+  } catch {
+    return fallback;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 export default async function Home() {
-  // Feed de AFILIADOS (topo) — pool AMPLO (150, já filtrado por desconto/valor),
-  // o componente client embaralha e mostra 15 a cada montagem. O ISR cacheia os
-  // 150 por 5 min (1 query), mas cada F5 do usuário vê um subconjunto sorteado —
-  // "ilusão de catálogo infinito" sem query extra (regra do dono 04/07).
-  let afiliados: Produto[] = [];
-  try { afiliados = await listarAfiliados(70); } catch {}
+  // As fontes da Home são independentes. Carregá-las em paralelo evita somar a
+  // latência de cada parceiro; o prazo preserva uma página funcional mesmo se
+  // uma integração estiver lenta. O resultado completo é persistido no ISR/R2.
+  const [
+    afiliados,
+    produtosRodizio,
+    cuponsLomadee,
+    carrosselBeleza,
+    destaques,
+    itensDestaque,
+    beleza,
+    perfumes,
+    gadgets,
+    fit,
+    todasNoticias,
+  ] = await Promise.all([
+    carregarComPrazo<Produto[]>(() => listarAfiliados(70), []),
+    carregarComPrazo<ProdutoRodizio[]>(() => listarAfiliadosRodizio(9), []),
+    carregarComPrazo<Awaited<ReturnType<typeof listarCupons>>>(() => listarCupons(14), []),
+    carregarComPrazo<Produto[]>(() => achadosBelezaCarrossel(40), []),
+    carregarComPrazo<Produto[]>(() => listarOfertas({ limit: 70 }), []),
+    carregarComPrazo<Awaited<ReturnType<typeof ofertasEmDestaque>>>(() => ofertasEmDestaque(8), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 12), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 12), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 12), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 12), []),
+    carregarComPrazo<Awaited<ReturnType<typeof listarNoticias>>>(() => listarNoticias(20), []),
+  ]);
 
-  let produtosRodizio: ProdutoRodizio[] = [];
-  try { produtosRodizio = await listarAfiliadosRodizio(9); } catch {}
-
-  // Cupons em destaque (carrossel no topo): curados à mão primeiro + Lomadee.
-  let cuponsDestaque: Awaited<ReturnType<typeof listarCupons>> = cuponsCurados();
-  try { cuponsDestaque = [...cuponsDestaque, ...(await listarCupons(14))]; } catch { /* mantém curados */ }
-
-  // 2º carrossel (sentido REVERSO): Beleza & Perfumes — perfumes importados/árabes
-  // + skincare/cabelos/maquiagem, variado por loja (L'Occitane, Sieno, Shopee…).
-  let carrosselBeleza: Produto[] = [];
-  try { carrosselBeleza = await achadosBelezaCarrossel(40); } catch {}
-
-  // Destaques: pool top-120 (monetizado primeiro), embaralhado NO CLIENTE
-  // pelo DestaquesGrid (12 exibidos do pool). O ISR cacheia o pool de 120;
-  // o client shuffle garante vitrine diferente a cada F5.
-  let destaques: Produto[] = [];
-  try { destaques = await listarOfertas({ limit: 70 }); } catch {}
-
-  // Oferta em destaque — pool de vários produtos das marcas monetizadas; gira
-  // em LOOP no cliente (FeaturedDealRotator). Comparador só ativa quando o
-  // item sorteado tem comparação REAL entre lojas (regra do dono 02/07).
-  let itensDestaque: Awaited<ReturnType<typeof ofertasEmDestaque>> = [];
-  try { itensDestaque = await ofertasEmDestaque(8); } catch {}
-
-  // Vitrines em destaque — Beleza, Perfumes, Gadgets e Fit. Achados RECENTES da
-  // vertical, sorteados SEM loja repetida em sequência (regra do dono): loja nova
-  // coletada entra na roda no mesmo dia, e nenhuma vitrine vira parede de marca.
-  let beleza: Produto[] = [], perfumes: Produto[] = [], gadgets: Produto[] = [], fit: Produto[] = [];
-  try {
-    [beleza, perfumes, gadgets, fit] = await Promise.all([
-      achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 12),
-      achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 12),
-      achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 12),
-      achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 12),
-    ]);
-  } catch {}
-
-  // Notícias (agora mais discretas, no rodapé): prioriza as que têm imagem.
-  let noticias: Awaited<ReturnType<typeof listarNoticias>> = [];
-  try {
-    const all = await listarNoticias(20);
-    noticias = [...all].sort((a, b) => (b.imagem_url ? 1 : 0) - (a.imagem_url ? 1 : 0)).slice(0, 7);
-  } catch {}
+  const cuponsDestaque: Awaited<ReturnType<typeof listarCupons>> = [
+    ...cuponsCurados(),
+    ...cuponsLomadee,
+  ];
+  const noticias = [...todasNoticias]
+    .sort((a, b) => (b.imagem_url ? 1 : 0) - (a.imagem_url ? 1 : 0))
+    .slice(0, 7);
 
   return (
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
