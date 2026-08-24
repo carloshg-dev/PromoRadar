@@ -1,4 +1,4 @@
-import { listarCupons } from "@/lib/lomadee-cupons";
+import { listarCupons, type CupomLomadee } from "@/lib/lomadee-cupons";
 import { cuponsCurados } from "@/lib/cupons-curados";
 import { CupomCard } from "@/components/cupom-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -11,12 +11,49 @@ export const metadata = {
   title: "Cupons de desconto",
   description: "Cupons e ofertas das lojas parceiras do PromoDetec — atualizados automaticamente, direto das marcas.",
 };
-export const revalidate = 3600; // cupons mudam ao longo do dia; 1h de cache basta
+// Se a API estiver temporariamente limitada durante o build, a pagina tenta se
+// recompor em poucos minutos. Uma coleta bem-sucedida continua cacheada por
+// 30 minutos dentro de `listarCupons`.
+export const revalidate = 300;
+
+function chavesDoCupom(cupom: CupomLomadee): string[] {
+  const chaves = [`id:${cupom.id}`, `link:${cupom.link.trim().toLowerCase()}`];
+  const codigo = cupom.codigo?.trim().toLowerCase();
+  if (codigo) chaves.push(`codigo:${cupom.marca.trim().toLowerCase()}:${codigo}`);
+  return chaves;
+}
+
+function mesclarComCurados(
+  curados: CupomLomadee[],
+  automaticos: CupomLomadee[],
+): CupomLomadee[] {
+  const vistos = new Set(curados.flatMap(chavesDoCupom));
+  const resultado = [...curados];
+
+  for (const cupom of automaticos) {
+    const chaves = chavesDoCupom(cupom);
+    if (chaves.some((chave) => vistos.has(chave))) continue;
+    chaves.forEach((chave) => vistos.add(chave));
+    resultado.push(cupom);
+  }
+
+  return resultado;
+}
 
 export default async function Cupons() {
-  // Curados à mão (Awin etc.) SEMPRE primeiro; Lomadee (automático) em seguida.
-  let cupons = cuponsCurados();
-  try { cupons = [...cupons, ...(await listarCupons(60))]; } catch { /* mantém curados */ }
+  // Curados manuais sempre sobrevivem e ficam antes da coleta automatica.
+  const curados = cuponsCurados();
+  let automaticos: CupomLomadee[] = [];
+  try {
+    automaticos = await listarCupons(60);
+  } catch (error) {
+    console.warn(
+      "[cupons] coleta automatica indisponivel:",
+      error instanceof Error ? error.message : "erro desconhecido",
+    );
+    // Uma falha externa nao remove campanhas curadas ja validadas.
+  }
+  const cupons = mesclarComCurados(curados, automaticos);
 
   return (
     <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">

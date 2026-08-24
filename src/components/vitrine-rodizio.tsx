@@ -2,23 +2,16 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { ArrowRight, ImageOff, Trophy } from "lucide-react";
+import { ArrowUpRight, BadgePercent, ImageOff } from "lucide-react";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { formatBRL, timeAgo } from "@/lib/utils";
 import { PriceHistoryChart, buildPriceVariationPoints, type PriceVariationPoint } from "@/components/price-history-chart";
 
-const LANTERN_CLIP = "polygon(50% 0%, 84% 11%, 96% 49%, 79% 84%, 50% 100%, 21% 84%, 4% 49%, 16% 11%)";
-const FLAG_CLIP = "polygon(0 0, 100% 0, 88% 100%, 50% 72%, 12% 100%)";
-const CARD_POSITIONS = [
-  "sm:rotate-[-4deg] sm:translate-y-4",
-  "sm:rotate-[2deg] sm:-translate-y-3",
-  "sm:rotate-[4deg] sm:translate-y-6",
-];
-const ACCENTS = ["#22e06b", "#f97316", "#a78bfa", "#facc15", "#38bdf8", "#fb7185", "#2dd4bf"];
+const CARD_ACCENTS = ["#22e06b", "#facc15", "#38bdf8", "#a78bfa", "#2dd4bf", "#fb7185"];
 
-function accentForProduct(product: ProdutoRodizio, index: number) {
-  const seed = [...product.id].reduce((total, char) => total + char.charCodeAt(0), index);
-  return ACCENTS[seed % ACCENTS.length]!;
+function accentForProduct(product: ProdutoRodizio) {
+  const seed = [...product.id].reduce((total, char) => total + char.charCodeAt(0), 0);
+  return CARD_ACCENTS[seed % CARD_ACCENTS.length]!;
 }
 
 function pricePointsForProduct(product: ProdutoRodizio): PriceVariationPoint[] {
@@ -36,7 +29,7 @@ function pricePointsForProduct(product: ProdutoRodizio): PriceVariationPoint[] {
   }, product.precoAtual);
 }
 
-function LanternProductCard({
+function ProductShowcaseCard({
   product,
   index,
   selected,
@@ -47,84 +40,101 @@ function LanternProductCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const accent = accentForProduct(product, index);
+  const [imageFailed, setImageFailed] = useState(false);
+  const accent = accentForProduct(product);
   const discount = product.precoOriginal && product.precoAtual && product.precoOriginal > product.precoAtual
     ? Math.round((1 - product.precoAtual / product.precoOriginal) * 100)
     : null;
   const style = {
-    "--lantern-accent": accent,
-    clipPath: LANTERN_CLIP,
-    filter: `drop-shadow(0 26px 30px ${accent}${selected ? "80" : "42"})`,
+    "--product-accent": accent,
+    borderColor: selected ? accent : "rgba(255,255,255,.14)",
+    boxShadow: selected
+      ? `0 0 0 1px ${accent}35, 0 26px 56px -34px ${accent}a6`
+      : "0 22px 50px -38px rgba(0,0,0,.95)",
   } as CSSProperties;
 
   return (
     <a
       href={`/r/${product.id}?o=vitrine-rodizio`}
       rel="nofollow sponsored"
+      aria-current={selected ? "true" : undefined}
+      aria-label={`Ver oferta: ${product.titulo}, ${formatBRL(product.precoAtual)}`}
       style={style}
       onFocus={onSelect}
       onMouseEnter={onSelect}
-      className={`group relative mx-auto block aspect-[0.56] w-full max-w-[238px] overflow-visible bg-[color:var(--lantern-accent)] p-[2px] outline-none transition duration-500 motion-safe:animate-lantern-float hover:-translate-y-8 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-lime-200 sm:max-w-none sm:motion-safe:animate-none ${CARD_POSITIONS[index] ?? ""} ${index > 0 ? "hidden sm:block" : "block"}`}
+      className={`group relative mx-auto aspect-[9/16] w-full max-w-[270px] overflow-hidden rounded border bg-[#071018]/92 outline-none backdrop-blur-md transition-[transform,border-color,box-shadow,opacity] duration-300 motion-safe:animate-fade-up hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-white/80 sm:max-w-none ${index > 0 ? "hidden sm:block" : "block"}`}
     >
-      <span className="relative block h-full w-full">
-        <span
-          aria-hidden="true"
-          className="absolute -inset-3 opacity-70 blur-2xl transition duration-500 motion-safe:animate-lantern-aura group-hover:-inset-6 group-hover:opacity-100"
-          style={{ background: `radial-gradient(circle at 50% 42%, ${accent}75, transparent 64%)`, clipPath: LANTERN_CLIP }}
-        />
-        <span aria-hidden="true" className="absolute inset-[2px] bg-[linear-gradient(180deg,rgba(8,22,34,.96),rgba(2,8,18,.94)_52%,rgba(4,20,22,.94))]" style={{ clipPath: LANTERN_CLIP }} />
-        <span aria-hidden="true" className="absolute inset-[2px] bg-[radial-gradient(circle_at_50%_5%,rgba(255,255,255,.16),transparent_31%),linear-gradient(90deg,rgba(255,255,255,.13),transparent_22%,transparent_78%,rgba(255,255,255,.1))]" style={{ clipPath: LANTERN_CLIP }} />
-        <span aria-hidden="true" className="absolute left-1/2 top-0 z-20 h-12 w-px -translate-x-1/2 -translate-y-10 bg-gradient-to-t from-amber-200/80 to-amber-700/40 shadow-[0_0_14px_rgba(251,191,36,.28)]" />
-        <span
-          aria-hidden="true"
-          className="absolute left-1/2 top-2 z-20 h-9 w-16 -translate-x-1/2 -translate-y-1 rounded-t-sm border border-white/20 shadow-[0_6px_14px_rgba(0,0,0,.25)]"
-          style={{
-            clipPath: FLAG_CLIP,
-            backgroundColor: accent,
-            backgroundImage:
-              "linear-gradient(45deg, rgba(255,255,255,.24) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.24) 75%), linear-gradient(45deg, rgba(0,0,0,.18) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.18) 75%)",
-            backgroundPosition: "0 0, 8px 8px",
-            backgroundSize: "16px 16px",
-          }}
-        />
-        <span aria-hidden="true" className="absolute bottom-0 left-1/2 z-20 grid h-14 w-14 -translate-x-1/2 translate-y-8 grid-cols-4 gap-1">
-          {Array.from({ length: 8 }).map((_, stripIndex) => (
+      <span
+        aria-hidden="true"
+        className={`absolute inset-x-0 top-0 h-[3px] bg-[color:var(--product-accent)] transition-opacity duration-300 ${selected ? "opacity-100" : "opacity-35 group-hover:opacity-80"}`}
+      />
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,.045),transparent_30%),linear-gradient(135deg,rgba(255,255,255,.025),transparent_58%)]"
+      />
+
+      <span className="relative flex h-full flex-col p-2.5">
+        <span className="flex h-4 items-center justify-between gap-2 text-[10px] font-bold uppercase text-zinc-300/75">
+          <span>Seleção {String(index + 1).padStart(2, "0")}</span>
+          <span className="inline-flex items-center gap-1.5 text-zinc-100/80">
             <span
-              key={stripIndex}
-              className="h-full rounded-full bg-[color:var(--lantern-accent)] shadow-[0_8px_14px_rgba(0,0,0,.3)]"
-              style={{ transform: `translateY(${stripIndex % 2 ? 8 : 0}px) rotate(${stripIndex % 2 ? 8 : -8}deg)` }}
+              aria-hidden="true"
+              className="h-1.5 w-1.5 rounded-full bg-[color:var(--product-accent)] shadow-[0_0_10px_var(--product-accent)]"
             />
-          ))}
+            {selected ? "Em foco" : "Oferta"}
+          </span>
         </span>
 
-        <span className="relative z-10 flex h-full flex-col items-center px-4 pb-8 pt-11 text-center">
-          <span className="relative grid h-28 w-28 place-items-center rounded-[1.35rem] border border-white/14 bg-white text-slate-950 shadow-[inset_0_1px_18px_rgba(255,255,255,.08),0_18px_30px_-22px_rgba(0,0,0,.9)] sm:h-24 sm:w-24 lg:h-28 lg:w-28">
-            {product.imagemUrl ? (
-              <Image src={product.imagemUrl} alt={product.titulo} fill sizes="112px" className="object-contain p-2" />
-            ) : (
-              <ImageOff className="h-9 w-9 text-slate-400" />
-            )}
-          </span>
-          <strong className="mt-3 line-clamp-2 min-h-[2rem] text-sm font-black leading-tight text-white sm:text-[13px] lg:text-sm">
-            {product.titulo}
-          </strong>
-          <span className="mt-1 line-clamp-1 text-[11px] font-medium leading-snug text-zinc-100/72">
-            {product.lojaNome} {product.categoriaNome ? `· ${product.categoriaNome}` : ""}
-          </span>
-          <span className="mt-2 text-lg font-black text-[#00f06a] drop-shadow-[0_0_16px_rgba(34,224,107,.34)] sm:text-base lg:text-lg">
-            {formatBRL(product.precoAtual)}
+        <span className="relative mt-1.5 block aspect-[4/3] w-full overflow-hidden rounded-[6px] border border-white/10 bg-[#f5f5f3]">
+          {product.imagemUrl && !imageFailed ? (
+            <Image
+              src={product.imagemUrl}
+              alt={product.titulo}
+              fill
+              sizes="(max-width: 639px) 246px, (max-width: 1279px) 180px, 206px"
+              onError={() => setImageFailed(true)}
+              className="object-contain p-2.5 transition-transform duration-500 group-hover:scale-[1.035]"
+            />
+          ) : (
+            <span className="grid h-full place-items-center">
+              <ImageOff className="h-9 w-9 text-slate-400" aria-hidden="true" />
+            </span>
+          )}
+        </span>
+
+        <span className="mt-2 line-clamp-1 text-[10px] font-semibold uppercase text-zinc-300/70">
+          {product.lojaNome}{product.categoriaNome ? ` · ${product.categoriaNome}` : ""}
+        </span>
+        <strong className="mt-1 line-clamp-2 min-h-[2rem] text-[13px] font-extrabold leading-[1.15] text-white lg:text-sm">
+          {product.titulo}
+        </strong>
+
+        <span className="mt-auto flex items-end justify-between gap-2 border-t border-white/10 pt-2">
+          <span className="min-w-0">
+            <span className="block text-[10px] font-medium text-zinc-300/65">Preço atual</span>
+            <span className="block truncate text-lg font-black text-white lg:text-xl">
+              {formatBRL(product.precoAtual)}
+            </span>
           </span>
           {discount != null ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-400/14 px-2 py-0.5 text-[10px] font-black text-emerald-200">
-              <Trophy className="h-3 w-3" /> -{discount}%
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-[5px] border border-[color:var(--product-accent)] bg-black/30 px-2 py-1 text-[10px] font-black text-white">
+              <BadgePercent className="h-3 w-3 text-[color:var(--product-accent)]" aria-hidden="true" />
+              -{discount}%
             </span>
+          ) : null}
+        </span>
+
+        <span className="mt-0.5 h-3.5 text-[10px] text-zinc-300/60">
+          {discount != null && product.precoOriginal ? (
+            <>Antes <span className="line-through">{formatBRL(product.precoOriginal)}</span></>
           ) : (
-            <span suppressHydrationWarning className="mt-1 text-[10px] text-zinc-300/65">{timeAgo(product.atualizadoEm)}</span>
+            <span suppressHydrationWarning>Atualizado {timeAgo(product.atualizadoEm)}</span>
           )}
-          <span className="mt-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--lantern-accent)] bg-black/24 px-3 py-1 text-[10px] font-extrabold text-white transition group-hover:bg-white group-hover:text-slate-950">
-            Oferta
-            <ArrowRight className="h-3 w-3" />
-          </span>
+        </span>
+
+        <span className="mt-1.5 flex h-7 items-center justify-between rounded-[6px] border border-white/12 bg-white/[.045] px-3 text-[11px] font-bold text-white transition-colors group-hover:border-[color:var(--product-accent)] group-hover:bg-white/[.08]">
+          Ver oferta
+          <ArrowUpRight className="h-3.5 w-3.5 text-[color:var(--product-accent)]" aria-hidden="true" />
         </span>
       </span>
     </a>
@@ -173,17 +183,17 @@ export function VitrineRodizio({
   if (!produtos.length) return null;
 
   const selectedProduct = produtos.find((product) => product.id === selectedId) ?? visibleProducts[0]!;
-  const selectedAccent = accentForProduct(selectedProduct, activeIndex);
+  const selectedAccent = accentForProduct(selectedProduct);
 
   return (
     <>
-      <div className="mt-10 max-w-[620px] sm:mt-12 lg:absolute lg:left-[46.5%] lg:top-[48%] lg:mt-0 lg:w-[620px] lg:max-w-[620px] lg:-translate-y-1/2 xl:left-[45%] xl:w-[690px] xl:max-w-[690px]">
+      <div className="mt-10 max-w-[620px] sm:mt-12 lg:absolute lg:left-[46.5%] lg:top-[46%] lg:mt-0 lg:w-[620px] lg:max-w-[620px] lg:-translate-y-1/2 xl:left-[45%] xl:w-[690px] xl:max-w-[690px]">
         <p className="sr-only" aria-live="polite">
-          Vitrine rotativa com produtos afiliados atualizados pelo banco.
+          Oferta selecionada: {selectedProduct.titulo}, {formatBRL(selectedProduct.precoAtual)}.
         </p>
-        <div className="grid min-h-[410px] grid-cols-1 items-center gap-4 px-8 sm:min-h-[360px] sm:grid-cols-3 sm:px-1 lg:min-h-[410px]">
+        <div className="grid min-h-[500px] grid-cols-1 items-center gap-3 px-5 sm:min-h-[370px] sm:grid-cols-3 sm:px-1 lg:min-h-[410px]">
           {visibleProducts.map((product, index) => (
-            <LanternProductCard
+            <ProductShowcaseCard
               key={product.id}
               product={product}
               index={index}

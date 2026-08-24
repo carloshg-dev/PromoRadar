@@ -121,6 +121,31 @@ export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
 }
 
 /**
+ * Pool compacto para vitrines de uma loja na Home. Diferente de `listarOfertas`,
+ * esta leitura exige os campos que um card visual precisa e embaralha apenas um
+ * conjunto limitado dos melhores resultados. Assim, centenas de itens coletados
+ * participam do rodizio sem aumentar o HTML nem o egress do Supabase.
+ */
+export async function listarVitrinePorLoja(lojaSlug: string, limit = 48): Promise<Produto[]> {
+  const sb = createPublicClient();
+  const limite = Math.max(1, Math.min(limit, 80));
+  const pool = Math.min(240, Math.max(limite * 3, 60));
+  const { data, error } = await sb
+    .from("vw_ofertas")
+    .select(SELECT)
+    .eq("loja_slug", lojaSlug)
+    .eq("em_estoque", true)
+    .not("imagem_url", "is", null)
+    .not("preco_atual", "is", null)
+    .order("promo_score", { ascending: false, nullsFirst: false })
+    .order("atualizado_em", { ascending: false })
+    .limit(pool);
+
+  if (error) throw error;
+  return embaralhar((data ?? []).map(map)).slice(0, limite);
+}
+
+/**
  * Seleciona até `n` produtos VARIADOS por categoria (rodízio round-robin) — evita
  * o feed/carrossel virar "só um tipo" (ex: só PC parts ou só conectores). Embaralha
  * antes pra a vitrine "passar aleatório" a cada revalidação.

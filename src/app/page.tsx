@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, listarVitrinePorLoja, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
-import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
+import type { Comparacao, ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { NewsCarousel } from "@/components/news-carousel";
 import { FeaturedDealRotator } from "@/components/featured-deal-rotator";
 import { ParceirosFeed } from "@/components/parceiros-feed";
 import { CuponsCarrossel } from "@/components/cupons-carrossel";
 import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
-import { listarCupons } from "@/lib/lomadee-cupons";
 import { cuponsCurados } from "@/lib/cupons-curados";
 import { OfertasVerificadas } from "@/components/ofertas-verificadas";
 import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
@@ -26,6 +25,75 @@ import {
 export const revalidate = 7200;
 
 const HOME_DATA_TIMEOUT_MS = 8_000;
+const LOJAS_SOMENTE_COMPARADOR = new Set([
+  "kabum",
+  "terabyteshop",
+  "epocacosmeticos",
+]);
+
+function permitidoNaHome(produto: Produto): boolean {
+  const imagem = produto.imagemUrl?.toLowerCase() ?? "";
+  const placeholder = /(?:no[-_]?image|placeholder|sem[-_]?imagem|image[-_]?not[-_]?found)/.test(imagem);
+  return !LOJAS_SOMENTE_COMPARADOR.has(produto.lojaSlug)
+    && produto.emEstoque
+    && produto.precoAtual !== null
+    && Boolean(imagem)
+    && !placeholder;
+}
+
+function filtrarParaHome<T extends Produto>(produtos: T[]): T[] {
+  return produtos.filter(permitidoNaHome);
+}
+
+function comparacaoPermitidaNaHome(comparacao: Comparacao | null): Comparacao | null {
+  if (!comparacao) return null;
+  const ofertas = comparacao.ofertas
+    .filter(permitidoNaHome)
+    .sort((a, b) => (a.precoAtual ?? Number.POSITIVE_INFINITY) - (b.precoAtual ?? Number.POSITIVE_INFINITY));
+  if (ofertas.length < 2) return null;
+
+  const precos = ofertas
+    .map((oferta) => oferta.precoAtual)
+    .filter((preco): preco is number => preco !== null);
+  if (precos.length < 2) return null;
+
+  const menorPreco = Math.min(...precos);
+  const maiorPreco = Math.max(...precos);
+  const economia = Math.max(0, maiorPreco - menorPreco);
+  const scores = ofertas
+    .map((oferta) => oferta.promoScore)
+    .filter((score): score is number => score !== null);
+
+  return {
+    ...comparacao,
+    ofertas,
+    lojas: ofertas.length,
+    menorPreco,
+    maiorPreco,
+    economia,
+    economiaPct: maiorPreco > 0 ? (economia / maiorPreco) * 100 : 0,
+    melhorScore: scores.length ? Math.max(...scores) : null,
+  };
+}
+
+function cupomPermitidoNaHome(cupom: { marca: string }): boolean {
+  const marca = cupom.marca
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  return !["kabum", "terabyte", "epocacosmeticos"].some((loja) => marca.includes(loja));
+}
+
+function produtosUnicos(...listas: Produto[][]): Produto[] {
+  const vistos = new Set<string>();
+  return listas.flat().filter((produto) => {
+    if (!permitidoNaHome(produto)) return false;
+    if (vistos.has(produto.id)) return false;
+    vistos.add(produto.id);
+    return produto.emEstoque && Boolean(produto.imagemUrl) && produto.precoAtual !== null;
+  });
+}
 
 async function carregarComPrazo<T>(
   carregar: () => Promise<T>,
@@ -53,8 +121,9 @@ export default async function Home() {
   const [
     afiliados,
     produtosRodizio,
-    cuponsLomadee,
     carrosselBeleza,
+    ofertasMonitoradas,
+    ofertasMercadoLivre,
     destaques,
     itensDestaque,
     beleza,
@@ -65,9 +134,10 @@ export default async function Home() {
   ] = await Promise.all([
     carregarComPrazo<Produto[]>(() => listarAfiliados(70), []),
     carregarComPrazo<ProdutoRodizio[]>(() => listarAfiliadosRodizio(9), []),
-    carregarComPrazo<Awaited<ReturnType<typeof listarCupons>>>(() => listarCupons(14), []),
     carregarComPrazo<Produto[]>(() => achadosBelezaCarrossel(40), []),
-    carregarComPrazo<Produto[]>(() => listarOfertas({ limit: 70 }), []),
+    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("carrefour", 40), []),
+    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("mercadolivre", 64), []),
+    carregarComPrazo<Produto[]>(() => listarOfertas({ limit: 48 }), []),
     carregarComPrazo<Awaited<ReturnType<typeof ofertasEmDestaque>>>(() => ofertasEmDestaque(8), []),
     carregarComPrazo<Produto[]>(() => achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 12), []),
     carregarComPrazo<Produto[]>(() => achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 12), []),
@@ -76,35 +146,71 @@ export default async function Home() {
     carregarComPrazo<Awaited<ReturnType<typeof listarNoticias>>>(() => listarNoticias(20), []),
   ]);
 
-  const cuponsDestaque: Awaited<ReturnType<typeof listarCupons>> = [
-    ...cuponsCurados(),
-    ...cuponsLomadee,
-  ];
+  const afiliadosHome = filtrarParaHome(afiliados);
+  const produtosRodizioHome = filtrarParaHome(produtosRodizio);
+  const carrosselBelezaHome = filtrarParaHome(carrosselBeleza);
+  const belezaHome = filtrarParaHome(beleza);
+  const perfumesHome = filtrarParaHome(perfumes);
+  const gadgetsHome = filtrarParaHome(gadgets);
+  const fitHome = filtrarParaHome(fit);
+  const itensDestaqueHome = itensDestaque
+    .filter(({ produto }) => permitidoNaHome(produto))
+    .map((item) => ({
+      ...item,
+      comparacao: comparacaoPermitidaNaHome(item.comparacao),
+    }));
+  // A API completa da Lomadee pertence a /cupons. Mantemos a Home isolada de
+  // limites externos para preservar LCP e evitar duas coletas concorrentes no build.
+  const cuponsDestaque = cuponsCurados().filter(cupomPermitidoNaHome);
   const noticias = [...todasNoticias]
     .sort((a, b) => (b.imagem_url ? 1 : 0) - (a.imagem_url ? 1 : 0))
     .slice(0, 7);
+  // Se a consulta geral perder o prazo, a Home ainda possui vários pools reais
+  // vindos do mesmo catálogo. Reaproveitá-los evita declarar falsamente que a
+  // primeira coleta não ocorreu e mantém a vitrine funcional.
+  const ofertasMonitoradasHome = filtrarParaHome(ofertasMonitoradas);
+  const ofertasMercadoLivreHome = filtrarParaHome(ofertasMercadoLivre);
+  const ofertasMonitoradasVisiveis = ofertasMonitoradasHome.length
+    ? ofertasMonitoradasHome
+    : afiliadosHome.filter((produto) => produto.lojaSlug === "carrefour");
+  const ofertasMercadoLivreVisiveis = ofertasMercadoLivreHome.length
+    ? ofertasMercadoLivreHome
+    : afiliadosHome.filter((produto) => produto.lojaSlug === "mercadolivre");
+  const destaquesPermitidos = destaques.filter(permitidoNaHome);
+  const destaquesVisiveis = destaquesPermitidos.length
+    ? destaquesPermitidos
+    : produtosUnicos(
+      afiliadosHome,
+      ofertasMonitoradasVisiveis,
+      ofertasMercadoLivreVisiveis,
+      carrosselBelezaHome,
+      belezaHome,
+      perfumesHome,
+      gadgetsHome,
+      fitHome,
+    ).slice(0, 48);
 
   return (
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
       {/* LOJAS PARCEIRAS — primeiro elemento visível na home.
           Quem chega pelo Instagram (Shopee, Amazon…) vê a logo de cara
           e confirma que está no lugar certo. */}
-      <BarraLojas baseHref="/ofertas" />
+      <BarraLojas baseHref="/ofertas" excluir={[...LOJAS_SOMENTE_COMPARADOR]} />
 
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática.
           Pool 150 → embaralha e exibe 15 por F5 (vitrine viva). */}
-      <ParceirosFeed produtos={afiliados} exibir={15} />
+      <ParceirosFeed produtos={afiliadosHome} exibir={15} />
 
       {/* BELEZA & PERFUMES — 2º carrossel logo ABAIXO, sentido REVERSO (movimento
           cruzado): perfumes importados/árabes + skincare/cabelos/maquiagem */}
-      <ParceirosFeed produtos={carrosselBeleza} exibir={15} direcao="reverso" variante="beleza"
+      <ParceirosFeed produtos={carrosselBelezaHome} exibir={15} direcao="reverso" variante="beleza"
         titulo="Beleza & Perfumes" verTudoHref="/categoria/perfumes-importados"
         subtitulo="Perfumes importados, skincare e cuidados do rosto e corpo — rodando sem parar." />
 
       {/* CUPONS EM DESTAQUE — carrossel enxuto logo abaixo do de produtos */}
       <CuponsCarrossel cupons={cuponsDestaque} />
 
-      <SeasonalHomeHero produtosRodizio={produtosRodizio} />
+      <SeasonalHomeHero produtosRodizio={produtosRodizioHome} />
 
       {/* HERO — comparador (Oferta em Destaque) na 1ª dobra, logo abaixo do feed */}
       <section className="relative overflow-hidden">
@@ -133,7 +239,7 @@ export default async function Home() {
 
           {/* OFERTA EM DESTAQUE (real, em loop) — no mobile vem ANTES do texto */}
           <div className="order-1 min-w-0 lg:order-2">
-            {itensDestaque.length ? <FeaturedDealRotator itens={itensDestaque} /> : (
+            {itensDestaqueHome.length ? <FeaturedDealRotator itens={itensDestaqueHome} /> : (
             <div className="ring-glow card-grad animate-fade-up rounded-3xl border border-line p-5 [animation-delay:.1s]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Exemplo ilustrativo</div>
@@ -167,19 +273,19 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* OFERTAS VERIFICADAS — promoções reais dos parceiros Awin (conferidas + ativas) */}
-      <OfertasVerificadas />
+      {/* OFERTAS MONITORADAS — amostra rotativa do catálogo Carrefour coletado. */}
+      <OfertasVerificadas produtos={ofertasMonitoradasVisiveis} />
 
-      {/* OFERTAS MERCADO LIVRE — showcase curado (meli.la) com foto + título REAIS resolvidos do destino */}
-      <OfertasMercadoLivre />
+      {/* MERCADO LIVRE — amostra rotativa do catálogo coletado, com tracking interno. */}
+      <OfertasMercadoLivre produtos={ofertasMercadoLivreVisiveis} />
 
       {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato) */}
       <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
-        href="/categoria/maquiagem" hrefLabel="ver beleza" produtos={beleza} />
+        href="/categoria/maquiagem" hrefLabel="ver beleza" produtos={belezaHome} />
       <VitrineVertical titulo="Perfumes" Icon={SprayCan} accentText="text-parfum-2" accentGrad="from-parfum to-fit"
-        href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumes} />
+        href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumesHome} />
       <VitrineVertical titulo="Gadgets" Icon={Headphones} accentText="text-gadget-2" accentGrad="from-gadget to-cyan"
-        href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgets} />
+        href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgetsHome} />
 
       {/* DESTAQUES — melhores ofertas do momento, mantidas abaixo do feed */}
       <section className="pb-16">
@@ -189,8 +295,8 @@ export default async function Home() {
           </h2>
           <Link href="/ofertas" className="text-xs text-brand-2 hover:underline">ver todas →</Link>
         </div>
-        {destaques.length ? (
-          <DestaquesGrid pool={destaques} exibir={12} />
+        {destaquesVisiveis.length ? (
+          <DestaquesGrid pool={destaquesVisiveis} exibir={12} />
         ) : (
           <EmptyState icon="🛰️" title="Coleta em preparação"
             hint="As ofertas aparecem aqui assim que a primeira coleta rodar. Enquanto isso, explore as categorias pelo menu superior."
@@ -199,9 +305,9 @@ export default async function Home() {
       </section>
 
       {/* MUNDO FIT (vertical suplementos — acento coral) */}
-      {fit.length > 0 && (
+      {fitHome.length > 0 && (
         <VitrineVertical titulo="Mundo Fit — suplementos" Icon={Dumbbell} accentText="text-fit" accentGrad="from-fit to-warn"
-          href="/categoria/whey-protein" hrefLabel="ver mais" produtos={fit} />
+          href="/categoria/whey-protein" hrefLabel="ver mais" produtos={fitHome} />
       )}
 
       {/* NOTÍCIAS (agora no rodapé, mais discretas) */}

@@ -21,16 +21,19 @@ function logoDaLoja(l: LojaVitrine): string | null {
   } catch { return null; }
 }
 
-export async function BarraLojas({ baseHref, ativa, params = {} }: {
+export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }: {
   baseHref: string;
   ativa?: string | null;
   /** filtros a preservar nos links (categoria, busca…) */
   params?: Record<string, string | undefined>;
+  /** lojas ocultas somente nesta instancia da barra */
+  excluir?: string[];
 }) {
   let lojas: LojaVitrine[] = [];
   try { lojas = await listarLojasVitrine(); } catch { return null; }
   // "lomadee" é REDE, não loja de verdade — os achados dela seguem no grid geral.
-  lojas = lojas.filter((l) => l.slug !== "lomadee");
+  const ocultas = new Set(["lomadee", ...excluir]);
+  lojas = lojas.filter((l) => !ocultas.has(l.slug));
   if (lojas.length < 2) return null;
 
   const href = (slug?: string) => {
