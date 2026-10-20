@@ -22,6 +22,7 @@ export function SubcategoriaNav({ slugAtivo }: { slugAtivo: string }) {
         const ativo = slug === slugAtivo;
         return (
           <Link
+            prefetch={false}
             key={slug}
             href={`/categoria/${slug}`}
             aria-current={ativo ? "page" : undefined}

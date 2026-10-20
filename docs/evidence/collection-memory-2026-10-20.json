@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-10-20T03:13:19.404Z",
+  "node": "v22.23.3",
+  "platform": "linux",
+  "heapLimitMiB": 192,
+  "mode": "Synthetic CSV only, explicit dry-run and invalid database endpoint",
+  "results": [
+    {
+      "rows": 20000,
+      "kept": 400,
+      "maxRssMiB": 129.1,
+      "seconds": 9.32
+    },
+    {
+      "rows": 200000,
+      "kept": 400,
+      "maxRssMiB": 152.9,
+      "seconds": 28.1
+    }
+  ],
+  "interpretation": "Measured peak RSS includes runtime, parser, SQLite and bounded selection; not a production benchmark or a before/after claim."
+}

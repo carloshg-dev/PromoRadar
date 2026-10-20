@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { DestaqueItem } from "@/infrastructure/repositories/produtos.repo";
 import { PriceChart } from "@/components/price-chart";
 import { StorePriceBars } from "@/components/store-price-bars";
-import { formatBRL, corLoja } from "@/lib/utils";
+import { formatBRL, corLoja, timeAgo } from "@/lib/utils";
 import { temaSazonal } from "@/lib/seasonal";
 import { BadgePercent, Sparkles, ImageOff, TrendingDown, ArrowUpRight, LineChart as LineChartIcon } from "lucide-react";
 
@@ -39,6 +39,8 @@ export function FeaturedDealRotator({ itens }: { itens: DestaqueItem[] }) {
   const rotulo = c ? c.rotulo : d.produto.titulo;
   const cor = corLoja(ref.lojaSlug ?? ref.lojaNome);
   const preco = c ? c.menorPreco : (d.produto.precoAtual as number);
+  const desconto = ref.precoOriginal !== null && Number.isFinite(ref.precoOriginal) && ref.precoOriginal > preco
+    ? Math.round((1 - preco / ref.precoOriginal) * 100) : null;
 
   return (
     <div key={d.produto.id} className="glow-green card-grad animate-fade-up rounded-3xl border border-neon/20 p-5"
@@ -52,25 +54,26 @@ export function FeaturedDealRotator({ itens }: { itens: DestaqueItem[] }) {
             </span>
           )}
         </span>
-        <Link href={c ? "/comparar" : "/ofertas"} className="text-xs text-brand-2 hover:underline">ver todas →</Link>
+        <Link prefetch={false} href={c ? "/comparar" : "/ofertas"} className="text-xs text-brand-2 hover:underline">ver todas →</Link>
       </div>
 
       <div className="flex items-center gap-4">
-        <Link href={`/produto/${ref.id}`} className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white">
+        <Link prefetch={false} href={`/produto/${ref.id}`} className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white">
           {ref.imagemUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={ref.imagemUrl} alt={rotulo} className="h-full w-full object-contain p-1.5" />
           ) : <ImageOff className="h-7 w-7 text-muted/40" />}
         </Link>
         <div className="min-w-0 flex-1">
-          <Link href={`/produto/${ref.id}`} className="line-clamp-1 font-display text-lg font-bold tracking-tightest text-white hover:text-neon">
+          <Link prefetch={false} href={`/produto/${ref.id}`} className="line-clamp-1 font-display text-lg font-bold tracking-tightest text-white hover:text-neon">
             {rotulo}
           </Link>
-          <div className="label-mono mt-0.5 text-[10px] text-neon">Melhor preço</div>
+          <div className="label-mono mt-0.5 text-[10px] text-neon">Preço coletado</div>
           <div className="font-display text-2xl font-extrabold text-neon text-neon-glow">{formatBRL(preco)}</div>
           <div className="mt-0.5 inline-flex items-center gap-1.5 label-mono text-[10px]" style={{ color: cor }}>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: cor }} />{ref.lojaNome}
           </div>
+          <time dateTime={ref.atualizadoEm} suppressHydrationWarning className="mt-1 block text-[11px] text-muted">Coletado {timeAgo(ref.atualizadoEm)}</time>
         </div>
       </div>
 
@@ -79,6 +82,7 @@ export function FeaturedDealRotator({ itens }: { itens: DestaqueItem[] }) {
         <div className="mt-4 rounded-2xl border border-line bg-bg-soft/40 p-3">
           <div className="mb-2 label-mono text-[10px] text-muted">Preço por loja (R$) · {c.lojas} lojas</div>
           <StorePriceBars ofertas={c.ofertas} menorPreco={c.menorPreco} maiorPreco={c.maiorPreco} />
+          <p className="mt-2 text-[11px] leading-relaxed text-muted">Opções semelhantes por classe; marcas e variantes podem diferir.</p>
         </div>
       )}
 
@@ -96,18 +100,18 @@ export function FeaturedDealRotator({ itens }: { itens: DestaqueItem[] }) {
       {c && c.economia > 0 ? (
         <div className="mt-3 flex items-center justify-between rounded-xl bg-neon/10 px-3 py-2">
           <span className="inline-flex items-center gap-1.5 text-xs text-neon">
-            <TrendingDown className="h-3.5 w-3.5" /> economize até {formatBRL(c.economia)}
+            <TrendingDown className="h-3.5 w-3.5" /> diferença de {formatBRL(c.economia)}
           </span>
-          <Link href="/comparar" className="inline-flex items-center gap-1 text-xs font-semibold text-neon hover:underline">
+          <Link prefetch={false} href="/comparar" className="inline-flex items-center gap-1 text-xs font-semibold text-neon hover:underline">
             comparar <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
-      ) : !c && d.produto.descontoPct != null && d.produto.descontoPct > 0 ? (
+      ) : !c && desconto !== null && desconto > 0 ? (
         <div className="mt-3 flex items-center justify-between rounded-xl bg-neon/10 px-3 py-2">
           <span className="inline-flex items-center gap-1.5 text-xs text-neon">
-            <TrendingDown className="h-3.5 w-3.5" /> {d.produto.descontoPct}% de desconto
+            <TrendingDown className="h-3.5 w-3.5 shrink-0" /> {desconto}% sobre a referência da loja
           </span>
-          <Link href={`/produto/${d.produto.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-neon hover:underline">
+          <Link prefetch={false} href={`/produto/${d.produto.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-neon hover:underline">
             ver oferta <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>

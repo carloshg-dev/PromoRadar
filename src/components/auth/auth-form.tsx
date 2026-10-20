@@ -5,13 +5,14 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/infrastructure/supabase/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { safeAuthDestination } from "@/core/auth-redirect";
 
 type Modo = "login" | "cadastro" | "recuperar";
 
 export function AuthForm({ modo }: { modo: Modo }) {
   const sb = createBrowserSupabase();
   const router = useRouter();
-  const next = useSearchParams().get("next") ?? "/";
+  const next = safeAuthDestination(useSearchParams().get("next"));
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");

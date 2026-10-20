@@ -26,8 +26,9 @@ async function main() {
   const keys = args.length ? (args.map((a) => ALIAS[a]).filter(Boolean) as AdapterKey[]) : undefined;
   console.log("▶ Iniciando coleta:", keys ?? "todos os adapters");
   const r = await executarColeta(keys);
-  console.log("\n✅ Coleta concluída");
+  console.log(r.erros ? "\nColeta incompleta" : "\nColeta concluída");
   console.table(r.porAdapter);
   console.log(`Total: ${r.salvos} salvos / ${r.coletados} coletados / ${r.erros} erros (job ${r.jobId})`);
+  if (r.erros) process.exitCode = 1;
 }
 main().catch((e) => { console.error("❌", e); process.exit(1); });

@@ -32,7 +32,7 @@ function run(mode: "missing" | "denied" | "accepted") {
         else if(pathname.endsWith('/buckets'))result={buckets:[{name:'promodetec-cache'}]};
         return Response.json({success:true,result});
       };`);
-    const env: NodeJS.ProcessEnv = { PATH: process.env.PATH, NODE_OPTIONS: `--import=${pathToFileURL(preload).href}` };
+    const env: NodeJS.ProcessEnv = { PATH: process.env.PATH, NODE_ENV: "test", NODE_OPTIONS: `--import=${pathToFileURL(preload).href}` };
     if (mode !== "missing") Object.assign(env, { CLOUDFLARE_ACCOUNT_ID: "a".repeat(32), CLOUDFLARE_API_TOKEN: fakeToken });
     const result = spawnSync(process.execPath, [script], { cwd: directory, env, encoding: "utf8", timeout: 20_000 });
     assert.equal(result.error, undefined);

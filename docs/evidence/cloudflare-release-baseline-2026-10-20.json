@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-20T19:00:42.592Z",
+  "source": "Authenticated Cloudflare dashboard DOM",
+  "worker": "promodetec",
+  "activeVersionPrefix": "b1c6a140",
+  "fullVersionIdExported": false,
+  "trafficPercent": 100,
+  "window": "Last 24 hours as shown on dashboard",
+  "errorRateShown": "5.3%",
+  "cpuMedianShown": "38.84ms",
+  "cpuExceededShown": "1k",
+  "productionBranch": "codex/cloudflare-migration",
+  "runtimeBindingNames": [
+    "NEXT_INC_CACHE_R2_BUCKET",
+    "WORKER_SELF_REFERENCE"
+  ],
+  "mode": "Read-only; no production mutation"
+}

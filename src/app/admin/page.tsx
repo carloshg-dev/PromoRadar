@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
+import { carregarMovimento } from "@/infrastructure/repositories/analytics.repo";
 import { papelAtual, ehStaff, podeColetar, podeGerirEquipe, PAPEL_LABEL, type Papel } from "@/infrastructure/auth/roles";
 import { Card } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -24,22 +25,9 @@ interface MembroEquipe { email: string | null; role: Papel }
 async function carregarAnalytics() {
   const sb = createAdminClient();
   const seteDias = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data } = await sb
-    .from("eventos")
-    .select("tipo,termo,produto_id,categoria_slug,dispositivo")
-    .gte("criado_em", seteDias)
-    .limit(5000);
-  const ev = data ?? [];
-
-  const topDe = (pred: (e: typeof ev[number]) => string | null, n: number) => {
-    const m = new Map<string, number>();
-    for (const e of ev) { const k = pred(e); if (k) m.set(k, (m.get(k) ?? 0) + 1); }
-    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
-  };
-
-  const topBuscas = topDe((e) => (e.tipo === "busca" ? (e.termo as string | null) : null), 8);
-  const topCategorias = topDe((e) => (e.tipo === "ver_categoria" ? (e.categoria_slug as string | null) : null), 6);
-  const viewIds = topDe((e) => (e.tipo === "ver_produto" ? (e.produto_id as string | null) : null), 5);
+  const summary = await carregarMovimento(seteDias, new Date().toISOString(), 5000);
+  if (!summary.complete) throw new Error("analytics_report_incomplete");
+  const viewIds = summary.topProdutoIds;
 
   let topProdutos: { titulo: string; lojaNome: string; views: number }[] = [];
   if (viewIds.length) {
@@ -50,9 +38,7 @@ async function carregarAnalytics() {
     });
   }
 
-  const mobile = ev.filter((e) => e.dispositivo === "mobile").length;
-  const desktop = ev.filter((e) => e.dispositivo === "desktop").length;
-  return { totalEventos: ev.length, topBuscas, topCategorias, topProdutos, mobile, desktop };
+  return { ...summary, topProdutos };
 }
 
 async function carregar() {
@@ -99,8 +85,12 @@ export default async function Admin() {
   try { d = await carregar(); } catch {}
   const ultimo = d.jobs[0];
 
-  let a: Awaited<ReturnType<typeof carregarAnalytics>> = { totalEventos: 0, topBuscas: [], topCategorias: [], topProdutos: [], mobile: 0, desktop: 0 };
-  try { a = await carregarAnalytics(); } catch {}
+  let analyticsAvailable = false;
+  let a: Awaited<ReturnType<typeof carregarAnalytics>> = {
+    totalEventos: 0, counts: {}, topBuscas: [], topCategorias: [], topProdutoIds: [], topProdutos: [], mobile: 0, desktop: 0,
+    rankingLimited: false, complete: false, since: "", until: "", redirectRequests: 0, registrations: 0,
+  };
+  try { a = await carregarAnalytics(); analyticsAvailable = true; } catch {}
   const totalDisp = a.mobile + a.desktop || 1;
 
   return (
@@ -134,9 +124,17 @@ export default async function Admin() {
       <section className="mt-8">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="label-mono text-[11px] text-muted">Analytics — comportamento (7 dias)</h2>
-          <span className="label-mono text-[10px] text-muted/70">{a.totalEventos.toLocaleString("pt-BR")} eventos · heatmaps/sessões no Microsoft Clarity</span>
+          <span className="text-xs text-muted">{analyticsAvailable ? `${a.totalEventos.toLocaleString("pt-BR")} ações registradas` : "Medição indisponível. Não interpretar como ausência de movimento."}</span>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <p className="mb-4 max-w-prose text-xs leading-relaxed text-muted">Ações não representam pessoas únicas ou vendas. Após a atualização, a medição do navegador depende do consentimento; compare períodos com essa diferença em mente. Receita confirmada vem dos relatórios das redes.</p>
+        {analyticsAvailable && <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Metric icon={<Eye className="h-4 w-4" />} label="Páginas vistas" value={String(a.counts.visita ?? 0)} />
+          <Metric icon={<Search className="h-4 w-4" />} label="Buscas sem resultado" value={String(a.counts.busca_sem_resultado ?? 0)} />
+          <Metric icon={<Activity className="h-4 w-4" />} label="Ofertas salvas" value={String(a.counts.salvar_produto ?? 0)} />
+          <Metric icon={<MousePointerClick className="h-4 w-4" />} label="Intenções de saída" value={String(a.counts.saida_loja ?? 0)} />
+        </div>}
+        {a.rankingLimited && <p className="mb-3 text-xs text-muted">Rankings limitados à diversidade analisada. Os totais de ações incluem todas as páginas lidas.</p>}
+        {analyticsAvailable && <div className="grid gap-4 lg:grid-cols-3">
           {/* Top buscas */}
           <Card className="glass p-4">
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Search className="h-3.5 w-3.5" /> Buscas mais feitas</div>
@@ -169,7 +167,7 @@ export default async function Admin() {
               </div>
             )) : <p className="text-xs text-muted">Sem categorias ainda.</p>}
           </Card>
-        </div>
+        </div>}
       </section>
 
       {podeColetar(papel) && (
@@ -194,7 +192,7 @@ export default async function Admin() {
       )}
 
       <section className="mt-8">
-        <h2 className="mb-3 label-mono text-[11px] text-muted">Top clicados (7 dias)</h2>
+        <h2 className="mb-3 label-mono text-[11px] text-muted">Produtos na amostra de redirecionamentos (7 dias)</h2>
         <Card className="glass overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-bg-soft/60 label-mono text-[10px] text-muted">
@@ -211,7 +209,7 @@ export default async function Admin() {
               ))}
               {!d.topClicados.length && (
                 <tr><td colSpan={3} className="px-4 py-6 text-center text-muted">
-                  Nenhum clique ainda — os botões &quot;Ir à loja&quot; passaram a contar a partir de agora.
+                  Nenhum redirecionamento disponível nesta amostra.
                 </td></tr>
               )}
             </tbody>

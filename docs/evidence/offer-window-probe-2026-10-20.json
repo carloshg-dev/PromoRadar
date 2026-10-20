@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-10-20T18:42:26.662Z",
+  "mode": "Read-only public offer pagination with seven-day window",
+  "results": [
+    {
+      "name": "search-fone",
+      "status": 206,
+      "ms": 7866,
+      "rows": 1000,
+      "contentRange": "0-999/1189",
+      "code": null,
+      "bytes": 786139,
+      "validWindow": true
+    },
+    {
+      "name": "all",
+      "status": 206,
+      "ms": 5621,
+      "rows": 1000,
+      "contentRange": "0-999/46500",
+      "code": null,
+      "bytes": 782756,
+      "validWindow": true
+    },
+    {
+      "name": "store-kabum",
+      "status": 206,
+      "ms": 3311,
+      "rows": 1000,
+      "contentRange": "0-999/2961",
+      "code": null,
+      "bytes": 843618,
+      "validWindow": true
+    },
+    {
+      "name": "category-fones",
+      "status": 200,
+      "ms": 3078,
+      "rows": 965,
+      "contentRange": "0-964/965",
+      "code": null,
+      "bytes": 757256,
+      "validWindow": true
+    }
+  ]
+}

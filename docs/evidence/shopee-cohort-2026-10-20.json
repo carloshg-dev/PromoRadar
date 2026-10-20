@@ -1,0 +1,8 @@
+{
+  "generatedAt": "2026-10-20T03:13:19.254Z",
+  "managedAvailable": 73986,
+  "manualAvailable": 0,
+  "lastSeenAt": "2026-10-19T05:17:38.217+00:00",
+  "latestCohort": 7955,
+  "interpretation": "Read-only baseline. Latest timestamp cohort is bootstrap evidence, not a verified completed run. Future successful job records provide the stable volume baseline."
+}

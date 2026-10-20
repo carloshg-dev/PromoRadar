@@ -18,7 +18,14 @@
     "scrape:all": "tsx scripts/run-scraper.ts all",
     "news": "tsx scripts/run-news.ts",
     "tg": "tsx scripts/telegram-check.ts",
-    "digest": "tsx scripts/daily-digest.ts"
+    "digest": "tsx scripts/daily-digest.ts",
+    "report:growth": "tsx scripts/growth-report.ts",
+    "report:catalog": "tsx scripts/catalog-health.ts",
+    "test:growth": "tsx --test tests/growth/*.test.ts",
+    "test:collection": "tsx --test tests/collection/*.test.ts",
+    "test:worker": "tsx scripts/validate-worker.ts",
+    "test:auth-measurement": "tsx scripts/validate-auth-measurement.ts",
+    "test:collection:memory": "tsx scripts/validate-collection-memory.ts"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

@@ -12,6 +12,8 @@ import type { RawProduct, AdapterKey } from "@/core/domain/types";
 
 export interface AdapterContext {
   log: (nivel: "info" | "warn" | "error", msg: string) => void;
+  /** Erro parcial preserva itens válidos, mas impede declarar a rodada integral. */
+  reportFailure?: (code: string) => void;
 }
 
 export abstract class StoreAdapter {

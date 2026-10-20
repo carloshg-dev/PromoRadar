@@ -1,0 +1,272 @@
+{
+  "checkedAt": "2026-10-20T10:36:53.638Z",
+  "buildId": "1HnzyB3z6YhD4mq8MZYKI",
+  "runtime": "Local OpenNext preview / Wrangler / workerd",
+  "remoteBindings": false,
+  "wranglerVersion": "4.151.2",
+  "requestedCompatibilityDate": "2026-08-23",
+  "effectiveCompatibilityDate": "2026-08-23",
+  "credentials": "public anon only; no service role or Cloudflare token inherited",
+  "analyticsDisabled": true,
+  "checks": [
+    {
+      "name": "home-first",
+      "passed": true,
+      "status": 200,
+      "ms": 415,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=6999, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "home-warm",
+      "passed": true,
+      "status": 200,
+      "ms": 75,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=7197, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "home-concurrent-1",
+      "passed": true,
+      "status": 200,
+      "ms": 245,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=7197, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "home-concurrent-4",
+      "passed": true,
+      "status": 200,
+      "ms": 251,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=7196, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "home-concurrent-2",
+      "passed": true,
+      "status": 200,
+      "ms": 253,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=7200, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "home-concurrent-3",
+      "passed": true,
+      "status": 200,
+      "ms": 253,
+      "bytes": 769385,
+      "cache": {
+        "cache-control": "s-maxage=7200, stale-while-revalidate=2592000",
+        "x-nextjs-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "asset-js",
+      "passed": true,
+      "status": 200,
+      "ms": 10,
+      "bytes": 3827,
+      "cache": {
+        "cache-control": "public,max-age=31536000,immutable",
+        "content-type": "text/javascript; charset=utf-8"
+      }
+    },
+    {
+      "name": "asset-css",
+      "passed": true,
+      "status": 200,
+      "ms": 8,
+      "bytes": 71788,
+      "cache": {
+        "cache-control": "public,max-age=31536000,immutable",
+        "content-type": "text/css; charset=utf-8"
+      }
+    },
+    {
+      "name": "/robots.txt",
+      "passed": true,
+      "status": 200,
+      "ms": 19,
+      "bytes": 262,
+      "cache": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "x-opennext-cache": "HIT",
+        "content-type": "text/plain"
+      }
+    },
+    {
+      "name": "/sitemap.xml",
+      "passed": true,
+      "status": 200,
+      "ms": 24,
+      "bytes": 200621,
+      "cache": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "x-opennext-cache": "HIT",
+        "content-type": "application/xml"
+      }
+    },
+    {
+      "name": "/cupons",
+      "passed": true,
+      "status": 200,
+      "ms": 30,
+      "bytes": 141314,
+      "cache": {
+        "cache-control": "s-maxage=98, stale-while-revalidate=2592000",
+        "x-opennext-cache": "HIT",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "/login",
+      "passed": true,
+      "status": 200,
+      "ms": 4051,
+      "bytes": 147503,
+      "cache": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "admin-anonymous",
+      "passed": true,
+      "status": 307,
+      "ms": 11,
+      "bytes": 0,
+      "cache": {}
+    },
+    {
+      "name": "admin-write-anonymous",
+      "passed": true,
+      "status": 401,
+      "ms": 24,
+      "bytes": 28,
+      "cache": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "track-disabled",
+      "passed": true,
+      "status": 204,
+      "ms": 16,
+      "bytes": 0,
+      "cache": {
+        "cache-control": "no-store"
+      }
+    },
+    {
+      "name": "outbound-head",
+      "passed": true,
+      "status": 204,
+      "ms": 12,
+      "bytes": 0,
+      "cache": {
+        "cache-control": "no-store"
+      }
+    },
+    {
+      "name": "outbound-prefetch",
+      "passed": true,
+      "status": 204,
+      "ms": 10,
+      "bytes": 0,
+      "cache": {}
+    },
+    {
+      "name": "outbound-bot",
+      "passed": true,
+      "status": 307,
+      "ms": 10,
+      "bytes": 0,
+      "cache": {}
+    },
+    {
+      "name": "outbound-invalid-id",
+      "passed": true,
+      "status": 307,
+      "ms": 9,
+      "bytes": 0,
+      "cache": {}
+    },
+    {
+      "name": "search-live-read",
+      "passed": true,
+      "status": 200,
+      "ms": 938,
+      "bytes": 1973,
+      "cache": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "product-live-read",
+      "passed": true,
+      "status": 200,
+      "ms": 140,
+      "bytes": 237359,
+      "cache": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "offers-live-read",
+      "passed": true,
+      "status": 200,
+      "ms": 453,
+      "bytes": 717807,
+      "cache": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "name": "comparison-live-read",
+      "passed": true,
+      "status": 200,
+      "ms": 341,
+      "bytes": 716778,
+      "cache": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    }
+  ],
+  "passed": 23,
+  "failed": 0,
+  "runtimeSignals": {
+    "queryTimeout": 0,
+    "analyticsWriteFailure": 0,
+    "cpuExceeded": 0
+  },
+  "limits": [
+    "HTTP checks do not validate browser rendering or hydration",
+    "Local latency is not production Worker CPU, startup or Core Web Vitals",
+    "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested",
+    "Cached home reads use the build selection; cache expiry and recovery still need a dedicated test"
+  ]
+}

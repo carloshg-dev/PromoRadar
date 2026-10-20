@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { obterProduto, historicoPrecos, comparacaoDeProduto, relacionados } from "@/infrastructure/repositories/produtos.repo";
 import { PriceChart, type ChartPoint } from "@/components/price-chart";
@@ -8,22 +9,27 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tooltip } from "@/components/ui/tooltip";
-import { formatBRL, corLoja } from "@/lib/utils";
+import { formatBRL, corLoja, timeAgo } from "@/lib/utils";
 import { gerarInsights, calcularTendencia, type SeriePonto } from "@/core/insights/insights";
 import { TrackView } from "@/components/analytics/track-view";
+import { ProductActions } from "@/components/product-actions";
+import { productMetadata, productStructuredData, safeJsonLd } from "@/lib/product-seo";
+import { hasRecentPrice } from "@/core/offer-freshness";
 import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles } from "lucide-react";
 
-// 10 min: preços mudam no máx. 3x/dia e a comparação por classe varre até
+// 30 min: preços mudam no máx. 3x/dia e a comparação por classe varre até
 // 2000 linhas — cache mais longo corta ~5x o egress do Supabase free.
 export const revalidate = 1800;
+// Cache do render Next fica na página; o repositório também é usado em scripts Node.
+const cachedProduct = cache(obterProduto);
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
-  const p = await obterProduto(params.id).catch(() => null);
-  return { title: p ? p.titulo.slice(0, 60) : "Produto" };
+  const p = await cachedProduct(params.id).catch(() => null);
+  return p ? productMetadata(p) : { title: "Produto não encontrado", robots: { index: false } };
 }
 
 export default async function ProdutoPage({ params }: { params: { id: string } }) {
-  const p = await obterProduto(params.id).catch(() => null);
+  const p = await cachedProduct(params.id).catch(() => null);
   if (!p) notFound();
 
   const hist = (await historicoPrecos(params.id).catch(() => [])) as SeriePonto[];
@@ -41,9 +47,15 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
   const TrendIcon = tend.direcao === "queda" ? TrendingDown : tend.direcao === "alta" ? TrendingUp : Minus;
   const trendColor = tend.direcao === "queda" ? "text-neon" : tend.direcao === "alta" ? "text-rose-400" : "text-muted";
   const cor = corLoja(p.lojaSlug ?? p.lojaNome);
+  const recentPrice = hasRecentPrice(p.atualizadoEm);
+  const historicalDiscount = hist.length >= 2 && p.precoAtual && p.precoAvgHist && p.precoAvgHist > p.precoAtual
+    ? Math.round((1 - p.precoAtual / p.precoAvgHist) * 100) : null;
+  const sellerDiscount = p.precoAtual && p.precoOriginal && p.precoOriginal > p.precoAtual
+    ? Math.round((1 - p.precoAtual / p.precoOriginal) * 100) : null;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productStructuredData(p)) }} />
       <TrackView tipo="ver_produto" produtoId={p.id} lojaSlug={p.lojaSlug} categoriaSlug={p.categoriaSlug} />
       <Breadcrumbs items={[
         { label: "Início", href: "/" },
@@ -58,13 +70,17 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
         </span>
       </div>
       <h1 className="mt-2 text-2xl font-bold leading-snug">{p.titulo}</h1>
+      {!recentPrice && <div role="note" className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-amber-100">
+        <strong className="block">Preço sem atualização recente</strong>
+        O valor e o estoque podem ter mudado desde a última coleta. Confira as condições atuais na loja.
+      </div>}
 
       {/* KPIs */}
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi label="Preço atual" value={formatBRL(p.precoAtual)} accent="text-neon" />
+        <Kpi label={recentPrice ? "Preço coletado" : "Último preço coletado"} value={formatBRL(p.precoAtual)} accent={recentPrice ? "text-neon" : "text-zinc-200"} />
         <Kpi label="Menor histórico" value={formatBRL(p.precoMinHist)} hint="O menor preço já coletado." />
         <Kpi label="Média histórica" value={formatBRL(p.precoAvgHist)} hint="Média de todos os preços coletados." />
-        <Kpi label="Tendência" value={`${tend.variacaoPct > 0 ? "+" : ""}${tend.variacaoPct}%`} icon={<TrendIcon className={`h-4 w-4 ${trendColor}`} />} accent={trendColor} hint="Variação vs. a média histórica." />
+        <Kpi label={recentPrice ? "Tendência" : "Variação histórica"} value={`${tend.variacaoPct > 0 ? "+" : ""}${tend.variacaoPct}%`} icon={<TrendIcon className={`h-4 w-4 ${recentPrice ? trendColor : "text-muted"}`} />} accent={recentPrice ? trendColor : "text-muted"} hint="Variação vs. a média histórica." />
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -119,23 +135,25 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
               <ImageOff className="h-10 w-10 text-muted/40" />
             )}
           </div>
-          <div className="mt-4 font-display text-3xl font-extrabold text-neon">{formatBRL(p.precoAtual)}</div>
+          <div className={`mt-4 font-display text-3xl font-extrabold ${recentPrice ? "text-neon" : "text-zinc-200"}`}>{formatBRL(p.precoAtual)}</div>
           {p.precoOriginal && p.precoAtual && p.precoOriginal > p.precoAtual && (
             <div className="text-sm text-muted line-through">{formatBRL(p.precoOriginal)}</div>
           )}
-          {p.descontoPct ? <div className="mt-1 text-sm font-semibold text-brand-2">{p.descontoPct}% vs. média histórica</div> : null}
+          {recentPrice && (historicalDiscount ? <div className="mt-1 text-sm font-semibold text-brand-2">{historicalDiscount}% abaixo da média histórica coletada</div>
+            : sellerDiscount ? <div className="mt-1 text-sm text-brand-2">{sellerDiscount}% sobre o preço de referência informado pela loja</div> : null)}
+          {Number.isFinite(Date.parse(p.atualizadoEm)) && <time dateTime={p.atualizadoEm} className="mt-2 text-xs text-muted">Última coleta: {timeAgo(p.atualizadoEm)}</time>}
           {/* CTA de saída — /r/ registra o clique (afiliados/conversão) e redireciona à loja */}
-          <a href={`/r/${p.id}?o=produto`} target="_blank" rel="noopener noreferrer nofollow" className="mt-5">
-            <Button className="w-full" size="lg">Ir à loja — {p.lojaNome}<ExternalLink className="h-4 w-4" /></Button>
-          </a>
+          <a href={`/r/${p.id}?o=produto`} target="_blank" rel="noopener noreferrer nofollow sponsored"
+            className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white hover:bg-brand-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">{recentPrice ? "Ir à loja" : "Conferir preço"} — {p.lojaNome}<ExternalLink className="h-4 w-4 shrink-0" /></a>
+          <ProductActions item={{ id: p.id, titulo: p.titulo }} />
           <p className="mt-3 text-[11px] text-muted">Preço e disponibilidade sujeitos a alteração — oferta válida enquanto durarem os estoques. Confirme o valor final na loja antes de comprar.</p>
         </Card>
       </div>
 
       {/* Insights automáticos */}
       <Card className="glass mt-4 p-5">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-200">🧠 Insights automáticos</h2>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-200"><Info className="h-4 w-4" />{recentPrice ? "Insights do histórico" : "Histórico como referência"}</h2>
+        {recentPrice ? <div className="grid gap-2 sm:grid-cols-2">
           {insights.map((i, idx) => (
             <div key={idx} className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${
               i.tipo === "positivo" ? "border-neon/20 bg-neon/5 text-neon-2"
@@ -145,7 +163,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
               <span className="leading-snug">{i.texto}</span>
             </div>
           ))}
-        </div>
+        </div> : <p className="text-sm leading-relaxed text-muted">Use o gráfico como referência histórica. Para decidir a compra, confirme o preço atual e a disponibilidade na loja.</p>}
       </Card>
 
       {/* Mais ofertas na mesma categoria */}

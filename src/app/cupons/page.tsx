@@ -9,6 +9,7 @@ import { Ticket } from "lucide-react";
 
 export const metadata = {
   title: "Cupons de desconto",
+  alternates: { canonical: "/cupons" },
   description: "Cupons e ofertas das lojas parceiras do PromoDetec — atualizados automaticamente, direto das marcas.",
 };
 // Se a API estiver temporariamente limitada durante o build, a pagina tenta se

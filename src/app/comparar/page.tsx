@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Scale } from "lucide-react";
 
-export const metadata = { title: "Comparador" };
+export const metadata = { title: "Comparador", alternates: { canonical: "/comparar" } };
 export const revalidate = 7200;
 
 export default async function Comparar({ searchParams }: { searchParams: { vertical?: string; categoria?: string } }) {
@@ -34,7 +34,7 @@ export default async function Comparar({ searchParams }: { searchParams: { verti
         <Scale className="h-6 w-6 text-brand-2" /> Comparador inteligente
       </h1>
       <p className="mt-1 text-sm text-muted">
-        O mesmo modelo em várias lojas, lado a lado — dentro de cada vertical. Agrupamos por classe de produto e mostramos onde está mais barato.
+        Ofertas da mesma classe de produto, lado a lado. Os grupos podem incluir marcas e variações diferentes: confira modelo, capacidade e condições antes de escolher.
       </p>
 
       <TrackView tipo="abrir_comparacao" categoriaSlug={dentroDaVertical ? categoria : vertical.slug} origem="comparar" />

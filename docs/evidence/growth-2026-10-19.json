@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-10-19T06:01:43.192Z",
+  "windowDays": 7,
+  "totalEventos": 96,
+  "counts": {
+    "visita": 0,
+    "busca": 5,
+    "busca_sem_resultado": 0,
+    "abrir_busca": 0,
+    "selecionar_busca": 0,
+    "ver_produto": 86,
+    "abrir_comparacao": 1,
+    "ver_categoria": 4,
+    "filtrar_ofertas": 0,
+    "salvar_produto": 0,
+    "remover_salvo": 0,
+    "compartilhar_produto": 0,
+    "saida_loja": 0,
+    "copiar_cupom": 0
+  },
+  "mobile": 59,
+  "desktop": 37,
+  "topBuscas": [
+    [
+      "cama",
+      3
+    ],
+    [
+      "monitor",
+      1
+    ],
+    [
+      "ryzen 5",
+      1
+    ]
+  ],
+  "topCategorias": [
+    [
+      "cabelos",
+      1
+    ],
+    [
+      "chaves-soquetes",
+      1
+    ],
+    [
+      "perifericos",
+      1
+    ],
+    [
+      "whey-protein",
+      1
+    ]
+  ],
+  "topProdutoIds": [
+    [
+      "6ab32ba9-6da0-4d17-9a48-17da3713efc3",
+      5
+    ],
+    [
+      "a58edd47-7a46-48db-a02e-7e63b2140aff",
+      4
+    ],
+    [
+      "c5ff87d9-5ffc-4501-933e-193282366086",
+      4
+    ],
+    [
+      "01bae541-2914-4933-9394-3cb04004f05b",
+      3
+    ],
+    [
+      "49a9b26d-242a-430d-9911-4e077e097419",
+      3
+    ]
+  ],
+  "rankingLimited": false,
+  "since": "2026-10-12T06:01:43.192Z",
+  "until": "2026-10-19T06:01:43.192Z",
+  "complete": true,
+  "redirectRequests": 43,
+  "registrations": 1,
+  "interpretation": "Contagens de ações, sem usuários únicos. Redirects não são vendas. Receita requer os relatórios das redes. A medição com consentimento pode ser menor que o tráfego total."
+}

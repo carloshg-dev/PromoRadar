@@ -22,13 +22,27 @@ export function MobileMenu() {
   // Garante que createPortal só roda no cliente (não durante SSR).
   useEffect(() => { setMounted(true); }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const desktop = window.matchMedia("(min-width: 1720px)");
+    const onResize = () => { if (desktop.matches) setOpen(false); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    desktop.addEventListener("change", onResize);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      desktop.removeEventListener("change", onResize);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   return (
-    <div className="md:hidden">
+    <div className="min-[1720px]:hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="Abrir menu"
+        aria-label={open ? "Fechar menu" : "Abrir menu"}
         aria-expanded={open}
-        className="grid h-9 w-9 place-items-center rounded-lg border border-line text-zinc-200 transition hover:bg-bg-soft hover:text-white"
+        aria-controls="navegacao-compacta"
+        className="grid h-11 w-11 place-items-center rounded-lg border border-line text-zinc-200 transition hover:bg-bg-soft hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -49,9 +63,9 @@ export function MobileMenu() {
       )}
 
       {open && (
-        <nav className="absolute left-0 right-0 top-full z-50 border-b border-line bg-bg-card shadow-2xl">
+        <nav id="navegacao-compacta" aria-label="Navegação principal" className="absolute left-0 right-0 top-full z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto border-b border-line bg-bg-card shadow-2xl">
           <div className="mx-auto flex max-w-page flex-col gap-1 px-4 py-3">
-            <Link href={DIRETOS[0].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[0].label}</Link>
+            <Link prefetch={false} href={DIRETOS[0].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[0].label}</Link>
 
             {/* Comparador — accordion com as seções (comparar por vertical) */}
             <div className="rounded-lg">
@@ -66,7 +80,7 @@ export function MobileMenu() {
               {aberta === "comparador" && (
                 <div className="mb-1 ml-3 grid gap-1 border-l border-line pl-3 pt-1">
                   {VERTICAIS.map((v) => (
-                    <Link
+                    <Link prefetch={false}
                       key={v.slug}
                       href={`/comparar?vertical=${v.slug}`}
                       onClick={fechar}
@@ -96,7 +110,7 @@ export function MobileMenu() {
                   {exp && (
                     <div className="mb-1 ml-3 grid grid-cols-2 gap-1 border-l border-line pl-3 pt-1">
                       {v.categorias.map(({ slug, nome, Icon }) => (
-                        <Link
+                        <Link prefetch={false}
                           key={slug}
                           href={`/categoria/${slug}`}
                           onClick={fechar}
@@ -114,7 +128,7 @@ export function MobileMenu() {
               );
             })}
 
-            <Link href={DIRETOS[2].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[2].label}</Link>
+            <Link prefetch={false} href={DIRETOS[2].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[2].label}</Link>
           </div>
         </nav>
       )}

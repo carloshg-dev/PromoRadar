@@ -25,7 +25,7 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
   return (
     <div className="group glass hover-raise relative isolate flex flex-col overflow-hidden rounded-2xl border border-line transition-colors hover:border-brand/50 animate-fade-up">
       {/* link que cobre o card → página do produto (histórico + comparação) */}
-      <Link href={`/produto/${p.id}`} aria-label={p.titulo} className="absolute inset-0 z-10" />
+      <Link prefetch={false} href={`/produto/${p.id}`} aria-label={p.titulo} className="absolute inset-0 z-10" />
       {/* FOTO DO PRODUTO (servida pelo CDN da loja; guardamos só a URL) */}
       <div className="relative aspect-[4/3] overflow-hidden bg-white">
         <span className="absolute inset-x-0 top-0 z-10 h-[3px]" style={{ background: cor, boxShadow: `0 0 14px ${cor}66` }} />
@@ -95,7 +95,7 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
                 <Trophy className="h-3 w-3" /> Menor preço histórico
               </span>
             ) : <span />}
-            <span suppressHydrationWarning className="label-mono text-[10px] text-muted">{timeAgo(p.atualizadoEm)}</span>
+            <time dateTime={p.atualizadoEm} suppressHydrationWarning className="label-mono text-[10px] text-muted">{timeAgo(p.atualizadoEm)}</time>
           </div>
 
           {/* CTA — modelo "Dois Níveis":
@@ -112,7 +112,7 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
               <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
             </a>
           ) : (
-            <Link href={`/produto/${p.id}`}
+            <Link prefetch={false} href={`/produto/${p.id}`}
               className="relative z-20 mt-3 flex items-center justify-center gap-1 rounded-lg border border-line bg-bg-soft/60 py-2 text-xs font-semibold text-muted transition-colors hover:bg-bg-soft hover:text-zinc-200">
               Comparar preço <span className="max-w-[7rem] truncate font-normal opacity-75">· {p.lojaNome}</span>
               <Scale className="h-3.5 w-3.5 shrink-0" />

@@ -1,0 +1,11 @@
+{
+  "ref": "main",
+  "file": "scripts/ingest-shopee-feed.ts",
+  "blobSha": "61a0d7ccd424d5acf17c5fc918185ee0b74d71a6",
+  "lines": 783,
+  "usesTopN": true,
+  "usesSeenTimestamp": true,
+  "staleSweepPresent": true,
+  "skipsFailedBatch": true,
+  "candidateMap": true
+}

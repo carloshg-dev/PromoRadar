@@ -1,0 +1,279 @@
+{
+  "checkedAt": "2026-10-20T19:06:50.603Z",
+  "startedAt": "2026-10-20T19:06:03.052Z",
+  "elapsedMs": 47551,
+  "mode": "Local workerd; browser reload of search fone, no merchant click; analytics disabled",
+  "requests": 51,
+  "prefetch": 46,
+  "requestsByPath": {
+    "/": 2,
+    "/login": 1,
+    "/cadastro": 1,
+    "/ofertas": 42,
+    "/_next/static/chunks/499-090331fd4fdfeebb.js": 1,
+    "/_next/static/chunks/573-41b597da7ca6e736.js": 1,
+    "/_next/static/chunks/729-e658228251afd97a.js": 1,
+    "/_next/static/chunks/app/page-8b43e74d50f21e57.js": 1,
+    "/favicon.ico": 1
+  },
+  "truncated": true,
+  "events": [
+    {
+      "path": "/",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/login",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/cadastro",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/_next/static/chunks/499-090331fd4fdfeebb.js",
+      "rsc": false,
+      "prefetch": null
+    },
+    {
+      "path": "/_next/static/chunks/573-41b597da7ca6e736.js",
+      "rsc": false,
+      "prefetch": null
+    },
+    {
+      "path": "/_next/static/chunks/729-e658228251afd97a.js",
+      "rsc": false,
+      "prefetch": null
+    },
+    {
+      "path": "/_next/static/chunks/app/page-8b43e74d50f21e57.js",
+      "rsc": false,
+      "prefetch": null
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/favicon.ico",
+      "rsc": false,
+      "prefetch": null
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    },
+    {
+      "path": "/ofertas",
+      "rsc": true,
+      "prefetch": "1"
+    }
+  ],
+  "limitation": "CDP buffer was truncated; counts are lower bounds, not complete totals or a controlled benchmark. No production CPU measurement.",
+  "documentTargets": []
+}
