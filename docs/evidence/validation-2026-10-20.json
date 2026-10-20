@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-20 03:46:53 UTC",
+  "delivery": "Local uncommitted candidate; production unchanged",
+  "runtime": { "platform": "Ubuntu WSL", "node": "22.23.3", "next": "14.2.35", "openNextCloudflare": "1.14.10", "wrangler": "4.59.2" },
+  "tests": { "growth": 27, "collection": 22, "passedOn": ["Windows", "Linux"], "failed": 0, "writesMocked": true },
+  "typecheck": "passed",
+  "cloudflareBuild": "passed with OPENNEXT_CLOUDFLARE=1",
+  "dryRun": { "passed": true, "uploaded": false, "uncompressedKiB": 7568.37, "gzipKiB": 1574.49 },
+  "bundleGraph": { "inputs": 308, "matchedBrowserOrCollectorInputs": [], "checkedPatterns": ["playwright", "playwright-core", "chromium-bidi", "candidate-spool", "shopee-persistence", "csv-stream", "awin.adapter"] },
+  "workflowYaml": "parsed; contents read permission",
+  "designDetector": "no findings in changed targets",
+  "whitespaceCheck": "passed",
+  "browserQa": {
+    "runtime": "Next production server on localhost, not Cloudflare runtime",
+    "analyticsDisabled": true,
+    "outboundMerchantNavigation": false,
+    "databaseWritesPerformed": 0,
+    "checks": ["home form search", "quick search eight recent suggestions", "save persists across navigation", "remove restores empty radar", "mobile menu Escape", "menu closes on desktop resize", "consent open accept revoke", "old product warning before KPIs", "old product JSON-LD has no Offer", "native share cancellation"],
+    "viewports": [
+      { "width": 390, "height": 844, "documentClientWidth": 380, "documentScrollWidth": 380 },
+      { "width": 1280, "height": 900, "documentClientWidth": 1270, "documentScrollWidth": 1270 },
+      { "width": 1680, "height": 960, "compactMenuVisible": true },
+      { "width": 1720, "height": 960, "documentClientWidth": 1710, "documentScrollWidth": 1710, "navigationRight": 1304.390625, "controlsLeft": 1335.03125, "controlsRight": 1670, "overlayClosed": true }
+    ],
+    "console": { "afterFinalRestart": 0, "historicalErrorSample": 12, "historicalFirstAt": "2026-10-20T03:40:46.580Z", "historicalLastAt": "2026-10-20T03:42:19.984Z", "context": "RSC prefetch fetch failures coincided with the deliberate server stop for rebuild. No entries after the final server restart were present in the consulted sample." },
+    "limitations": ["native share was cancelled, no recipient delivery", "clipboard fallback not verified", "real Auth and event writes require isolated environment", "not a production performance measurement"]
+  },
+  "remainingGates": ["isolated database contracts", "review first Shopee retirement set and stock semantics", "Cloudflare runtime CPU startup and queue validation", "real Auth and affiliate attribution", "explicit human production approval"]
+}

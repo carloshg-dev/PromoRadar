@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-20T18:45:01.205Z",
+  "mode": "Read-only Cloudflare release audit",
+  "worker": "promodetec",
+  "checks": {
+    "settings": {
+      "status": 401,
+      "success": false,
+      "errorCodes": [
+        10000
+      ],
+      "data": null
+    }
+  },
+  "productionMutation": false,
+  "failure": "cloudflare_settings_unavailable",
+  "run": "https://github.com/carloshg-dev/PromoRadar/actions/runs/39477445206"
+}

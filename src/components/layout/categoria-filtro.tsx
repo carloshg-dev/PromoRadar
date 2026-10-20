@@ -23,7 +23,7 @@ export function CategoriaFiltro({ baseHref, ativo }: { baseHref: string; ativo: 
       ? CHIP_ATIVO[vertical] ?? CHIP_ATIVO.tech!
       : "border-line text-muted hover:bg-bg-soft hover:text-white";
     return (
-      <Link key={slug} href={`${baseHref}?categoria=${slug}`}
+      <Link prefetch={false} key={slug} href={`${baseHref}?categoria=${slug}`}
         className={`rounded-full border px-3 py-1 text-xs transition ${classe}`}>
         {label}
       </Link>

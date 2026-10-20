@@ -3,6 +3,28 @@ import type { Produto, CategoriaSlug } from "@/core/domain/types";
 import { assinatura, rotuloClasse } from "@/core/matching/match";
 import { ehLinkMonetizado, redeAfiliada } from "@/lib/afiliados";
 import { scoreConteudo, legendaPersuasiva } from "@/core/curadoria";
+import { titlePattern } from "@/core/search";
+import { permitidoNaHome } from "@/core/home-catalog";
+import { limitedFetch } from "@/infrastructure/supabase/limited-fetch";
+import { recentPriceSince } from "@/core/offer-freshness";
+
+export interface LeituraVitrine {
+  agora: number;
+  signal: AbortSignal;
+  pools: Map<string, Promise<Produto[]>>;
+  client: ReturnType<typeof createPublicClient>;
+}
+
+/** Contexto por render: compartilha pools e cancela também as leituras encadeadas. */
+export function criarLeituraVitrine(): LeituraVitrine {
+  return { agora: Date.now(), signal: AbortSignal.timeout(8_000), pools: new Map(), client: createPublicClient(limitedFetch((input, init) => fetch(input, init))) };
+}
+
+function consultaVitrine(sb: ReturnType<typeof createPublicClient>, leitura: LeituraVitrine) {
+  // Predicados de preço/data na view causaram 57014 no prerender; validação no pool limitado.
+  return sb.from("vw_ofertas").select(SELECT).eq("em_estoque", true)
+    .not("imagem_url", "is", null).not("preco_atual", "is", null).abortSignal(leitura.signal);
+}
 
 export interface AchadoDoDia extends Produto {
   scoreConteudo: number;
@@ -84,6 +106,11 @@ function map(r: Record<string, unknown>): Produto {
   };
 }
 
+function mapVitrine(rows: Record<string, unknown>[], leitura?: LeituraVitrine): Produto[] {
+  const produtos = rows.map(map);
+  return leitura ? produtos.filter((produto) => permitidoNaHome(produto, leitura.agora)) : produtos;
+}
+
 export interface OfertaFiltro {
   categoria?: string;
   /** filtro por várias categorias (ex: todas as de uma vertical). Tem prioridade sobre `categoria`. */
@@ -94,23 +121,27 @@ export interface OfertaFiltro {
   limit?: number;
 }
 
-export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
-  const sb = createPublicClient();
+export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitrine): Promise<Produto[]> {
+  const sb = leitura?.client ?? createPublicClient();
+  const agora = Date.now();
   const limite = f.limit ?? 60;
   // Pool maior que o limite pedido: dá margem pra achar monetizados pra promover
   // à frente sem re-buscar. Piso BAIXO (30) protege o egress do Supabase free — vitrine
   // pequena (3-5 itens) não precisa varrer 60 linhas pra achar afiliado no topo.
   const pool = Math.min(400, Math.max(limite * 6, 30));
-  let q = sb.from("vw_ofertas").select(SELECT).order("promo_score", { ascending: false, nullsFirst: false });
+  let q = leitura ? consultaVitrine(sb, leitura).order("atualizado_em", { ascending: false })
+    : sb.from("vw_ofertas").select(SELECT).eq("em_estoque", true).gt("preco_atual", 0)
+      .gte("atualizado_em", recentPriceSince(agora)).lte("atualizado_em", new Date(agora).toISOString())
+      .order("promo_score", { ascending: false, nullsFirst: false }).abortSignal(AbortSignal.timeout(12_000));
   if (f.categorias && f.categorias.length) q = q.in("categoria_slug", f.categorias);
   else if (f.categoria && f.categoria !== "all") q = q.eq("categoria_slug", f.categoria);
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
-  if (f.busca) q = q.ilike("titulo", `%${f.busca}%`);
+  if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
   q = q.limit(pool);
   const { data, error } = await q;
   if (error) throw error;
-  const produtos = (data ?? []).map(map);
+  const produtos = mapVitrine(data ?? [], leitura);
   // MONETIZADO PRIMEIRO: loja que paga comissão vira destaque mesmo com nota menor
   // — promo_score só desempata dentro do mesmo grupo (monetizado × não-monetizado).
   // Dentro de cada grupo, embaralha (Fisher-Yates) pra vitrine variar a cada refresh
@@ -126,23 +157,17 @@ export async function listarOfertas(f: OfertaFiltro = {}): Promise<Produto[]> {
  * conjunto limitado dos melhores resultados. Assim, centenas de itens coletados
  * participam do rodizio sem aumentar o HTML nem o egress do Supabase.
  */
-export async function listarVitrinePorLoja(lojaSlug: string, limit = 48): Promise<Produto[]> {
-  const sb = createPublicClient();
+export async function listarVitrinePorLoja(lojaSlug: string, limit = 48, leitura = criarLeituraVitrine()): Promise<Produto[]> {
+  const sb = leitura.client;
   const limite = Math.max(1, Math.min(limit, 80));
   const pool = Math.min(240, Math.max(limite * 3, 60));
-  const { data, error } = await sb
-    .from("vw_ofertas")
-    .select(SELECT)
+  const { data, error } = await consultaVitrine(sb, leitura)
     .eq("loja_slug", lojaSlug)
-    .eq("em_estoque", true)
-    .not("imagem_url", "is", null)
-    .not("preco_atual", "is", null)
-    .order("promo_score", { ascending: false, nullsFirst: false })
     .order("atualizado_em", { ascending: false })
     .limit(pool);
 
   if (error) throw error;
-  return embaralhar((data ?? []).map(map)).slice(0, limite);
+  return embaralhar(mapVitrine(data ?? [], leitura)).slice(0, limite);
 }
 
 /**
@@ -197,39 +222,44 @@ export function aleatorioSemLojaSeguida<T extends { lojaSlug: string }>(produtos
  * (bug real: coleta Awin salvou a Olympikus por último → só Olympikus no ar).
  */
 const POOL_POR_LOJA = 24;
-async function poolAfiliadosPorLoja(
+function poolAfiliadosPorLoja(
   sb: ReturnType<typeof createPublicClient>,
   categorias?: string[],
+  leitura = criarLeituraVitrine(),
 ): Promise<Produto[]> {
-  const { data: lojas } = await sb.from("lojas").select("slug,adapter_key").eq("ativo", true);
-  const slugs = (lojas ?? [])
-    .filter((l) => redeAfiliada(l.adapter_key as string))
-    .map((l) => l.slug as string);
-  if (!slugs.length) return [];
-  const fatias = await Promise.all(slugs.map(async (slug) => {
-    let q = sb
-      .from("vw_ofertas")
-      .select(SELECT)
-      .eq("loja_slug", slug)
-      .eq("em_estoque", true)
-      .not("imagem_url", "is", null)
-      .not("preco_atual", "is", null);
-    // fatia por CATEGORIA (ex: carrossel de beleza) → garante variedade de LINHA
-    if (categorias?.length) q = q.in("categoria_slug", categorias);
-    const { data } = await q.order("atualizado_em", { ascending: false }).limit(POOL_POR_LOJA);
-    return (data ?? []).map(map);
-  }));
-  return fatias.flat();
+  const key = categorias?.length ? [...categorias].sort().join(",") : "*";
+  const existing = leitura.pools.get(key);
+  if (existing) return existing;
+  const pending = (async () => {
+    const { data: lojas, error } = await sb.from("lojas").select("slug,adapter_key").eq("ativo", true)
+      .limit(200).abortSignal(leitura.signal);
+    if (error) throw error;
+    const slugs = (lojas ?? []).filter((l) => redeAfiliada(l.adapter_key as string)).map((l) => l.slug as string);
+    const pool: Produto[] = [];
+    for (let start = 0; start < slugs.length; start += 4) {
+      const fatias = await Promise.all(slugs.slice(start, start + 4).map(async (slug) => {
+        let q = consultaVitrine(sb, leitura).eq("loja_slug", slug);
+        if (categorias?.length) q = q.in("categoria_slug", categorias);
+        const { data, error: readError } = await q.order("atualizado_em", { ascending: false }).limit(POOL_POR_LOJA);
+        if (readError) throw readError;
+        return mapVitrine(data ?? [], leitura);
+      }));
+      pool.push(...fatias.flat());
+    }
+    return pool;
+  })();
+  leitura.pools.set(key, pending);
+  return pending;
 }
 
 /** Carrossel de Beleza & Perfumes — pool BALANCEADO POR LOJA nas categorias de
  *  perfume/skincare (garante Sieno, L'Occitane, Shopee, AliExpress… lado a lado)
  *  + aleatório sem loja repetida em sequência. */
-export async function achadosBelezaCarrossel(n = 24): Promise<Produto[]> {
-  const sb = createPublicClient();
+export async function achadosBelezaCarrossel(n = 24, leitura = criarLeituraVitrine()): Promise<Produto[]> {
+  const sb = leitura.client;
   const pool = await poolAfiliadosPorLoja(sb, [
     "perfumes-importados", "perfumes-arabes", "skincare", "cabelos", "maquiagem",
-  ]);
+  ], leitura);
   return aleatorioSemLojaSeguida(pool, n);
 }
 
@@ -282,9 +312,9 @@ function vitrinePorDescontoEValor(pool: Produto[], n: number): Produto[] {
   return out;
 }
 
-export async function listarAfiliados(limit = 24): Promise<Produto[]> {
-  const sb = createPublicClient();
-  return vitrinePorDescontoEValor(await poolAfiliadosPorLoja(sb), limit);
+export async function listarAfiliados(limit = 24, leitura = criarLeituraVitrine()): Promise<Produto[]> {
+  const sb = leitura.client;
+  return vitrinePorDescontoEValor(await poolAfiliadosPorLoja(sb, undefined, leitura), limit);
 }
 
 /**
@@ -293,15 +323,10 @@ export async function listarAfiliados(limit = 24): Promise<Produto[]> {
  * só) + sorteio sem loja repetida em sequência (regra do dono 02/07). Recência
  * garante que loja nova coletada entra na roda no mesmo dia.
  */
-export async function achadosPorCategorias(slugs: CategoriaSlug[], n: number): Promise<Produto[]> {
-  const sb = createPublicClient();
+export async function achadosPorCategorias(slugs: CategoriaSlug[], n: number, leitura = criarLeituraVitrine()): Promise<Produto[]> {
+  const sb = leitura.client;
   const base = () =>
-    sb.from("vw_ofertas")
-      .select(SELECT)
-      .in("categoria_slug", slugs)
-      .eq("em_estoque", true)
-      .not("imagem_url", "is", null)
-      .not("preco_atual", "is", null);
+    consultaVitrine(sb, leitura).in("categoria_slug", slugs);
   // DUAS fatias no pool: RECENTES (loja recém-coletada entra na roda no mesmo
   // dia) + TOP por nota (as consagradas não somem quando chega lote novo).
   // Uma fatia só — qualquer que fosse — virava parede de uma marca.
@@ -314,7 +339,7 @@ export async function achadosPorCategorias(slugs: CategoriaSlug[], n: number): P
   const porId = new Map<string, Produto>();
   for (const r of [...(recentes.data ?? []), ...(top.data ?? [])]) {
     const p = map(r);
-    porId.set(p.id, p);
+    if (permitidoNaHome(p, leitura.agora)) porId.set(p.id, p);
   }
   return aleatorioSemLojaSeguida([...porId.values()], n);
 }
@@ -332,10 +357,10 @@ type PontoHistoricoRow = PontoHistorico & {
  * os pontos historicos dos produtos selecionados. Mantem a home data-driven sem
  * puxar catalogo grande para memoria.
  */
-export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12): Promise<ProdutoRodizio[]> {
-  const sb = createPublicClient();
+export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12, leitura = criarLeituraVitrine()): Promise<ProdutoRodizio[]> {
+  const sb = leitura.client;
   // Pool balanceado POR LOJA + aleatório sem loja repetida em sequência (regra do dono).
-  const produtos = aleatorioSemLojaSeguida(await poolAfiliadosPorLoja(sb), limit);
+  const produtos = aleatorioSemLojaSeguida(await poolAfiliadosPorLoja(sb, undefined, leitura), limit);
   if (!produtos.length) return [];
 
   const ids = produtos.map((produto) => produto.id);
@@ -345,7 +370,7 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
     .select("produto_id,preco,coletado_em")
     .in("produto_id", ids)
     .order("coletado_em", { ascending: false })
-    .limit(historicoLimit);
+    .limit(historicoLimit).abortSignal(leitura.signal);
   if (historicoError) throw historicoError;
 
   const porProduto = new Map<string, PontoHistorico[]>();
@@ -372,18 +397,22 @@ const POOL_ORDENACAO = 1000;
 
 export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number } = {}): Promise<PaginaOfertas> {
   const sb = createPublicClient();
+  const agora = Date.now();
   const porPagina = f.limit ?? 60;
   const pagina = Math.max(1, f.pagina ?? 1);
   const de = (pagina - 1) * porPagina;
   let q = sb
     .from("vw_ofertas")
     .select(SELECT, { count: "exact" })
+    .eq("em_estoque", true).gt("preco_atual", 0)
+    .gte("atualizado_em", recentPriceSince(agora)).lte("atualizado_em", new Date(agora).toISOString())
     .order("promo_score", { ascending: false, nullsFirst: false })
-    .order("atualizado_em", { ascending: false }); // desempate estável entre páginas
+    .order("atualizado_em", { ascending: false }).order("id")
+    .abortSignal(AbortSignal.timeout(12_000));
   if (f.categoria && f.categoria !== "all") q = q.eq("categoria_slug", f.categoria);
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
-  if (f.busca) q = q.ilike("titulo", `%${f.busca}%`);
+  if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
 
   // Páginas rasas: puxa o pool (top por nota) e reordena MONETIZADO PRIMEIRO — a loja que
   // te paga comissão vira destaque, mesmo com nota menor (a nota vira só desempate interno).
@@ -448,9 +477,7 @@ async function ofertasParaComparar(opts: { categoria?: string; categorias?: stri
   const teto = temFiltro ? MAX_COMPARAR : 2 * PAGINA_COMPARAR;
   const todas: Produto[] = [];
   for (let de = 0; de < teto; de += PAGINA_COMPARAR) {
-    let q = sb
-      .from("vw_ofertas")
-      .select(SELECT)
+    let q = sb.from("vw_ofertas").select(SELECT)
       .eq("em_estoque", true)
       .not("preco_atual", "is", null)
       .order("promo_score", { ascending: false, nullsFirst: false })
@@ -461,7 +488,7 @@ async function ofertasParaComparar(opts: { categoria?: string; categorias?: stri
     if (error) throw error;
     const lote = (data ?? []).map(map);
     todas.push(...lote);
-    if (lote.length < PAGINA_COMPARAR) break; // última página
+    if ((data ?? []).length < PAGINA_COMPARAR) break;
   }
   return todas;
 }
@@ -472,7 +499,10 @@ async function ofertasParaComparar(opts: { categoria?: string; categorias?: stri
  */
 export async function listarComparacoes(opts: { categoria?: string; categorias?: string[]; limit?: number } = {}): Promise<Comparacao[]> {
   const produtos = await ofertasParaComparar({ categoria: opts.categoria, categorias: opts.categorias });
+  return agruparComparacoes(produtos, opts.limit ?? 60);
+}
 
+function agruparComparacoes(produtos: Produto[], limit: number): Comparacao[] {
   const grupos = new Map<string, Produto[]>();
   for (const p of produtos) {
     if (p.precoAtual == null || !p.emEstoque) continue;
@@ -522,7 +552,7 @@ export async function listarComparacoes(opts: { categoria?: string; categorias?:
   }
 
   out.sort((a, b) => b.lojas - a.lojas || b.economia - a.economia);
-  return out.slice(0, opts.limit ?? 60);
+  return out.slice(0, limit);
 }
 
 /**
@@ -543,12 +573,11 @@ export interface DestaqueItem {
   historico: Array<{ data: string; preco: number }>;
 }
 
-export async function ofertasEmDestaque(n = 8): Promise<DestaqueItem[]> {
-  const sb = createPublicClient();
-  const [pool, cmps] = await Promise.all([
-    poolAfiliadosPorLoja(sb),
-    listarComparacoes({ limit: 200 }),
-  ]);
+export async function ofertasEmDestaque(n = 8, leitura = criarLeituraVitrine()): Promise<DestaqueItem[]> {
+  const sb = leitura.client;
+  const pool = await poolAfiliadosPorLoja(sb, undefined, leitura);
+  // A home compara o pool já selecionado; o comparador completo conserva sua leitura própria.
+  const cmps = agruparComparacoes(pool, 200);
 
   // Comparações REAIS são raras entre lojas monetizadas hoje (a guilhotina de
   // não-afiliadas 02-03/07 cortou junto o overlap de catálogo que as gerava —
@@ -573,7 +602,7 @@ export async function ofertasEmDestaque(n = 8): Promise<DestaqueItem[]> {
     const refId = comparacao ? comparacao.ofertas[0]!.id : produto.id;
     let historico: DestaqueItem["historico"] = [];
     try {
-      const pts = await historicoPrecos(refId, 30);
+      const pts = await historicoPrecos(refId, 30, leitura);
       historico = pts.map((p) => ({
         data: new Date(p.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         preco: Number(p.preco),
@@ -584,10 +613,21 @@ export async function ofertasEmDestaque(n = 8): Promise<DestaqueItem[]> {
 }
 
 export async function obterProduto(id: string): Promise<Produto | null> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
   const sb = createPublicClient();
   const { data, error } = await sb.from("vw_ofertas").select(SELECT).eq("id", id).maybeSingle();
   if (error) throw error;
   return data ? map(data) : null;
+}
+
+/** Sitemap curado e limitado; não calcula scores/históricos nem varre o catálogo. */
+export async function listarUrlsProdutos(): Promise<{ id: string; atualizadoEm: string }[]> {
+  const { data, error } = await createPublicClient().from("produtos")
+    .select("id,atualizado_em").eq("em_estoque", true).gt("preco_atual", 0)
+    .order("atualizado_em", { ascending: false }).order("id").limit(1000)
+    .abortSignal(AbortSignal.timeout(5_000));
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ id: row.id as string, atualizadoEm: row.atualizado_em as string }));
 }
 
 /** A comparação entre lojas da classe de modelo deste produto (ou null se só há 1 loja). */
@@ -607,16 +647,17 @@ export async function relacionados(categoriaSlug: string, excluirId: string, lim
 
 export interface PontoHistorico { preco: number; coletado_em: string }
 
-export async function historicoPrecos(produtoId: string, limit = 120): Promise<PontoHistorico[]> {
-  const sb = createPublicClient();
-  const { data, error } = await sb
+export async function historicoPrecos(produtoId: string, limit = 120, leitura?: LeituraVitrine): Promise<PontoHistorico[]> {
+  const sb = leitura?.client ?? createPublicClient();
+  const query = sb
     .from("historico_precos")
     .select("preco,coletado_em")
     .eq("produto_id", produtoId)
-    .order("coletado_em", { ascending: true })
+    .order("coletado_em", { ascending: false })
     .limit(limit);
+  const { data, error } = await (leitura ? query.abortSignal(leitura.signal) : query);
   if (error) throw error;
-  return (data ?? []) as PontoHistorico[];
+  return ((data ?? []) as PontoHistorico[]).reverse();
 }
 
 export interface Noticia {
@@ -624,13 +665,14 @@ export interface Noticia {
   url: string; imagem_url: string | null; publicado_em: string | null; tags: string[];
 }
 
-export async function listarNoticias(limit = 30): Promise<Noticia[]> {
-  const sb = createPublicClient();
-  const { data, error } = await sb
+export async function listarNoticias(limit = 30, leitura?: LeituraVitrine): Promise<Noticia[]> {
+  const sb = leitura?.client ?? createPublicClient();
+  const query = sb
     .from("noticias")
     .select("id,fonte,titulo,resumo,url,imagem_url,publicado_em,tags")
     .order("publicado_em", { ascending: false, nullsFirst: false })
     .limit(limit);
+  const { data, error } = await (leitura ? query.abortSignal(leitura.signal) : query);
   if (error) throw error;
   return (data ?? []) as Noticia[];
 }

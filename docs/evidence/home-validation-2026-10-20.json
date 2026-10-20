@@ -1,0 +1,152 @@
+{
+  "checkedAt": "2026-10-20T05:46:14.845Z",
+  "branch": "codex/cloudflare-migration",
+  "mode": "Local isolated laboratory; read-only database access; no production mutation",
+  "buildId": "1HnzyB3z6YhD4mq8MZYKI",
+  "runtime": {
+    "platform": "Ubuntu WSL",
+    "node": "22.23.3",
+    "next": "14.2.35",
+    "openNextCloudflare": "1.14.10",
+    "wrangler": "4.59.2"
+  },
+  "tests": {
+    "growth": 38,
+    "collection": 22,
+    "passed": 60,
+    "failed": 0,
+    "writes": "mocked"
+  },
+  "build": {
+    "nextAndOpenNext": "passed",
+    "types": "passed",
+    "sourceUnavailableWarnings": 0,
+    "homeFirstLoadJsKB": 240,
+    "warning": "OpenNext direct queue is not recommended for production"
+  },
+  "packaging": {
+    "dryRun": "passed",
+    "uploadPerformed": false,
+    "bundleKiB": 7549.7,
+    "gzipKiB": 1574.47,
+    "heavyInputs": [],
+    "heavyImports": []
+  },
+  "sourceParity": {
+    "comparedFiles": 14,
+    "matches": true,
+    "packageLockUnchanged": true,
+    "hashes": [
+      {
+        "file": "src/core/home-catalog.ts",
+        "sha256": "b9d291f41b2d4cb73b24b1f079ec61c72c52d8660c96cd3cd1fc70377586055f"
+      },
+      {
+        "file": "src/infrastructure/supabase/limited-fetch.ts",
+        "sha256": "3f2cd9fb3010524dd9ce008b6c9f99fbc8ff1982b4ffd02a5a438bba15eb5614"
+      },
+      {
+        "file": "src/infrastructure/supabase/client.ts",
+        "sha256": "bc17b68c08c994f43f1c589cc6e29afa56e7fc2b13ea75f922af5ae61c049e86"
+      },
+      {
+        "file": "src/infrastructure/repositories/produtos.repo.ts",
+        "sha256": "9d5043e028a389fc80c1af53d78ccec8352771c61012bc8ee681856d7a1b9216"
+      },
+      {
+        "file": "src/app/page.tsx",
+        "sha256": "443e2d66b8d570d6aa09c297b4fadc55bb9591ffd0f8eb9268fd7303af19a53e"
+      },
+      {
+        "file": "src/components/produto-card.tsx",
+        "sha256": "d9997509d41919fa8098d436ffd1c7b8889bf26351de5543d84b158ae568eb90"
+      },
+      {
+        "file": "src/components/featured-deal-rotator.tsx",
+        "sha256": "bb3e288a9da68575e3a798af29ef1f813d9c576f642aafb931bb2bd0b5414067"
+      },
+      {
+        "file": "src/components/vitrine-rodizio.tsx",
+        "sha256": "8e6c3f5884b28704bee0b28214ac20d60c96d572f45088f32dc960953994deea"
+      },
+      {
+        "file": "src/components/layout/nav-desktop.tsx",
+        "sha256": "9a75be6446d46f8a26d78822423445a608d015efab36230df25bf27ea3ed390b"
+      },
+      {
+        "file": "src/components/layout/mobile-menu.tsx",
+        "sha256": "a6cdf884fca47796d64b47ed60fc5d47ff86698eef8f3106f5beb30a513d06fd"
+      },
+      {
+        "file": "src/components/layout/navbar.tsx",
+        "sha256": "2ee953d13640ad9fadde285f1912e019de7fb993fc14270a5d6278901602ac4b"
+      },
+      {
+        "file": "tests/growth/home-catalog.test.ts",
+        "sha256": "f4e992e14b9ef7a6bcff5d870c7f6d8ace0b68647e13feccae922836de09e457"
+      },
+      {
+        "file": "package.json",
+        "sha256": "68acd685850d545fad7f435ae393ae6b9f7a165679c5a9dcbaef9953bbd520f3"
+      },
+      {
+        "file": "package-lock.json",
+        "sha256": "5e065fe1ea4860cd0bcb7d80476ee8d8845432bfbc07348e3c31db7fe4e9a9dd"
+      }
+    ]
+  },
+  "readOnlySourceProbes": {
+    "before": {
+      "total": 12,
+      "errors": 8
+    },
+    "after": {
+      "total": 12,
+      "errors": 0,
+      "maxElapsedMs": 5185,
+      "validEmptySources": [
+        "carrefour",
+        "mercadolivre"
+      ]
+    }
+  },
+  "browser": {
+    "finalBuildRepeat": "blocked by Work settings: Local browser use is disabled in Work settings",
+    "priorRound": {
+      "widths": [
+        1280,
+        390
+      ],
+      "horizontalOverflow": false,
+      "dateElements": 94,
+      "invalidOrOlderThanSevenDays": 0,
+      "internalProductLinks": 95,
+      "productNavigation": "passed",
+      "search": "passed",
+      "consoleWarningsOrErrors": 0
+    },
+    "priorPrefetchObservation": {
+      "beforeProductPages": 8,
+      "afterProductPages": 0,
+      "seconds": 30,
+      "afterBuildId": "Yh1j5k8hDk7bXKCBrbB4f"
+    },
+    "limitation": "Visual and request observations precede the final backend queue change; not a final-build browser pass or a controlled benchmark"
+  },
+  "production": {
+    "databaseWrites": false,
+    "ddl": false,
+    "collection": false,
+    "commit": false,
+    "push": false,
+    "deploy": false,
+    "dnsChange": false,
+    "affiliateOutboundClicked": false
+  },
+  "remaining": [
+    "Repeat final-build desktop/mobile smoke when browser use is available",
+    "Worker bindings/cache/startup/CPU and concurrent-load validation",
+    "Isolated events/auth/affiliate attribution checks and first Shopee withdrawal review",
+    "Human approval before production"
+  ]
+}

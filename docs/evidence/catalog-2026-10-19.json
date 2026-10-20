@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-10-19T06:14:56.332Z",
+  "totalProducts": 118363,
+  "inStockWithPositivePrice": 107564,
+  "olderThanSevenDaysAndStillAvailable": 58397,
+  "missingImageAmongAvailable": 0,
+  "staleBefore": "2026-10-12T06:14:56.332Z",
+  "sample": {
+    "policy": "200 most recently updated available products; nonrandom sample",
+    "size": 200,
+    "newestUpdatedAt": "2026-10-19T05:18:42.064494+00:00",
+    "oldestUpdatedAt": "2026-10-19T05:18:42.064494+00:00",
+    "referenceDiscountAtLeast80Percent": 1,
+    "destinationHosts": {
+      "shopee.com.br": 200
+    }
+  },
+  "interpretation": "Catalog health at extraction. Reference discount is advertised original versus collected price; not verified historical savings. Host names do not prove affiliate attribution."
+}

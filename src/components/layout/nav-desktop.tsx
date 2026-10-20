@@ -12,12 +12,12 @@ const linkBase = "rounded-lg px-3 py-1.5 text-muted transition hover:bg-bg-soft 
 
 export function NavDesktop() {
   return (
-    <nav className="hidden items-center gap-1 text-sm md:flex">
-      <Link href="/ofertas" className={linkBase}>Ofertas</Link>
+    <nav className="hidden shrink-0 items-center gap-1 whitespace-nowrap text-sm min-[1720px]:flex">
+      <Link prefetch={false} href="/ofertas" className={linkBase}>Ofertas</Link>
 
       {/* Comparador — destaque (cereja do bolo): pílula com accent da marca */}
       <div className="group/c relative">
-        <Link href="/comparar" className="inline-flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-3 py-1.5 font-semibold text-white transition hover:border-brand/60 hover:bg-brand/20">
+        <Link prefetch={false} href="/comparar" className="inline-flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-3 py-1.5 font-semibold text-white transition hover:border-brand/60 hover:bg-brand/20">
           <Scale className="h-3.5 w-3.5 text-brand-2" />
           Comparador
           <ChevronDown className="h-3.5 w-3.5 text-brand-2 transition-transform duration-200 group-hover/c:rotate-180" />
@@ -27,7 +27,7 @@ export function NavDesktop() {
             <div className="mb-2 px-2 label-mono text-[10px] uppercase tracking-wide text-muted">Comparar por seção</div>
             <div className="grid gap-1">
               {VERTICAIS.map((v) => (
-                <Link
+                <Link prefetch={false}
                   key={v.slug}
                   href={`/comparar?vertical=${v.slug}`}
                   className={`flex items-center gap-2.5 rounded-xl border border-transparent p-2 transition hover:bg-bg-soft/70 ${v.accent.border}`}
@@ -43,7 +43,7 @@ export function NavDesktop() {
 
       {VERTICAIS.map((v) => (
         <div key={v.slug} className="group/v relative">
-          <Link
+          <Link prefetch={false}
             href={v.href}
             className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${v.accent.text} hover:bg-bg-soft ${v.accent.textHover}`}
           >
@@ -57,11 +57,11 @@ export function NavDesktop() {
             <div className="w-[min(92vw,420px)] rounded-2xl border border-line bg-bg-card/95 p-3 shadow-2xl backdrop-blur-xl">
               <div className="mb-2 flex items-center justify-between px-2">
                 <span className={`label-mono text-[10px] uppercase tracking-wide ${v.accent.text}`}>{v.label}</span>
-                <Link href={v.href} className="label-mono text-[10px] text-muted hover:text-white">ver tudo →</Link>
+                <Link prefetch={false} href={v.href} className="label-mono text-[10px] text-muted hover:text-white">ver tudo →</Link>
               </div>
               <div className="grid grid-cols-2 gap-1">
                 {v.categorias.map(({ slug, nome, Icon }) => (
-                  <Link
+                  <Link prefetch={false}
                     key={slug}
                     href={`/categoria/${slug}`}
                     className={`group flex items-center gap-2.5 rounded-xl border border-transparent p-2 transition hover:bg-bg-soft/70 ${v.accent.border}`}
@@ -78,7 +78,7 @@ export function NavDesktop() {
         </div>
       ))}
 
-      <Link href="/cupons" className={linkBase}>Cupons</Link>
+      <Link prefetch={false} href="/cupons" className={linkBase}>Cupons</Link>
     </nav>
   );
 }

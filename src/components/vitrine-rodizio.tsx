@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowUpRight, BadgePercent, ImageOff } from "lucide-react";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
@@ -87,13 +86,14 @@ function ProductShowcaseCard({
 
         <span className="relative mt-1.5 block aspect-[4/3] w-full overflow-hidden rounded-[6px] border border-white/10 bg-[#f5f5f3]">
           {product.imagemUrl && !imageFailed ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={product.imagemUrl}
               alt={product.titulo}
-              fill
-              sizes="(max-width: 639px) 246px, (max-width: 1279px) 180px, 206px"
+              loading="lazy"
+              decoding="async"
               onError={() => setImageFailed(true)}
-              className="object-contain p-2.5 transition-transform duration-500 group-hover:scale-[1.035]"
+              className="absolute inset-0 h-full w-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-[1.035]"
             />
           ) : (
             <span className="grid h-full place-items-center">

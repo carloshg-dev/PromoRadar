@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgePercent,
-  BellRing,
+  Bookmark,
   ChartNoAxesCombined,
   ShieldCheck,
   Sparkles,
@@ -31,10 +31,10 @@ function FeatureItem({ icon: Icon, label, accent }: { icon: LucideIcon; label: s
 function Features({ accent }: { accent?: string }) {
   return (
     <div className="mt-8 grid max-w-xl grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:items-center sm:gap-0">
-      <FeatureItem icon={ShieldCheck} label="Ofertas verificadas" accent={accent} />
+      <FeatureItem icon={ShieldCheck} label="Preços coletados" accent={accent} />
       <FeatureItem icon={ChartNoAxesCombined} label="Histórico de preços" accent={accent} />
-      <FeatureItem icon={BadgePercent} label="Cupons exclusivos" accent={accent} />
-      <FeatureItem icon={BellRing} label="Alertas inteligentes" accent={accent} />
+      <FeatureItem icon={BadgePercent} label="Cupons de parceiros" accent={accent} />
+      <FeatureItem icon={Bookmark} label="Ofertas salvas no radar" accent={accent} />
     </div>
   );
 }

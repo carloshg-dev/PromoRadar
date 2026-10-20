@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { CommandPalette } from "@/components/command-palette";
 import { Clarity } from "@/components/analytics/clarity";
-import { CookieConsent } from "@/components/analytics/cookie-consent";
+import { CookieConsent, PrivacySettings } from "@/components/analytics/cookie-consent";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { Journey } from "@/components/analytics/journey";
 import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 
 // Geist (display) via pacote oficial self-hosted; Inter (corpo) e JetBrains (mono)
@@ -22,7 +23,6 @@ export const metadata: Metadata = {
   keywords: SITE_KEYWORDS,
   manifest: "/site.webmanifest",
   applicationName: SITE_NAME,
-  alternates: { canonical: SITE_URL },
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
@@ -50,30 +50,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${inter.variable} ${mono.variable} ${GeistSans.variable} dark`}>
       <body className="min-h-screen font-sans antialiased">
         <Clarity />
+        <GoogleAnalytics />
+        <Journey />
         <Navbar />
         <CommandPalette />
         {children}
         
-        {/* Google Analytics */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-Z49LMP5ZKT"
-        />
-        <Script id="google-analytics">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-Z49LMP5ZKT');
-          `}
-        </Script>
-
         <footer className="mx-auto max-w-page px-4 py-10 text-center text-xs text-muted sm:px-6 lg:px-10">
           <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/sobre" className="transition hover:text-zinc-200">Sobre</Link>
             <Link href="/comparar" className="transition hover:text-zinc-200">Comparador</Link>
             <Link href="/noticias" className="transition hover:text-zinc-200">Notícias</Link>
             <Link href="/privacidade" className="transition hover:text-zinc-200">Privacidade</Link>
+            <PrivacySettings />
             <Link href="/termos" className="transition hover:text-zinc-200">Termos</Link>
             <Link href="/contato" className="transition hover:text-zinc-200">Contato</Link>
           </nav>

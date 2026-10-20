@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-20T23:26:34.989Z",
+  "startedAt": "2026-10-20T23:24:54.753Z",
+  "elapsedMs": 100236,
+  "route": "/ofertas?busca=fone",
+  "viewport": {
+    "height": 720,
+    "width": 1280
+  },
+  "buildId": "m-8-2gP_HoUmwmvU1WNSh",
+  "applicationRequests": 28,
+  "prefetchRequests": 4,
+  "offerRequests": 1,
+  "prefetchedPaths": [
+    "/",
+    "/login",
+    "/cadastro",
+    "/"
+  ],
+  "truncated": false,
+  "hasMore": false,
+  "mode": "Second local sample; navigation followed by idle; no clicks or scroll",
+  "limits": [
+    "Not production CPU or a controlled comparison with the truncated baseline"
+  ]
+}

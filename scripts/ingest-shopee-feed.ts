@@ -1,17 +1,20 @@
 import { createReadStream, createWriteStream } from "node:fs";
-import { mkdtemp, open, rm, stat } from "node:fs/promises";
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { createGunzip } from "node:zlib";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import csv from "csv-parser";
 import { config } from "dotenv";
 import { contemTermoProibido } from "../src/core/blacklist-nicho";
 import { linkShopeeAfiliado, shopeeAffiliateId } from "../src/core/shopee-afiliado";
 import { traduzirTitulo } from "../src/core/traducao-titulos";
+import { CandidateSpool } from "../src/infrastructure/shopee/candidate-spool";
+import { selectTopByCategory } from "../src/core/collection/top-by-category";
+import { persistShopeeFeed } from "../src/services/shopee-persistence.service";
+import { readCsvRows } from "../src/infrastructure/scraping/core/csv-stream";
+import { validFeedUrl } from "../src/core/collection/feed-url";
 
 config({ path: ".env.local" });
 
@@ -198,7 +201,6 @@ const TRACKING_PARAMS = [
 ] as const;
 const PAUSED_STORES = ["epoca cosmeticos"];
 
-const SUPABASE_BATCH_SIZE = 500;
 const NEUTRAL_CATEGORY: CategoriaSlug = "ofertas-parceiros";
 
 const stats: IngestStats = {
@@ -224,17 +226,20 @@ const stats: IngestStats = {
 async function main() {
   const runStartedAt = new Date().toISOString();
   const pisoPreco = readPositiveNumberEnv("PISO_PRECO_BRL", 20);
-  const topN = Math.max(1, Math.trunc(readPositiveNumberEnv("SHOPEE_TOP_N", 400)));
+  const topN = Math.min(5000, Math.max(1, Math.trunc(readPositiveNumberEnv("SHOPEE_TOP_N", 400))));
   const dryRun = process.argv.includes("--dry-run") || process.env.SHOPEE_DRY_RUN === "true";
 
-  const input = await resolveFeedInput();
-  const candidatesByItemId = new Map<string, NormalizedShopeeItem>();
-
-  console.log(`[Shopee] Iniciando ingestao: ${input.source}`);
-  console.log(`[Shopee] Piso de preco: R$ ${pisoPreco.toFixed(2)} | Top-N por categoria: ${topN}`);
-  if (dryRun) console.log("[Shopee] DRY_RUN ativo: Supabase nao sera alterado.");
+  const spoolDir = await mkdtemp(join(tmpdir(), "promodetec-candidates-"));
+  let input: FeedInput | undefined;
+  let spool: CandidateSpool<NormalizedShopeeItem> | undefined;
+  let selecionados: NormalizedShopeeItem[];
 
   try {
+    input = await resolveFeedInput();
+    console.log(`[Shopee] Iniciando ingestao: ${input.source}`);
+    console.log(`[Shopee] Piso de preco: R$ ${pisoPreco.toFixed(2)} | Top-N por categoria: ${topN}`);
+    if (dryRun) console.log("[Shopee] DRY_RUN ativo: Supabase nao sera alterado.");
+    spool = new CandidateSpool<NormalizedShopeeItem>(join(spoolDir, "candidates.sqlite"));
     await readCsvStream(input.path, async (row) => {
       stats.lidos += 1;
       recordRawCategories(row);
@@ -242,19 +247,22 @@ async function main() {
       const normalized = normalizeRow(row, pisoPreco);
       if (!normalized) return;
 
-      if (candidatesByItemId.has(normalized.itemId)) {
-        stats.dedupSubstituidos += 1;
-      }
-      candidatesByItemId.set(normalized.itemId, normalized);
+      spool!.add(normalized);
       stats.candidatosValidos += 1;
     });
+    spool.seal();
+    stats.dedupSubstituidos = stats.candidatosValidos - spool.size;
+    const selection = selectTopByCategory(spool.items(), topN, VALID_CATEGORY_SLUGS,
+      (item) => item.categoriaSlug, (a, b) => b.qualityScore - a.qualityScore || a.titulo.localeCompare(b.titulo, "pt-BR"));
+    selecionados = selection.items;
+    for (const [slug, counts] of selection.stats) stats.porCategoria.set(slug as CategoriaSlug, counts);
   } finally {
-    await input.cleanup();
+    try { spool?.close(); }
+    finally { try { await rm(spoolDir, { recursive: true, force: true }); } finally { await input?.cleanup(); } }
   }
 
   logRawCategoryDiagnostics();
 
-  const selecionados = selectTopNByCategory([...candidatesByItemId.values()], topN);
   const categoryCounts = [...stats.porCategoria.entries()]
     .map(([slug, s]) => `${slug}: mantidos=${s.mantidos}, cortados=${s.cortados}`)
     .join(" | ");
@@ -270,10 +278,8 @@ async function main() {
   const categoriaIds = await resolveCategoryIds(supabase, selecionados.map((item) => item.categoriaSlug));
   const rows = selecionados.map((item) => toProdutoUpsert(item, lojaId, requireCategoryId(categoriaIds, item.categoriaSlug), runStartedAt));
 
-  await upsertRows(supabase, rows);
-  stats.stale = await markStaleProducts(supabase, lojaId, runStartedAt);
-
-  printFinalStats();
+  try { await persistShopeeFeed(supabase, rows, lojaId, runStartedAt, stats); }
+  finally { printFinalStats(); }
 }
 
 async function resolveFeedInput(): Promise<FeedInput> {
@@ -298,18 +304,18 @@ async function resolveFeedInput(): Promise<FeedInput> {
 }
 
 async function downloadFeed(feedUrl: string): Promise<FeedInput> {
-  const dir = await mkdtemp(join(tmpdir(), "promodetec-shopee-"));
   const url = new URL(feedUrl);
+  if (!validFeedUrl(feedUrl)) throw new Error("shopee_invalid_feed_url");
+  const dir = await mkdtemp(join(tmpdir(), "promodetec-shopee-"));
   const extension = url.pathname.endsWith(".gz") ? ".csv.gz" : ".csv";
   const filePath = join(dir, `shopee-feed${extension}`);
 
   console.log(`[Shopee] Baixando feed para disco temporario: ${basename(filePath)}`);
-  const response = await fetch(feedUrl);
-  if (!response.ok || !response.body) {
-    throw new Error(`Falha ao baixar SHOPEE_FEED_URL: HTTP ${response.status}`);
-  }
-
-  await pipeline(Readable.fromWeb(response.body as never), createWriteStream(filePath));
+  try {
+    const response = await fetch(feedUrl, { signal: AbortSignal.timeout(120_000) });
+    if (!response.ok || !response.body) { await response.body?.cancel(); throw new Error("shopee_download_failed"); }
+    await pipeline(Readable.fromWeb(response.body as never), createWriteStream(filePath));
+  } catch (error) { await rm(dir, { recursive: true, force: true }); throw error; }
   return {
     path: filePath,
     source: `SHOPEE_FEED_URL (${url.hostname})`,
@@ -320,39 +326,11 @@ async function downloadFeed(feedUrl: string): Promise<FeedInput> {
 }
 
 async function readCsvStream(filePath: string, onRow: (row: ShopeeCsvRow) => Promise<void> | void): Promise<void> {
-  const source = createReadStream(filePath);
-  const input = await isGzip(filePath) ? source.pipe(createGunzip()) : source;
-
-  await pipeline(
-    input,
-    csv({
-      separator: ",",
-      mapHeaders: ({ header }: { header: string }) => header.trim().replace(/^\uFEFF/, ""),
-    }),
-    async function* (rows: AsyncIterable<ShopeeCsvRow>) {
-      let headersChecked = false;
-      for await (const row of rows) {
-        if (!headersChecked) {
-          headersChecked = true;
-          warnIfMissingHeaders(row);
-        }
-        await onRow(row);
-      }
-    },
-  );
-}
-
-async function isGzip(filePath: string): Promise<boolean> {
-  if (filePath.toLowerCase().endsWith(".gz")) return true;
-
-  const handle = await open(filePath, "r");
-  try {
-    const buffer = Buffer.alloc(2);
-    const { bytesRead } = await handle.read(buffer, 0, 2, 0);
-    return bytesRead === 2 && buffer[0] === 0x1f && buffer[1] === 0x8b;
-  } finally {
-    await handle.close();
-  }
+  let checked = false;
+  await readCsvRows(createReadStream(filePath), async (row) => {
+    if (!checked) { checked = true; warnIfMissingHeaders(row); }
+    await onRow(row);
+  }, { required: ["itemid", "title", "sale_price", "image_link", "product_link"] });
 }
 
 function warnIfMissingHeaders(row: ShopeeCsvRow) {
@@ -365,7 +343,7 @@ function warnIfMissingHeaders(row: ShopeeCsvRow) {
 
 function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeItem | null {
   const itemId = pick(row, ["itemid"]);
-  if (!itemId) {
+  if (!itemId || itemId.length > 128) {
     stats.semItemId += 1;
     increment(stats.invalidos, "itemid_ausente");
     return null;
@@ -389,7 +367,7 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
 
   // REGRA DO DONO (02/07): título em português — o glossário roda DEPOIS da
   // blacklist (que tem termos em inglês) e antes de qualquer uso do título.
-  const tituloPt = traduzirTitulo(titulo);
+  const tituloPt = traduzirTitulo(titulo).slice(0, 500);
 
   const precoAtual = parseMoney(pick(row, ["sale_price", "price", "Preco", "Preco atual"]));
   if (!isPositiveNumber(precoAtual)) {
@@ -411,14 +389,14 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
   const linkCru = pick(row, ["product_link"]);
   const linkShort = pick(row, ["product_short link", "Link de Afiliado"]);
   const url = afId && linkCru ? linkShopeeAfiliado(linkCru, afId) : (linkShort || linkCru);
-  if (!url || !hasAffiliateTracking(url)) {
+  if (!url || !validFeedUrl(url) || !hasAffiliateTracking(url)) {
     stats.semTracking += 1;
     increment(stats.invalidos, "link_sem_tracking_afiliado");
     return null;
   }
 
   const imagemUrl = pick(row, ["image_link", "image_link_3", "Imagem"]);
-  if (!imagemUrl) {
+  if (!imagemUrl || !validFeedUrl(imagemUrl)) {
     stats.semImagem += 1;
     increment(stats.invalidos, "imagem_ausente");
     return null;
@@ -445,34 +423,10 @@ function normalizeRow(row: ShopeeCsvRow, pisoPreco: number): NormalizedShopeeIte
     descontoPct,
     imagemUrl,
     url,
-    marca: loja,
+    marca: loja?.slice(0, 200) ?? null,
     categoriaSlug,
     qualityScore: computeQualityScore(row, descontoPct),
   };
-}
-
-function selectTopNByCategory(items: NormalizedShopeeItem[], topN: number): NormalizedShopeeItem[] {
-  const grouped = new Map<CategoriaSlug, NormalizedShopeeItem[]>();
-
-  for (const item of items) {
-    const bucket = grouped.get(item.categoriaSlug) ?? [];
-    bucket.push(item);
-    grouped.set(item.categoriaSlug, bucket);
-  }
-
-  const selected: NormalizedShopeeItem[] = [];
-  for (const [slug, bucket] of grouped) {
-    bucket.sort((a, b) => b.qualityScore - a.qualityScore || a.titulo.localeCompare(b.titulo, "pt-BR"));
-    const kept = bucket.slice(0, topN);
-    selected.push(...kept);
-    stats.porCategoria.set(slug, {
-      candidatos: bucket.length,
-      mantidos: kept.length,
-      cortados: Math.max(0, bucket.length - kept.length),
-    });
-  }
-
-  return selected;
 }
 
 function classifyCategory(row: ShopeeCsvRow): CategoriaSlug {
@@ -613,41 +567,6 @@ function requireCategoryId(categoryIds: Map<CategoriaSlug, string>, slug: Catego
   return id;
 }
 
-async function upsertRows(supabase: SupabaseClient, rows: ProdutoUpsert[]): Promise<void> {
-  for (let start = 0; start < rows.length; start += SUPABASE_BATCH_SIZE) {
-    const batch = rows.slice(start, start + SUPABASE_BATCH_SIZE);
-    const { error } = await supabase
-      .from("produtos")
-      .upsert(batch, { onConflict: "loja_id,sku_loja" });
-
-    if (error) {
-      stats.batchErrors += 1;
-      console.error(`[Shopee] Erro no batch ${start / SUPABASE_BATCH_SIZE + 1}: ${error.message}`);
-      continue;
-    }
-
-    stats.upserted += batch.length;
-  }
-}
-
-async function markStaleProducts(supabase: SupabaseClient, lojaId: string, runStartedAt: string): Promise<number | null> {
-  const { count, error } = await supabase
-    .from("produtos")
-    .update({ em_estoque: false }, { count: "exact" })
-    .eq("loja_id", lojaId)
-    .lt("visto_em", runStartedAt)
-    // BLINDAGEM (v4.0): a varredura NUNCA apaga oferta adicionada à mão pelo painel
-    // (sku_loja "manual:..."). O robô automático não derruba a curadoria humana.
-    .not("sku_loja", "like", "manual:%");
-
-  if (error) {
-    console.error(`[Shopee] Falha ao marcar stale: ${error.message}`);
-    return null;
-  }
-
-  return count ?? null;
-}
-
 function recordRawCategories(row: ShopeeCsvRow) {
   for (const key of ["global_category1", "global_category2", "global_category3"] as const) {
     const value = pick(row, [key]);
@@ -657,7 +576,7 @@ function recordRawCategories(row: ShopeeCsvRow) {
 }
 
 function logRawCategoryDiagnostics() {
-  console.log("[Shopee] Categorias brutas mais frequentes no feed:");
+  console.log("[Shopee] Categorias brutas mais frequentes (diagnóstico limitado a 1000 valores):");
   const top = [...stats.categoriasBrutas.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 40);
@@ -678,6 +597,7 @@ function printFinalStats() {
   console.log(`Total upserted: ${stats.upserted}`);
   console.log(`Total batches com erro: ${stats.batchErrors}`);
   console.log(`Total stale marcado fora de estoque: ${stats.stale ?? "nao executado"}`);
+  console.log(`Pico de RSS do processo: ${(process.resourceUsage().maxRSS / 1024).toFixed(1)} MiB`);
 
   const principaisMotivos = [...stats.invalidos.entries()]
     .sort((a, b) => b[1] - a[1])
@@ -765,6 +685,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function increment(map: Map<string, number>, key: string, by = 1) {
+  if (!map.has(key) && map.size >= 1000) return;
   map.set(key, (map.get(key) ?? 0) + by);
 }
 
@@ -777,6 +698,7 @@ function readPositiveNumberEnv(name: string, fallback: number): number {
 }
 
 main().catch((error) => {
-  console.error("[Shopee] Falha fatal na ingestao:", error);
+  const code = error instanceof Error && /^shopee_[a-z_]+$/.test(error.message) ? error.message : "feed_read_or_validation_failed";
+  console.error(`[Shopee] Ingestão incompleta (${code}); confira schema, volume, lotes e finalização.`);
   process.exit(1);
 });

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, listarVitrinePorLoja, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
+import { DiscoverySearch } from "@/components/discovery-search";
+import { SavedRadar } from "@/components/saved-radar";
+import { criarLeituraVitrine, listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, listarVitrinePorLoja, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { Comparacao, ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { NewsCarousel } from "@/components/news-carousel";
@@ -16,39 +18,23 @@ import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { ehLinkMonetizado } from "@/lib/afiliados";
+import { LOJAS_SOMENTE_COMPARADOR, permitidoNaHome, validarDisponibilidadeHome } from "@/core/home-catalog";
 import {
   Sparkles, Search, ArrowRight, Dumbbell,
-  Palette, SprayCan, Headphones,
+  Palette, SprayCan, Headphones, Clock3, LineChart,
 } from "lucide-react";
 
 export const revalidate = 7200;
-
-const HOME_DATA_TIMEOUT_MS = 8_000;
-const LOJAS_SOMENTE_COMPARADOR = new Set([
-  "kabum",
-  "terabyteshop",
-  "epocacosmeticos",
-]);
-
-function permitidoNaHome(produto: Produto): boolean {
-  const imagem = produto.imagemUrl?.toLowerCase() ?? "";
-  const placeholder = /(?:no[-_]?image|placeholder|sem[-_]?imagem|image[-_]?not[-_]?found)/.test(imagem);
-  return !LOJAS_SOMENTE_COMPARADOR.has(produto.lojaSlug)
-    && produto.emEstoque
-    && produto.precoAtual !== null
-    && Boolean(imagem)
-    && !placeholder;
-}
+export const metadata = { alternates: { canonical: "/" } };
 
 function filtrarParaHome<T extends Produto>(produtos: T[]): T[] {
-  return produtos.filter(permitidoNaHome);
+  return produtos.filter((produto) => permitidoNaHome(produto));
 }
 
 function comparacaoPermitidaNaHome(comparacao: Comparacao | null): Comparacao | null {
   if (!comparacao) return null;
   const ofertas = comparacao.ofertas
-    .filter(permitidoNaHome)
+    .filter((produto) => permitidoNaHome(produto))
     .sort((a, b) => (a.precoAtual ?? Number.POSITIVE_INFINITY) - (b.precoAtual ?? Number.POSITIVE_INFINITY));
   if (ofertas.length < 2) return null;
 
@@ -95,26 +81,18 @@ function produtosUnicos(...listas: Produto[][]): Produto[] {
   });
 }
 
-async function carregarComPrazo<T>(
-  carregar: () => Promise<T>,
-  fallback: T,
-): Promise<T> {
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    const prazo = new Promise<T>((resolve) => {
-      timeout = setTimeout(() => resolve(fallback), HOME_DATA_TIMEOUT_MS);
-    });
-
-    return await Promise.race([carregar(), prazo]);
-  } catch {
-    return fallback;
-  } finally {
-    if (timeout) clearTimeout(timeout);
-  }
-}
-
 export default async function Home() {
+  const leitura = criarLeituraVitrine();
+  let falhasOfertas = 0;
+  async function carregarComPrazo<T>(carregar: () => Promise<T>, fallback: T): Promise<T> {
+    try { return await carregar(); }
+    catch (error) {
+      falhasOfertas++;
+      const code = (error as { code?: unknown } | null)?.code;
+      console.warn("[home] source_unavailable", typeof code === "string" && /^[A-Z0-9_]{1,16}$/.test(code) ? code : leitura.signal.aborted ? "deadline" : "read_failed");
+      return fallback;
+    }
+  }
   // As fontes da Home são independentes. Carregá-las em paralelo evita somar a
   // latência de cada parceiro; o prazo preserva uma página funcional mesmo se
   // uma integração estiver lenta. O resultado completo é persistido no ISR/R2.
@@ -132,18 +110,18 @@ export default async function Home() {
     fit,
     todasNoticias,
   ] = await Promise.all([
-    carregarComPrazo<Produto[]>(() => listarAfiliados(70), []),
-    carregarComPrazo<ProdutoRodizio[]>(() => listarAfiliadosRodizio(9), []),
-    carregarComPrazo<Produto[]>(() => achadosBelezaCarrossel(40), []),
-    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("carrefour", 40), []),
-    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("mercadolivre", 64), []),
-    carregarComPrazo<Produto[]>(() => listarOfertas({ limit: 48 }), []),
-    carregarComPrazo<Awaited<ReturnType<typeof ofertasEmDestaque>>>(() => ofertasEmDestaque(8), []),
-    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 12), []),
-    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 12), []),
-    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 12), []),
-    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 12), []),
-    carregarComPrazo<Awaited<ReturnType<typeof listarNoticias>>>(() => listarNoticias(20), []),
+    carregarComPrazo<Produto[]>(() => listarAfiliados(70, leitura), []),
+    carregarComPrazo<ProdutoRodizio[]>(() => listarAfiliadosRodizio(9, 12, leitura), []),
+    carregarComPrazo<Produto[]>(() => achadosBelezaCarrossel(40, leitura), []),
+    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("carrefour", 40, leitura), []),
+    carregarComPrazo<Produto[]>(() => listarVitrinePorLoja("mercadolivre", 64, leitura), []),
+    carregarComPrazo<Produto[]>(() => listarOfertas({ limit: 48 }, leitura), []),
+    carregarComPrazo<Awaited<ReturnType<typeof ofertasEmDestaque>>>(() => ofertasEmDestaque(8, leitura), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["maquiagem", "skincare", "cabelos"], 12, leitura), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["perfumes-importados", "perfumes-arabes"], 12, leitura), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["fones-bluetooth", "smartwatch", "caixa-de-som", "power-bank", "webcam-acao"], 12, leitura), []),
+    carregarComPrazo<Produto[]>(() => achadosPorCategorias(["whey-protein", "creatina", "pre-treino", "fit-outros"], 12, leitura), []),
+    listarNoticias(20, leitura).catch(() => []),
   ]);
 
   const afiliadosHome = filtrarParaHome(afiliados);
@@ -176,7 +154,12 @@ export default async function Home() {
   const ofertasMercadoLivreVisiveis = ofertasMercadoLivreHome.length
     ? ofertasMercadoLivreHome
     : afiliadosHome.filter((produto) => produto.lojaSlug === "mercadolivre");
-  const destaquesPermitidos = destaques.filter(permitidoNaHome);
+  const destaquesPermitidos = filtrarParaHome(destaques);
+  validarDisponibilidadeHome([
+    afiliadosHome, produtosRodizioHome, carrosselBelezaHome, ofertasMonitoradasHome,
+    ofertasMercadoLivreHome, destaquesPermitidos, itensDestaqueHome.map((item) => item.produto),
+    belezaHome, perfumesHome, gadgetsHome, fitHome,
+  ], falhasOfertas);
   const destaquesVisiveis = destaquesPermitidos.length
     ? destaquesPermitidos
     : produtosUnicos(
@@ -192,6 +175,12 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
+      <DiscoverySearch />
+      <p className="mb-4 flex max-w-prose items-start gap-2 text-xs leading-relaxed text-muted">
+        <Clock3 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <span>Vitrines selecionadas entre coletas dos últimos 7 dias. Seleção atualizada em <time dateTime={new Date(leitura.agora).toISOString()}>{new Date(leitura.agora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</time>, horário de Brasília. Confira o preço final na loja.</span>
+      </p>
+      <SavedRadar />
       {/* LOJAS PARCEIRAS — primeiro elemento visível na home.
           Quem chega pelo Instagram (Shopee, Amazon…) vê a logo de cara
           e confirma que está no lugar certo. */}
@@ -199,7 +188,7 @@ export default async function Home() {
 
       {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática.
           Pool 150 → embaralha e exibe 15 por F5 (vitrine viva). */}
-      <ParceirosFeed produtos={afiliadosHome} exibir={15} />
+      <ParceirosFeed produtos={afiliadosHome} exibir={15} subtitulo="Seleção de coletas recentes — confira preço e disponibilidade na loja." />
 
       {/* BELEZA & PERFUMES — 2º carrossel logo ABAIXO, sentido REVERSO (movimento
           cruzado): perfumes importados/árabes + skincare/cabelos/maquiagem */}
@@ -218,15 +207,15 @@ export default async function Home() {
         <div className="relative grid items-center gap-10 py-10 lg:grid-cols-[1.05fr_.95fr] lg:py-14">
           <div className="order-2 min-w-0 animate-fade-up lg:order-1">
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-soft/60 px-3 py-1 text-xs text-muted">
-              <Sparkles className="h-3.5 w-3.5 text-brand-2" /> Inteligência de promoções · comparação em tempo real
+              <Sparkles className="h-3.5 w-3.5 text-brand-2" /> Ofertas, comparação e histórico de preços
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
+            <h2 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
               <span className="gradient-text">A oportunidade</span><br />antes do mercado.
-            </h1>
+            </h2>
             <p className="mt-5 max-w-md text-base text-muted">
               Monitoramos preços reais em tecnologia, eletro, ferramentas, suplementos, gadgets, perfumes e beleza,
-              detectamos descontos falsos e comparamos entre lojas com histórico de preço. Você compra no momento
-              certo — com dados, não com vitrine.
+              mostramos o histórico disponível e ajudamos você a comparar antes de escolher. Confira o preço final
+              e as condições de cada oferta na loja.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link href="/ofertas"><Button size="lg">Ver melhores ofertas <ArrowRight className="h-4 w-4" /></Button></Link>
@@ -240,34 +229,9 @@ export default async function Home() {
           {/* OFERTA EM DESTAQUE (real, em loop) — no mobile vem ANTES do texto */}
           <div className="order-1 min-w-0 lg:order-2">
             {itensDestaqueHome.length ? <FeaturedDealRotator itens={itensDestaqueHome} /> : (
-            <div className="ring-glow card-grad animate-fade-up rounded-3xl border border-line p-5 [animation-delay:.1s]">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-muted"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Exemplo ilustrativo</div>
-                <span className="rounded-md bg-bg-soft px-1.5 py-0.5 text-[10px] text-muted">demonstração</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-bg-soft/60 p-4">
-                <div>
-                  <div className="text-xs text-muted">Preço atual</div>
-                  <div className="font-display text-3xl font-extrabold text-emerald-400">R$ 3.499</div>
-                  <div className="text-[11px] text-emerald-300/80">38% abaixo da média</div>
-                </div>
-                <span className="rounded-xl bg-emerald-500/15 px-3 py-2 text-lg font-black text-emerald-300">−36%</span>
-              </div>
-              <div className="mt-4 flex h-24 items-end gap-1.5">
-                {[60,72,55,80,68,90,40,52,38,30,44,28].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-brand/30 to-cyan"
-                    style={{ height: `${h}%`, opacity: i > 7 ? 1 : .5 }} />
-                ))}
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                {[["Mínimo","R$ 3.4k","text-emerald-400"],["Médio","R$ 5.6k",""],["Máximo","R$ 6.9k","text-rose-400"]].map(([l,v,c]) => (
-                  <div key={l} className="rounded-lg bg-bg-soft/60 py-2">
-                    <div className="text-[10px] text-muted">{l}</div>
-                    <div className={`text-xs font-semibold ${c}`}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <EmptyState icon={<LineChart className="h-6 w-6 text-brand-2" />} title="Sem ofertas recentes em destaque"
+              hint="Não temos uma seleção recente para mostrar aqui agora. Explore o catálogo completo e confira a data de cada coleta."
+              action={<Link href="/ofertas" prefetch={false}><Button variant="outline" size="sm">Explorar ofertas</Button></Link>} />
             )}
           </div>
         </div>
@@ -298,8 +262,8 @@ export default async function Home() {
         {destaquesVisiveis.length ? (
           <DestaquesGrid pool={destaquesVisiveis} exibir={12} />
         ) : (
-          <EmptyState icon="🛰️" title="Coleta em preparação"
-            hint="As ofertas aparecem aqui assim que a primeira coleta rodar. Enquanto isso, explore as categorias pelo menu superior."
+          <EmptyState icon={<Search className="h-6 w-6 text-brand-2" />} title="Sem ofertas recentes para destacar"
+            hint="Consulte o catálogo completo e confira a data da coleta antes de escolher."
             action={<Link href="/ofertas"><Button variant="outline" size="sm">Ir para ofertas</Button></Link>} />
         )}
       </section>

@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-20T10:38:28.399Z",
+  "buildId": "1HnzyB3z6YhD4mq8MZYKI",
+  "reusedApplicationBuild": true,
+  "originalBuildEvidence": "home-validation-2026-10-20.json",
+  "savedBuildFilesUnchanged": 13,
+  "comparedFiles": 205,
+  "laboratoryMatchesWorkspace": true,
+  "sourceFingerprint": "8e00caed5748be542dda6d9ce411fe8b139d55c6e25351a284e2bab1d07d4302",
+  "validatorSha256": "8b028dd95e82dadb1bccfe5701d76c67b6fe6f18418b0ad921f22a73710a1410",
+  "workerHandlerSha256": "81fb3e19766082ea29d76c7de0e227138f89af7078b653f15655296f98e4d664",
+  "dependenciesUnchanged": true,
+  "packageLockUnchanged": true,
+  "typecheck": "passed",
+  "diffWhitespaceCheck": "passed",
+  "browserCheck": "not repeated: disabled in Work settings",
+  "productionMutation": false
+}

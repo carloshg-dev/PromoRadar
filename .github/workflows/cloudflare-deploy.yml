@@ -10,6 +10,10 @@ on:
         description: "Publicar no Cloudflare depois da validacao"
         type: boolean
         default: false
+      preflight_only:
+        description: "Inspecionar Cloudflare sem build nem publicacao"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,7 +23,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  audit:
+    if: ${{ github.event.inputs.preflight_only == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/cloudflare-preflight.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudflare-preflight-${{ github.run_id }}
+          path: reports/cloudflare-preflight.json
+          retention-days: 14
+          if-no-files-found: error
   cloudflare:
+    if: ${{ github.event.inputs.preflight_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

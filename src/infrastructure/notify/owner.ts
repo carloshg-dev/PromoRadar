@@ -130,6 +130,7 @@ export async function notificarNovoUsuario(u: { nome?: string | null; email?: st
 export async function notificarResumoDiario(d: {
   eventos: number; buscas: number; produtosVistos: number; novosUsuarios: number;
   topBuscas: Array<[string, number]>; topCategorias: Array<[string, number]>;
+  semResultado?: number; salvos?: number; compartilhamentos?: number; saidas?: number; redirects?: number;
 }): Promise<void> {
   const buscas = d.topBuscas.length ? d.topBuscas.map(([t, n]) => `• ${t} (${n})`).join("\n") : "—";
   const cats = d.topCategorias.length ? d.topCategorias.map(([c, n]) => `• ${c.replace(/-/g, " ")} (${n})`).join("\n") : "—";
@@ -138,6 +139,8 @@ export async function notificarResumoDiario(d: {
     cor: COR.info,
     campos: [
       { nome: "Resumo", valor: `${d.eventos} interações · ${d.buscas} buscas · ${d.produtosVistos} produtos vistos · ${d.novosUsuarios} novos usuários` },
+      { nome: "Ações para acompanhar", valor: `${d.semResultado ?? 0} buscas sem resultado · ${d.salvos ?? 0} ofertas salvas · ${d.compartilhamentos ?? 0} compartilhamentos · ${d.saidas ?? 0} intenções de saída` },
+      { nome: "Redirecionamentos", valor: `${d.redirects ?? 0} requisições de saída. Não representam pessoas únicas, vendas ou comissões.` },
       { nome: "Buscas mais feitas", valor: buscas },
       { nome: "Categorias mais vistas", valor: cats },
     ],

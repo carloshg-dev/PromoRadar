@@ -1,0 +1,86 @@
+{
+  "checkedAt": "2026-10-20T18:35:44.256Z",
+  "mode": "Read-only Cloudflare release preflight",
+  "checks": {
+    "settings": {
+      "status": 401,
+      "success": false,
+      "errors": [
+        {
+          "code": 10000
+        }
+      ],
+      "data": null
+    },
+    "deployments": {
+      "status": 401,
+      "success": false,
+      "errors": [
+        {
+          "code": 10000
+        }
+      ],
+      "data": null
+    },
+    "versions": {
+      "status": 429,
+      "success": false,
+      "errors": [
+        {
+          "code": 10429
+        }
+      ],
+      "data": null
+    },
+    "scriptSubdomain": {
+      "status": 401,
+      "success": false,
+      "errors": [
+        {
+          "code": 10000
+        }
+      ],
+      "data": null
+    },
+    "accountSubdomain": {
+      "status": 429,
+      "success": false,
+      "errors": [
+        {
+          "code": 10429
+        }
+      ],
+      "data": null
+    },
+    "domains": {
+      "status": 401,
+      "success": false,
+      "errors": [
+        {
+          "code": 10000
+        }
+      ],
+      "data": null
+    },
+    "zones": {
+      "status": 403,
+      "success": false,
+      "errors": [
+        {
+          "code": 9109
+        }
+      ],
+      "data": null
+    },
+    "buckets": {
+      "status": 401,
+      "success": false,
+      "errors": [
+        {
+          "code": 10000
+        }
+      ],
+      "data": null
+    }
+  }
+}

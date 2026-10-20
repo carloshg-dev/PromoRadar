@@ -1,0 +1,38 @@
+name: Relatório de crescimento (somente leitura)
+
+on:
+  schedule:
+    - cron: "30 12 * * *" # 09:30 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: growth-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run report:growth -- --days 7 --output reports/growth.json
+      - if: ${{ !cancelled() }}
+        run: npm run report:catalog -- --days 7 --output reports/catalog-health.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promodetec-growth-${{ github.run_id }}
+          path: reports/*.json
+          retention-days: 30
+          if-no-files-found: error

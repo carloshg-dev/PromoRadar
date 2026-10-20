@@ -1,26 +1,26 @@
 "use client";
 import Script from "next/script";
 import { useEffect, useState } from "react";
-import { CONSENT_KEY } from "@/components/analytics/cookie-consent";
+import { hasAnalyticsConsent, CONSENT_EVENT } from "./consent";
 
 /**
  * Microsoft Clarity — heatmaps, gravações de sessão, cliques e navegação.
  * Projeto x614k77uhr. Só carrega em produção (sessões de dev não sujam os dados)
  * E somente após o usuário ACEITAR cookies (LGPD) — escuta o evento
- * `pd-consent-change` do banner. Eventos de NEGÓCIO (cookieless) vão p/ o Supabase.
+ * `pd-consent-change` do banner. A medição própria também respeita essa escolha.
  */
 const CLARITY_ID = "x614k77uhr";
 
 export function Clarity() {
   const [ok, setOk] = useState(false);
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
+    if (process.env.NODE_ENV !== "production" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;
     const check = () => {
-      try { if (localStorage.getItem(CONSENT_KEY) === "accepted") setOk(true); } catch { /* ignore */ }
+      setOk(hasAnalyticsConsent());
     };
     check();
-    window.addEventListener("pd-consent-change", check);
-    return () => window.removeEventListener("pd-consent-change", check);
+    window.addEventListener(CONSENT_EVENT, check);
+    return () => window.removeEventListener(CONSENT_EVENT, check);
   }, []);
   if (!ok) return null;
   return (

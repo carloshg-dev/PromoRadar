@@ -49,6 +49,7 @@ export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }:
       <div className="label-mono text-[11px] text-muted">Lojas parceiras</div>
       <DragScroll className="mt-2 flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
+          prefetch={false}
           href={href()}
           className={`flex shrink-0 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition ${
             !ativa ? "border-brand bg-brand/15 text-brand-2" : "border-line text-muted hover:bg-bg-soft hover:text-white"
@@ -62,6 +63,7 @@ export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }:
           const logo = logoDaLoja(l);
           return (
             <Link
+              prefetch={false}
               key={l.slug}
               href={href(l.slug)}
               title={l.rede ? `${l.nome} · parceira ${l.rede}` : l.nome}

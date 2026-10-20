@@ -1,71 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
+import { batchSchema, isAutomatedRequest, sameRequestOrigin } from "@/core/analytics/events";
 
 export const dynamic = "force-dynamic";
+const MAX_BYTES = 8_192;
 
-const TIPOS = new Set(["busca", "ver_produto", "abrir_comparacao", "ver_categoria"]);
-
-function geoHeader(req: NextRequest, cloudflareName: string, vercelName: string): string | null {
-  const raw = req.headers.get(cloudflareName) ?? req.headers.get(vercelName);
-  if (!raw) return null;
+async function readBody(req: Request): Promise<unknown> {
+  if (Number(req.headers.get("content-length")) > MAX_BYTES) throw new Error("size");
+  const reader = req.body?.getReader();
+  if (!reader) throw new Error("empty");
+  const decoder = new TextDecoder();
+  let bytes = 0, body = "";
   try {
-    return decodeURIComponent(raw).slice(0, 120);
-  } catch {
-    return raw.slice(0, 120);
-  }
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > MAX_BYTES) { await reader.cancel(); throw new Error("size"); }
+      body += decoder.decode(value, { stream: true });
+    }
+    return JSON.parse(body + decoder.decode());
+  } finally { reader.releaseLock(); }
 }
 
-/** Detecta dispositivo e navegador a partir do user-agent (grosso, suficiente p/ analytics). */
-function uaInfo(ua: string): { dispositivo: string; navegador: string; bot: boolean } {
-  const bot = /bot|crawl|spider|preview|lighthouse|headless|monitor/i.test(ua);
-  const dispositivo = /mobile|android|iphone|ipad/i.test(ua) ? "mobile" : "desktop";
-  const navegador =
-    /edg/i.test(ua) ? "edge"
-    : /chrome|crios/i.test(ua) ? "chrome"
-    : /firefox|fxios/i.test(ua) ? "firefox"
-    : /safari/i.test(ua) ? "safari"
-    : "outro";
-  return { dispositivo, navegador, bot };
-}
-
-/**
- * Coletor de eventos de analytics (write-only). Chamado pelo cliente via
- * sendBeacon/fetch. Geo e device vêm dos headers (servidor), não confiáveis do
- * cliente. Bots são ignorados. Sem leitura pública — só o painel admin lê.
- */
 export async function POST(req: NextRequest) {
-  let body: Record<string, unknown>;
-  try { body = await req.json(); } catch { return new NextResponse(null, { status: 204 }); }
-
-  const tipo = String(body.tipo ?? "");
-  if (!TIPOS.has(tipo)) return new NextResponse(null, { status: 204 });
-
+  const empty = () => new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } });
+  if (process.env.PROMODETEC_ANALYTICS_DISABLED === "1" || req.headers.get("sec-gpc") === "1" || req.headers.get("dnt") === "1") return empty();
   const ua = req.headers.get("user-agent") ?? "";
-  const { dispositivo, navegador, bot } = uaInfo(ua);
-  if (bot) return new NextResponse(null, { status: 204 }); // não conta robô
-
-  const refererRaw = req.headers.get("referer") ?? "";
-  let referer: string | null = null;
-  try { referer = refererRaw ? new URL(refererRaw).host : null; } catch { referer = null; }
-
-  const str = (v: unknown, max = 200) => (typeof v === "string" && v ? v.slice(0, max) : null);
-
+  if (isAutomatedRequest(ua, req.headers.get("purpose") ?? req.headers.get("sec-purpose") ?? "")) return empty();
+  if (!sameRequestOrigin(req) || req.headers.get("sec-fetch-site") === "cross-site") return empty();
+  let body: unknown;
+  try { body = await readBody(req); } catch { return empty(); }
+  const parsed = batchSchema.safeParse(body);
+  if (!parsed.success) return empty();
+  const device = /mobile|android|iphone|ipad/i.test(ua) ? "mobile" : "desktop";
+  const browser = /edg/i.test(ua) ? "edge" : /chrome|crios/i.test(ua) ? "chrome" : /firefox|fxios/i.test(ua) ? "firefox" : /safari/i.test(ua) ? "safari" : "outro";
+  const country = req.headers.get("cf-ipcountry") ?? req.headers.get("x-vercel-ip-country");
+  const rows = parsed.data.events.map((event) => ({
+    tipo: event.tipo, termo: event.termo ?? null, produto_id: event.produtoId ?? null,
+    loja_slug: event.lojaSlug ?? null, categoria_slug: event.categoriaSlug ?? null,
+    origem: event.origem ?? null, dispositivo: device, navegador: browser,
+    pais: country && /^[A-Z]{2}$/.test(country) ? country : null,
+  }));
   try {
-    const sb = createAdminClient();
-    await sb.from("eventos").insert({
-      tipo,
-      termo: str(body.termo, 120),
-      produto_id: str(body.produtoId, 40),
-      loja_slug: str(body.lojaSlug, 40),
-      categoria_slug: str(body.categoriaSlug, 40),
-      origem: str(body.origem, 60),
-      referer,
-      dispositivo,
-      navegador,
-      cidade: geoHeader(req, "cf-ipcity", "x-vercel-ip-city"),
-      pais: geoHeader(req, "cf-ipcountry", "x-vercel-ip-country"),
-    });
-  } catch { /* analytics nunca quebra a navegação */ }
-
-  return new NextResponse(null, { status: 204 });
+    const { error } = await createAdminClient().from("eventos").insert(rows).abortSignal(AbortSignal.timeout(3_000));
+    if (error) throw error;
+  } catch {
+    console.warn("analytics_write_failed");
+    return NextResponse.json({ error: "measurement_unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  }
+  return empty();
 }

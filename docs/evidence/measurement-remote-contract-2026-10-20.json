@@ -1,0 +1,1601 @@
+{
+  "checkedAt": "2026-10-20T18:47:57.856Z",
+  "run": "https://github.com/carloshg-dev/PromoRadar/actions/runs/39477445211",
+  "sha": "d5802ca",
+  "mode": "Postgres catalog inspection in forced read-only transaction; no user/event rows",
+  "tables": [
+    {
+      "name": "cliques",
+      "rlsForced": false,
+      "rlsEnabled": true
+    },
+    {
+      "name": "eventos",
+      "rlsForced": false,
+      "rlsEnabled": true
+    },
+    {
+      "name": "scrape_jobs",
+      "rlsForced": false,
+      "rlsEnabled": true
+    },
+    {
+      "name": "usuarios",
+      "rlsForced": false,
+      "rlsEnabled": true
+    }
+  ],
+  "policies": [
+    {
+      "name": "own_usuario",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "table": "usuarios",
+      "using": "(auth.uid() = auth_id)",
+      "command": "SELECT",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "name": "own_usuario_insert",
+      "check": "(auth.uid() = auth_id)",
+      "roles": [
+        "public"
+      ],
+      "table": "usuarios",
+      "using": null,
+      "command": "INSERT",
+      "permissive": "PERMISSIVE"
+    },
+    {
+      "name": "own_usuario_upsert",
+      "check": "(auth.uid() = auth_id)",
+      "roles": [
+        "public"
+      ],
+      "table": "usuarios",
+      "using": "(auth.uid() = auth_id)",
+      "command": "UPDATE",
+      "permissive": "PERMISSIVE"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "trg_new_user",
+      "table": "users",
+      "schema": "auth",
+      "function": "fn_handle_new_user",
+      "functionSchema": "public",
+      "securityDefiner": true,
+      "roleMentionedInFunction": false
+    },
+    {
+      "name": "trg_protege_privilegios",
+      "table": "usuarios",
+      "schema": "public",
+      "function": "fn_protege_privilegios",
+      "functionSchema": "public",
+      "securityDefiner": true,
+      "roleMentionedInFunction": true
+    }
+  ],
+  "constraints": [
+    {
+      "name": "cliques_pkey",
+      "type": "p",
+      "table": "cliques",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cliques_produto_id_fkey",
+      "type": "f",
+      "table": "cliques",
+      "definition": "FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "eventos_pkey",
+      "type": "p",
+      "table": "eventos",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "eventos_produto_id_fkey",
+      "type": "f",
+      "table": "eventos",
+      "definition": "FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "scrape_jobs_pkey",
+      "type": "p",
+      "table": "scrape_jobs",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "usuarios_auth_id_key",
+      "type": "u",
+      "table": "usuarios",
+      "definition": "UNIQUE (auth_id)"
+    },
+    {
+      "name": "usuarios_email_key",
+      "type": "u",
+      "table": "usuarios",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "name": "usuarios_pkey",
+      "type": "p",
+      "table": "usuarios",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "usuarios_role_chk",
+      "type": "c",
+      "table": "usuarios",
+      "definition": "CHECK ((role = ANY (ARRAY['super_admin'::text, 'admin'::text, 'moderador'::text, 'operador'::text, 'user'::text])))"
+    }
+  ],
+  "columnGrants": [
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "loja_slug",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "loja_slug",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "loja_slug",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "loja_slug",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "movel",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "movel",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "movel",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "movel",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "origem",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "origem",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "origem",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "origem",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "produto_id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "produto_id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "produto_id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "cliques",
+      "column": "produto_id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "categoria_slug",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "categoria_slug",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "categoria_slug",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "categoria_slug",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "cidade",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "cidade",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "cidade",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "cidade",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "dispositivo",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "dispositivo",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "dispositivo",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "dispositivo",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "loja_slug",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "loja_slug",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "loja_slug",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "loja_slug",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "navegador",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "navegador",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "navegador",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "navegador",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "origem",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "origem",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "origem",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "origem",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "pais",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "pais",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "pais",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "pais",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "produto_id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "produto_id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "produto_id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "produto_id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "referer",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "referer",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "referer",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "referer",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "termo",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "termo",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "termo",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "termo",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "tipo",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "tipo",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "tipo",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "eventos",
+      "column": "tipo",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "anon",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "adapter_key",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "erros",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "finalizado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "iniciado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_coletados",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "itens_salvos",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "scrape_jobs",
+      "column": "status",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "auth_id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "criado_via",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "email",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "is_admin",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "authenticated",
+      "table": "usuarios",
+      "column": "role",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "auth_id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "auth_id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "auth_id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "auth_id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "avatar_url",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_em",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_em",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_em",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_em",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_via",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_via",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_via",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "criado_via",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "email",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "email",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "email",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "email",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "id",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "id",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "id",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "id",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "interesses",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "is_admin",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "is_admin",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "is_admin",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "is_admin",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "nome",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "onboarding_completo",
+      "privilege": "UPDATE"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "role",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "role",
+      "privilege": "REFERENCES"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "role",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "table": "usuarios",
+      "column": "role",
+      "privilege": "UPDATE"
+    }
+  ],
+  "serverVersion": "17.6",
+  "transactionReadOnly": "on"
+}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/infrastructure/supabase/server";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
 import { notificarNovoUsuario } from "@/infrastructure/notify/owner";
+import { safeAuthDestination } from "@/core/auth-redirect";
 
 /** Avisa o dono se este login é de um cadastro recém-criado (≤5 min). Lê com
  *  service_role (independe de RLS). Nunca derruba o fluxo de login. */
@@ -27,7 +28,7 @@ async function avisarSeNovoUsuario(authId: string): Promise<void> {
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeAuthDestination(searchParams.get("next"));
   if (code) {
     const supabase = createServerSupabase();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
           .from("usuarios").select("onboarding_completo").eq("auth_id", user.id).maybeSingle();
         if (!perfil?.onboarding_completo) return NextResponse.redirect(`${origin}/onboarding`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(new URL(next, origin));
     }
   }
   return NextResponse.redirect(`${origin}/login?erro=auth`);

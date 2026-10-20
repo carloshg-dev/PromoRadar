@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Copy, Check, ExternalLink, Ticket } from "lucide-react";
 import { corLoja } from "@/lib/utils";
 import type { CupomLomadee } from "@/lib/lomadee-cupons";
+import { track } from "./analytics/track";
 
 /** Card de cupom: código copiável + CTA afiliado. Logo com fallback de monograma. */
 export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
@@ -15,6 +16,7 @@ export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
     try {
       await navigator.clipboard.writeText(cupom.codigo);
       setCopiado(true);
+      track("copiar_cupom", { origem: "cupons" });
       setTimeout(() => setCopiado(false), 2200);
     } catch { /* clipboard bloqueado → usuário copia na mão */ }
   }

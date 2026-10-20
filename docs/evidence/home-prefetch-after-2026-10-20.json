@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-20T05:28:36.852Z",
+  "build": "Yh1j5k8hDk7bXKCBrbB4f",
+  "startedAt": "2026-10-20T05:27:18.532Z",
+  "windowSeconds": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "requests": 16,
+  "counts": {
+    "document": 2,
+    "imageOptimizer": 1,
+    "otherRsc": 13
+  },
+  "uniqueProductPages": 0,
+  "mode": "Local Next production server; browser idle after navigation, no merchant click; analytics disabled",
+  "limitation": "One sample with rotating pools and browser/server caches; not production CPU, Core Web Vitals, audience or a controlled benchmark."
+}

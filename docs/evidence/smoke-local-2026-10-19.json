@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-10-19T06:16:08.026Z",
+  "mode": "Local Next production server, HTTP/SSR checks; no browser visual QA",
+  "trackingDisabled": true,
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "canonical": "https://promodetec.com.br",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 680
+    },
+    {
+      "path": "/produto/6ab32ba9-6da0-4d17-9a48-17da3713efc3",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/produto/6ab32ba9-6da0-4d17-9a48-17da3713efc3",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 1235
+    },
+    {
+      "path": "/categoria/fones-bluetooth",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/categoria/fones-bluetooth",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 2323
+    },
+    {
+      "path": "/ofertas?busca=fone",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/ofertas",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 2278
+    },
+    {
+      "path": "/ofertas?pagina=Infinity",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/ofertas",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 3328
+    },
+    {
+      "path": "/privacidade",
+      "status": 200,
+      "canonical": null,
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 567
+    },
+    {
+      "path": "/comparar",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/comparar",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 3293
+    },
+    {
+      "path": "/cupons",
+      "status": 200,
+      "canonical": "https://promodetec.com.br/cupons",
+      "h1": 1,
+      "remoteAnalyticsBeforeConsent": 0,
+      "milliseconds": 598
+    }
+  ],
+  "sitemap": {
+    "status": 200,
+    "totalUrls": 1044,
+    "productUrls": 1000
+  },
+  "protectedRoute": {
+    "status": 307,
+    "destination": "/login"
+  },
+  "stylesheet": {
+    "status": 200,
+    "contentType": "text/css; charset=UTF-8"
+  },
+  "search": {
+    "status": 200,
+    "suggestions": 8
+  },
+  "limitation": "No browser interaction, desktop/mobile rendering or production CPU measurement. No outbound /r URL requested."
+}

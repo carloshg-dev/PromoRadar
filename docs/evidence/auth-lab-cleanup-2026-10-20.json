@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-20T15:08:30.179144+00:00",
+  "localOnly": true,
+  "supabaseContainersRunning": 0,
+  "ownedDockerDaemonStopped": true,
+  "verifiedClosedLoopbackPorts": [
+    3216,
+    55321,
+    55322,
+    55324
+  ],
+  "volumesPreserved": true,
+  "globalDockerReset": false,
+  "productionMutation": false
+}

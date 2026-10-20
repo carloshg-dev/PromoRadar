@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-10-20T15:12:37.567Z",
+  "buildId": "lStAG4HrK68e0lzWShgzw",
+  "rebuiltAfterProductFixes": true,
+  "comparedFiles": 266,
+  "laboratoryMatchesWorkspace": true,
+  "authApplicationSourcesMatchWorkspace": true,
+  "sourceFingerprint": "903f14e6e1264e39b3c71753fa72f59ba21de4f64973035c068a647a78437d8d",
+  "workerHandlerSha256": "9ecce711dd09d9b8258e71007009cdd2a08456948a8cceb44970ee739b8d5b2f",
+  "authValidatorSha256": "93a70e84b3c59207768c66e952b00aaf0f9aa6d07b69e4db30acfd19f7ff48de",
+  "localFixtureSha256": "0bec3ff7ade1699c6fca0a6d6df3c5547d9cc797e90e548e5a5df707d796c44f",
+  "dependenciesUnchanged": true,
+  "packageLockUnchanged": true,
+  "typecheck": "passed",
+  "growthAndCollectionTests": {
+    "passed": 64,
+    "failed": 0
+  },
+  "authIntegration": {
+    "passed": 16,
+    "failed": 0,
+    "runtime": "Next dev + real local Supabase"
+  },
+  "workerHttp": {
+    "passed": 23,
+    "failed": 0,
+    "compatibilityDate": "2026-08-23",
+    "analyticsDisabled": true
+  },
+  "dryRun": {
+    "uploadKiB": 7551.88,
+    "gzipKiB": 1573.82,
+    "deployed": false
+  },
+  "queryTimeoutMessagesInBuild": 0,
+  "existingWarnings": [
+    "OpenNext direct mode queue",
+    "Supabase process.version in Edge runtime",
+    "webpack cache large string serialization"
+  ],
+  "diffWhitespaceCheck": "passed",
+  "browserCheck": "disabled in Work settings; no browser QA repeated",
+  "localAuthLabStopped": true,
+  "productionMutation": false,
+  "limit": "Local reference database policies do not prove remote schema, RLS or grants; Worker authenticated persistence and real bindings not tested"
+}
