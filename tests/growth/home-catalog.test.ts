@@ -148,17 +148,17 @@ test("consulta em andamento é interrompida pelo cancelamento da renderização"
   assert.equal(observed, true);
 });
 
-test("recomendações exigem preços recentes; comparador mantém seu contrato completo", async (context) => {
+test("recomendações exigem preços recentes; comparador indisponível não inicia varredura como fallback", async (context) => {
   let calls = 0;
   context.mock.method(globalThis, "fetch", async (url: unknown) => {
     calls++;
     const query = new URL(String(url));
-    assert.equal(query.searchParams.has("atualizado_em"), calls === 1);
+    assert.equal(query.searchParams.has("atualizado_em"), true);
     return Response.json([]);
   });
   await listarOfertas({ limit: 4 });
-  await listarComparacoes({ categoria: "fones-bluetooth" });
-  assert.equal(calls, 2);
+  await assert.rejects(listarComparacoes({ categoria: "fones-bluetooth" }));
+  assert.equal(calls, 1);
 });
 
 test("concorrência total é limitada mesmo com várias vitrines e pools independentes", async (context) => {

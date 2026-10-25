@@ -1,6 +1,6 @@
 import test, { after } from "node:test";
 import assert from "node:assert/strict";
-import { listarOfertas, listarOfertasPaginado } from "../../src/infrastructure/repositories/produtos.repo";
+import { listarOfertas, listarOfertasPaginado, listarUrlsProdutos } from "../../src/infrastructure/repositories/produtos.repo";
 
 const priorUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const priorKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -43,4 +43,17 @@ test("recomendações fora da home obedecem à mesma janela de preço", async co
 test("falha de consulta paginada não vira catálogo vazio válido", async context => {
   context.mock.method(globalThis, "fetch", async () => Response.json({ code: "57014", message: "timeout" }, { status: 500 }));
   await assert.rejects(listarOfertasPaginado({ busca: "fone" }));
+});
+
+test("sitemap usa uma amostra por cursor e só publica produtos recentes, disponíveis e com preço", async context => {
+  let calls = 0;
+  context.mock.method(globalThis, "fetch", async (url: unknown) => {
+    calls++; const query = new URL(String(url));
+    assert.equal(query.pathname, "/rest/v1/produtos"); assert.equal(query.searchParams.get("order"), "id.asc");
+    assert.equal(query.searchParams.get("limit"), "1000");
+    assert.equal(query.searchParams.has("atualizado_em"), false);
+    const row = { id: "12345678-1234-4234-8234-123456789abc", atualizado_em: new Date(Date.now() - 1000).toISOString(), em_estoque: true, preco_atual: 99 };
+    return Response.json([row, { ...row, em_estoque: false }, { ...row, preco_atual: 0 }, { ...row, atualizado_em: "2020-01-01" }]);
+  });
+  assert.equal((await listarUrlsProdutos()).length, 1); assert.equal(calls, 1);
 });

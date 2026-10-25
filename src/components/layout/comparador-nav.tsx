@@ -34,7 +34,7 @@ export function ComparadorNav({ verticalAtiva, categoriaAtiva }: { verticalAtiva
         {VERTICAIS.map((v) => {
           const on = v.slug === vertical.slug;
           return (
-            <Link key={v.slug} href={`/comparar?vertical=${v.slug}`}
+            <Link prefetch={false} key={v.slug} href={`/comparar?vertical=${v.slug}`}
               className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
                 on ? ABA_ATIVA[v.slug] ?? ABA_ATIVA.tech : "border-line text-muted hover:bg-bg-soft hover:text-white"}`}>
               <span className={`h-2 w-2 rounded-full ${v.accent.dot}`} />{v.label}
@@ -58,6 +58,6 @@ function CategoriaChip({ vertical, slug, label, ativo }: { vertical: string; slu
   const href = slug === "all" ? `/comparar?vertical=${vertical}` : `/comparar?vertical=${vertical}&categoria=${slug}`;
   const classe = ativo ? CHIP_ATIVO[vertical] ?? CHIP_ATIVO.tech : "border-line text-muted hover:bg-bg-soft hover:text-white";
   return (
-    <Link href={href} className={`rounded-full border px-3 py-1 text-xs transition ${classe}`}>{label}</Link>
+    <Link prefetch={false} href={href} className={`rounded-full border px-3 py-1 text-xs transition ${classe}`}>{label}</Link>
   );
 }

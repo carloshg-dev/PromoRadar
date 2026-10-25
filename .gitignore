@@ -26,3 +26,6 @@ feeds/
 
 # Saída da Máquina de Conteúdo (regenerada; não versionar)
 achados-do-dia/
+
+# Relatorios operacionais regeneraveis
+/reports/

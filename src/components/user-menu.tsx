@@ -22,8 +22,8 @@ export function UserMenu() {
   if (!email) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
-        <Link href="/cadastro"><Button size="sm">Criar conta</Button></Link>
+        <Link prefetch={false} href="/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
+        <Link prefetch={false} href="/cadastro"><Button size="sm">Criar conta</Button></Link>
       </div>
     );
   }
@@ -35,8 +35,8 @@ export function UserMenu() {
       {open && (
         <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-line bg-bg-card shadow-xl">
           <div className="border-b border-line px-3 py-2.5 text-xs text-muted">{email}</div>
-          <Link href="/admin" onClick={() => setOpen(false)} className="block px-3 py-2 text-sm hover:bg-bg-soft">Dashboard</Link>
-          <Link href="/onboarding" onClick={() => setOpen(false)} className="block px-3 py-2 text-sm hover:bg-bg-soft">Meus interesses</Link>
+          <Link prefetch={false} href="/admin" onClick={() => setOpen(false)} className="block px-3 py-2 text-sm hover:bg-bg-soft">Dashboard</Link>
+          <Link prefetch={false} href="/onboarding" onClick={() => setOpen(false)} className="block px-3 py-2 text-sm hover:bg-bg-soft">Meus interesses</Link>
           <button onClick={sair} className="block w-full px-3 py-2 text-left text-sm text-rose-300 hover:bg-bg-soft">Sair</button>
         </div>
       )}

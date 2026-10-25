@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-10-20T23:39:03.371Z",
+  "worker": "promodetec",
+  "activeVersionPrefix": "ade85b7e",
+  "source": "Authenticated settings DOM, runtime sections only",
+  "runtimeVariables": [
+    {
+      "name": "CRON_SECRET",
+      "present": true
+    },
+    {
+      "name": "LOMADEE_API_KEY",
+      "present": true
+    },
+    {
+      "name": "ML_CLIENT_ID",
+      "present": true
+    },
+    {
+      "name": "ML_CLIENT_SECRET",
+      "present": true
+    },
+    {
+      "name": "ML_REDIRECT_URI",
+      "present": true
+    },
+    {
+      "name": "NEXT_PUBLIC_SITE_URL",
+      "present": true
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "present": true
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_URL",
+      "present": true
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "present": true
+    }
+  ],
+  "bindings": [
+    {
+      "name": "NEXT_INC_CACHE_R2_BUCKET",
+      "present": true
+    },
+    {
+      "name": "WORKER_SELF_REFERENCE",
+      "present": true
+    }
+  ],
+  "r2BucketPresent": true,
+  "selfReferencePresent": true,
+  "valuesExported": false,
+  "mutation": false
+}

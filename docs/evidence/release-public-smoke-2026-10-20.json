@@ -1,0 +1,164 @@
+{
+  "checkedAt": "2026-10-20T23:34:41.739Z",
+  "origin": "https://promodetec.com.br",
+  "releaseCommit": "4bf5e517644fd2ddea1693387f2f7541f1fb6f93",
+  "mode": "GET/HEAD only; DNT/GPC and explicit bot UA; manual redirects; no account or merchant navigation",
+  "passed": 17,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "home",
+      "passed": true,
+      "status": 200,
+      "ms": 6505,
+      "bytes": 776826,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "asset-css",
+      "passed": true,
+      "status": 200,
+      "ms": 314,
+      "bytes": 71526,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "asset-js",
+      "passed": true,
+      "status": 200,
+      "ms": 74,
+      "bytes": 172836,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "www",
+      "passed": true,
+      "status": 200,
+      "server": "cloudflare"
+    },
+    {
+      "name": "/robots.txt",
+      "passed": true,
+      "status": 200,
+      "ms": 489,
+      "bytes": 2938,
+      "server": "cloudflare",
+      "cache": "HIT"
+    },
+    {
+      "name": "/sitemap.xml",
+      "passed": true,
+      "status": 200,
+      "ms": 607,
+      "bytes": 200621,
+      "server": "cloudflare",
+      "cache": "HIT"
+    },
+    {
+      "name": "/login",
+      "passed": true,
+      "status": 200,
+      "ms": 3913,
+      "bytes": 147906,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "/cupons",
+      "passed": true,
+      "status": 200,
+      "ms": 545,
+      "bytes": 177063,
+      "server": "cloudflare",
+      "cache": "HIT"
+    },
+    {
+      "name": "admin-anonymous",
+      "passed": true,
+      "status": 307,
+      "ms": 37,
+      "bytes": 0,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "auth-callback-no-code",
+      "passed": true,
+      "status": 307,
+      "ms": 423,
+      "bytes": 0,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "search-read",
+      "passed": true,
+      "status": 200,
+      "ms": 1909,
+      "bytes": 1976,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "product-read",
+      "passed": true,
+      "status": 200,
+      "ms": 2944,
+      "bytes": 239464,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "offers-fresh",
+      "passed": true,
+      "status": 200,
+      "ms": 941,
+      "bytes": 720395,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "comparison-read",
+      "passed": true,
+      "status": 200,
+      "ms": 13270,
+      "bytes": 715191,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "outbound-head",
+      "passed": true,
+      "status": 204,
+      "ms": 28,
+      "bytes": 0,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "outbound-prefetch",
+      "passed": true,
+      "status": 204,
+      "ms": 387,
+      "bytes": 0,
+      "server": "cloudflare",
+      "cache": null
+    },
+    {
+      "name": "outbound-bot",
+      "passed": true,
+      "status": 307,
+      "ms": 102,
+      "bytes": 0,
+      "server": "cloudflare",
+      "cache": null
+    }
+  ],
+  "limits": [
+    "No authenticated OAuth, production event insertion, affiliate attribution, sustained CPU or load test",
+    "No unique audience or revenue measurement"
+  ]
+}

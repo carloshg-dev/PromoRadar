@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-20T23:38:03.632Z",
+  "origin": "https://promodetec.com.br",
+  "releaseCommit": "4bf5e517644fd2ddea1693387f2f7541f1fb6f93",
+  "activeVersionPrefix": "ade85b7e",
+  "checks": {
+    "homeDesktop1440": true,
+    "homeMobile390": true,
+    "searchSubmit": true,
+    "searchResultsWithin7Days": 60,
+    "mobileMenuOpenClose": true,
+    "saveOfferAndHomeRadar": true,
+    "removedOnlyOwnTestSavedOffer": true,
+    "horizontalOverflow": false,
+    "consoleWarningsOrErrors": 0
+  },
+  "privacy": {
+    "cookieChoice": "rejected before home navigation",
+    "syntheticTrackingRequestsObserved": 0,
+    "networkTruncated": true,
+    "networkHasMore": false,
+    "searchNavigationSample": {
+      "trackingRequestsObserved": 0,
+      "truncated": false,
+      "hasMore": false
+    }
+  },
+  "screenshots": [
+    "home-desktop.jpg",
+    "home-mobile.jpg",
+    "search-mobile.jpg",
+    "radar-mobile.jpg"
+  ],
+  "limits": [
+    "Browser observation does not prove server-side event persistence, OAuth, unique visitors, commissions or CPU stability",
+    "Radar was tested only in this browser; it does not send price alerts",
+    "Later full-session CDP buffer was truncated; absence of analytics requests is asserted only for the complete search-navigation sample"
+  ]
+}

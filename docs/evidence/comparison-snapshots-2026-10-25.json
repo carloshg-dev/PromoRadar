@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "version": "cc12f85a-56e4-40a4-a3ea-2444f534b0bb",
+  "generatedAt": "2026-10-25T12:46:17.778Z",
+  "rows": 38128,
+  "comparisons": 212,
+  "scopes": 45,
+  "maxBatch": 250,
+  "maxGroupStores": 3,
+  "published": true
+}

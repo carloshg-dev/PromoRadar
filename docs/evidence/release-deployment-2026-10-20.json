@@ -1,0 +1,74 @@
+{
+  "checkedAt": "2026-10-20T23:38:47.477Z",
+  "pr": {
+    "mergeCommit": {
+      "oid": "4bf5e517644fd2ddea1693387f2f7541f1fb6f93"
+    },
+    "mergedAt": "2026-10-20T23:30:01Z",
+    "state": "MERGED",
+    "url": "https://github.com/carloshg-dev/PromoRadar/pull/1"
+  },
+  "productionBranch": "codex/cloudflare-migration",
+  "releaseCommit": "4bf5e517644fd2ddea1693387f2f7541f1fb6f93",
+  "releaseCandidateCodeTreeMatchesMerge": true,
+  "growthCi": {
+    "sha": "d078b282083383e5c140980f6f3310ba7a6b4804",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/39515226475",
+    "jobs": [
+      {
+        "name": "contracts",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "cloudflarePackageValidation": {
+    "sha": "4bf5e517644fd2ddea1693387f2f7541f1fb6f93",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/39515413275",
+    "jobs": [
+      {
+        "name": "cloudflare",
+        "conclusion": "success"
+      },
+      {
+        "name": "audit",
+        "conclusion": "skipped"
+      }
+    ]
+  },
+  "cloudflareBuildChecks": [
+    {
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-20T23:32:57Z",
+      "url": "https://dash.cloudflare.com/0fcbdab34f0d44e0e948a4bb2f051810/workers/services/view/promodetec/production/builds/be30fb6a-b0ce-4d57-b4e6-247c4ce8bfa6"
+    }
+  ],
+  "dashboard": {
+    "source": "Authenticated Cloudflare deployment page DOM",
+    "activeVersionPrefix": "ade85b7e",
+    "fullVersionIdExported": false,
+    "trafficPercent": 100,
+    "rollbackVersionPrefix": "b1c6a140",
+    "earlyObservation": {
+      "deployedAgo": "3 minutes",
+      "errorRate": "0%",
+      "medianCpu": "125.04ms",
+      "requestRate": "0 req/sec"
+    },
+    "limit": "Very early sparse sample, including QA and cold reads; not comparable to the previous 24-hour CPU/error baseline."
+  },
+  "deploymentMethod": "Existing Cloudflare Git Builds triggered automatically by merge; no manual hook used",
+  "dnsChanged": false,
+  "remoteDdl": false,
+  "databaseMigration": false,
+  "uniqueAudienceOrRevenueMeasured": false,
+  "limits": [
+    "Vercel account-blocked status remains unrelated to the serving Cloudflare release",
+    "OAuth and production event persistence not tested",
+    "No proof of ongoing scheduled execution in main"
+  ]
+}

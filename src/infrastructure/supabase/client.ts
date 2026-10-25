@@ -7,3 +7,8 @@ export function createPublicClient(fetcher?: typeof fetch) {
   if (!url || !key) throw new Error("Supabase env (public) ausente.");
   return createClient(url, key, { auth: { persistSession: false }, ...(fetcher ? { global: { fetch: fetcher } } : {}) });
 }
+
+/** Só leituras públicas: a URL e os filtros identificam uma entrada compartilhada. */
+export function createCachedPublicClient() {
+  return createPublicClient((input, init) => fetch(input, { ...init, next: { revalidate: 300 } }));
+}

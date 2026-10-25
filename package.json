@@ -21,6 +21,7 @@
     "digest": "tsx scripts/daily-digest.ts",
     "report:growth": "tsx scripts/growth-report.ts",
     "report:catalog": "tsx scripts/catalog-health.ts",
+    "cache:comparisons": "tsx scripts/build-comparison-snapshots.ts",
     "test:growth": "tsx --test tests/growth/*.test.ts",
     "test:collection": "tsx --test tests/collection/*.test.ts",
     "test:worker": "tsx scripts/validate-worker.ts",
