@@ -34,3 +34,11 @@ Workers Free mantém seu limite por requisição. Bloquear tráfego e reduzir co
 - Regras WAF/rate limiting podem ser desativadas individualmente no painel.
 - Aplicação pode retornar à versão anterior, mantendo snapshots privados sem uso. O índice anterior pode ser restaurado a partir do recibo/versionamento enquanto os objetos existirem.
 - Não desfazer cadastro de produtos, métricas, histórico ou links de afiliados. Nenhuma dessas tabelas foi alterada por esta etapa.
+
+## Continuação: validação e publicação
+
+- PR #2 integrada em `codex/cloudflare-migration`, SHA `f3f055e32215f88a0bfb0f866e506a1a655d69ee`, 25/10/2026 às 10:15 de Brasília. CI de contratos `40196163599` e validação OpenNext/dry-run `40196162807` passaram. A publicação automática no Cloudflare foi iniciada; confirmação de versão ainda será registrada.
+- `npm ci` no laboratório isolado, 78 testes Linux e 23 contratos HTTP no workerd aprovados; gzip 1.582,57 KiB. O primeiro ensaio com `node_modules` compartilhado falhou no require dinâmico do manifesto; após instalação própria, o pacote foi recompilado e o ensaio integral passou. Não foi alterado o manifesto manualmente para esconder o problema.
+- QA local com Next de produção e leitura de snapshots reais: 60 grupos na vertical Tech, 29 na categoria de placas de vídeo e comparação presente no detalhe do produto. Desktop 1440×900 e celular 390×844 sem overflow, menu móvel funcional e console sem erros/avisos na amostra. Analytics foi desabilitado no servidor do laboratório; nenhum clique humano de afiliado foi seguido.
+- PR #3 integrada em `main`, SHA `2b4887793f74e82017989806245a10f82e3ef2ec`, adicionando SOMENTE o workflow. Primeiro run manual `40196927610` iniciado. O código da aplicação continua no ramo de produção separado; não declarar continuidade agendada a partir de execução manual.
+- Descoberta uma entrada alternativa pública via `workers.dev` e URLs de prévia. Candidato adicional fixa `workers_dev=false` e `preview_urls=false`; a desativação efetiva será conferida após o deploy. Domínios oficiais e autorreferência por service binding permanecem configurados.

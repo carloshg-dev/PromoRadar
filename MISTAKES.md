@@ -132,3 +132,16 @@ Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e preven
 ## Manutenção do registro
 
 Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transforme o procedimento em skill somente se ele for recorrente e verificável.
+
+## 2026-10-25: Build verde com dependências compartilhadas não provou o Worker
+- Fato observado: o pacote compilou, mas 17 dos 23 contratos HTTP falharam com require dinâmico de middleware-manifest.json no workerd.
+- Causa: a hipótese de caminho real das dependências compartilhadas foi confirmada operacionalmente pela repetição com npm ci no diretório próprio; não houve alteração funcional do manifesto.
+- Correção: dependências instaladas no laboratório, recompilação e 23 contratos repetidos com sucesso.
+- Regra preventiva: para homologar o pacote OpenNext, instalar dependências no próprio checkout saneado e verificar o runtime; symlink de node_modules não comprova paridade de empacotamento.
+- Evidência: docs/evidence/worker-lab-2026-10-25.json.
+
+## 2026-10-25: Ordenação global do sitemap interrompeu publicação
+- Fato observado: dois builds falharam com 57014 ao ordenar produtos por atualização; a consulta isolada também falhou.
+- Causa: o plano SQL não foi perfilado; a forma de consulta é o gargalo observado, sem atribuir a um índice inexistente não verificado.
+- Correção: amostra limitada por cursor/PK e validação de estoque, preço e recência; 1.000 URLs lidas em 1,53 s e build aprovado.
+- Regra preventiva: sitemap não pode depender de ordenação global cara nem converter timeout em catálogo vazio silencioso.
