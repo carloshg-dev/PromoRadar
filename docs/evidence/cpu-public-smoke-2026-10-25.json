@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-10-25T13:28:27.766Z",
+  "workerVersion": "f6e91608",
+  "checks": [
+    {
+      "name": "home",
+      "status": 200,
+      "passed": true,
+      "ms": 914,
+      "bytes": 776374
+    },
+    {
+      "name": "offers",
+      "status": 200,
+      "passed": true,
+      "ms": 4945,
+      "bytes": 178584
+    },
+    {
+      "name": "comparison",
+      "status": 200,
+      "passed": true,
+      "ms": 1996,
+      "bytes": 702470
+    },
+    {
+      "name": "product",
+      "status": 200,
+      "passed": true,
+      "ms": 3136,
+      "bytes": 254344
+    },
+    {
+      "name": "coupons",
+      "status": 200,
+      "passed": true,
+      "ms": 454,
+      "bytes": 206236
+    },
+    {
+      "name": "sitemap",
+      "status": 200,
+      "passed": true,
+      "ms": 393,
+      "bytes": 200621
+    },
+    {
+      "name": "robots",
+      "status": 200,
+      "passed": true,
+      "ms": 350,
+      "bytes": 2938
+    },
+    {
+      "name": "login",
+      "status": 200,
+      "passed": true,
+      "ms": 1404,
+      "bytes": 147839
+    },
+    {
+      "name": "public-search",
+      "status": 200,
+      "passed": true,
+      "ms": 918,
+      "bytes": 1926
+    },
+    {
+      "name": "admin-anonymous",
+      "status": 307,
+      "passed": true,
+      "ms": 23,
+      "bytes": 0
+    },
+    {
+      "name": "affiliate-head",
+      "status": 204,
+      "passed": true,
+      "ms": 506,
+      "bytes": 0
+    },
+    {
+      "name": "affiliate-prefetch",
+      "status": 204,
+      "passed": true,
+      "ms": 84,
+      "bytes": 0
+    },
+    {
+      "name": "affiliate-bot",
+      "status": 307,
+      "passed": true,
+      "ms": 103,
+      "bytes": 0
+    },
+    {
+      "name": "blocked-AwarioBot",
+      "status": 403,
+      "passed": true,
+      "ms": 15,
+      "bytes": 0
+    },
+    {
+      "name": "blocked-MJ12bot",
+      "status": 403,
+      "passed": true,
+      "ms": 39,
+      "bytes": 0
+    },
+    {
+      "name": "www",
+      "status": 200,
+      "passed": true,
+      "ms": 224,
+      "bytes": 0
+    },
+    {
+      "name": "worker-alias-disabled",
+      "status": 404,
+      "passed": true,
+      "ms": 44,
+      "bytes": 0
+    },
+    {
+      "name": "catalog-data-/ofertas",
+      "status": 200,
+      "productLinks": 60,
+      "passed": true
+    },
+    {
+      "name": "catalog-data-/categoria/placas-de-video",
+      "status": 200,
+      "productLinks": 60,
+      "passed": true
+    }
+  ],
+  "passed": 19,
+  "failed": 0,
+  "limits": [
+    "HTTP latency is not Worker CPU",
+    "No human affiliate redirect, login, purchase or consented event insertion performed",
+    "Geo-IP rule and rate-limit threshold were verified in configuration; no production load test"
+  ]
+}

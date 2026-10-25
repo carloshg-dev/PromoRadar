@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-10-25T13:28:27.766Z",
+  "productionBranch": "codex/cloudflare-migration",
+  "productionSha": "675b9d318f7a23cf1d24d598d188750be0f8a710",
+  "workerVersion": "f6e91608",
+  "trafficPercent": 100,
+  "buildId": "cf5fcd66-04f9-474c-9761-0f6dd61466a7",
+  "mainSha": "2b4887793f74e82017989806245a10f82e3ef2ec",
+  "snapshotRun": 40196927610,
+  "snapshotRunEvent": "workflow_dispatch",
+  "snapshotRunConclusion": "success",
+  "scheduledContinuityProven": false,
+  "snapshotReceipt": {
+    "schema": 1,
+    "version": "efc67271-4fd3-4021-9388-7ab5e5ea64f6",
+    "generatedAt": "2026-10-25T13:17:59.203Z",
+    "rows": 38087,
+    "comparisons": 211,
+    "scopes": 45,
+    "maxBatch": 250,
+    "maxGroupStores": 3,
+    "published": true
+  },
+  "cpuBeforeAfterComparable": false,
+  "snapshotSourceSha": "f3f055e32215f88a0bfb0f866e506a1a655d69ee",
+  "aliases": {
+    "workersDevEnabled": false,
+    "previewUrlsEnabled": false,
+    "workersDevStatus": 404,
+    "officialStatuses": [
+      200,
+      200
+    ]
+  },
+  "storage": {
+    "private": true,
+    "anonymousDownloadStatus": 400
+  },
+  "validation": {
+    "tests": 78,
+    "localHttpPassed": 23,
+    "publicHttpPassed": 19,
+    "productionBrowserComparisons": 60,
+    "localGzipKiB": 1582.57
+  }
+}
