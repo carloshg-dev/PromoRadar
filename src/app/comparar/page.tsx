@@ -19,13 +19,14 @@ export default async function Comparar({ searchParams }: { searchParams: { verti
   const dentroDaVertical = vertical.categorias.some((c) => c.slug === categoria);
 
   let comparacoes: Awaited<ReturnType<typeof listarComparacoes>> = [];
+  let available = true;
   try {
     comparacoes = await listarComparacoes(
       dentroDaVertical
         ? { categoria, limit: 60 }
         : { categorias: vertical.categorias.map((c) => c.slug), limit: 60 },
     );
-  } catch { comparacoes = []; }
+  } catch { available = false; }
 
   return (
     <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
@@ -45,9 +46,9 @@ export default async function Comparar({ searchParams }: { searchParams: { verti
           {comparacoes.map((c) => <ComparacaoCard key={c.chave} c={c} />)}
         </div>
       ) : (
-        <EmptyState className="mt-8" icon="⚖️" title={`Sem comparações em ${vertical.label} ainda`}
-          hint="Comparações aparecem quando o mesmo modelo é encontrado em 2+ lojas. Conforme mais lojas são coletadas, esta vertical se enche."
-          action={<Link href="/ofertas"><Button variant="outline" size="sm">Ver ofertas</Button></Link>} />
+        <EmptyState className="mt-8" icon="⚖️" title={available ? `Sem comparações em ${vertical.label} ainda` : "Comparações temporariamente indisponíveis"}
+          hint={available ? "Comparações aparecem quando o mesmo modelo é encontrado em 2+ lojas." : "Não foi possível carregar as comparações atualizadas. Você pode continuar consultando as ofertas."}
+          action={<Link prefetch={false} href="/ofertas"><Button variant="outline" size="sm">Ver ofertas</Button></Link>} />
       )}
     </main>
   );

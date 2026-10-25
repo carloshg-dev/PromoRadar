@@ -1,5 +1,14 @@
 # Estado operacional do PromoDetec
 
+## Proteção e candidato de CPU em 25/10/2026
+
+- Aprovado pelo usuário em "faça": aplicadas duas regras WAF e uma regra de rate limiting no domínio. Awario/MJ12 recebem 403 no catálogo; a leitura normal testada recebeu 200. A georrestrição cobre GET/HEAD das rotas públicas de catálogo e busca, com exceção para `cf.client.bot`; integrações, autenticação, `/api/track` e `/r/` não entram nessa expressão. Limite: 60 leituras de catálogo por IP em dez segundos, bloqueio de dez segundos, com exceção para bots verificados.
+- Criado bucket PRIVADO `catalog-comparisons` no Supabase existente, sem DDL ou mudança de RLS das tabelas. Geração Node validada e executada: 38.128 ofertas recentes, 212 comparações, 45 escopos; índice `cc12f85a-56e4-40a4-a3ea-2444f534b0bb`, leitura de lista e comparação individual confirmadas. O site ainda precisa do novo release para consumir esses objetos.
+- Candidato em worktree separado `codex/cpu-protection`: snapshots com publicação atômica, cache de páginas finais de ofertas, prefetch removido da navegação restante e logo estático. A ordenação global do sitemap causou `57014` em dois builds; a amostra limitada por cursor entregou 1.000 URLs em 1,53 s e destravou o build Next/OpenNext.
+- Credenciais S3/R2 locais receberam HTTP 401; não foram rotacionadas. O acesso ao Storage privado existente foi verificado com a service role já disponível. Migração para outra conta segue adiada.
+- O workflow novo exige estar no ramo padrão para receber agendamentos/workflow_run; faz checkout explícito do ramo publicado `codex/cloudflare-migration`. Não declarar agendamento ativo apenas por sua presença no candidato.
+- Ainda pendentes neste registro: CI, homologação final, publicação e janela de CPU comparável. Detalhes em `docs/CPU_PROTECTION_2026-10-25.md`.
+
 ## Publicação confirmada em 20/10/2026
 
 - Publicação autorizada pelo usuário e concluída pelo fluxo Git/Builds existente. [PR #1](https://github.com/carloshg-dev/PromoRadar/pull/1) integrado em **`codex/cloudflare-migration`**, SHA **`4bf5e517644fd2ddea1693387f2f7541f1fb6f93`**, às 20:30 de Brasília. Cloudflare concluiu o build às 20:32; painel confirmou versão **`ade85b7e`**, Ready, **100% do tráfego**. `main` não foi atualizado.

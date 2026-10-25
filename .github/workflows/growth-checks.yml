@@ -8,6 +8,8 @@ on:
       - "tests/collection/**"
       - "scripts/ingest-shopee-feed.ts"
       - "scripts/catalog-health.ts"
+      - "scripts/build-comparison-snapshots.ts"
+      - ".github/workflows/comparison-snapshots.yml"
       - "scripts/run-scraper.ts"
       - "scripts/validate-collection-memory.ts"
       - "middleware.ts"

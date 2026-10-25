@@ -17,8 +17,7 @@ import { productMetadata, productStructuredData, safeJsonLd } from "@/lib/produc
 import { hasRecentPrice } from "@/core/offer-freshness";
 import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles } from "lucide-react";
 
-// 30 min: preços mudam no máx. 3x/dia e a comparação por classe varre até
-// 2000 linhas — cache mais longo corta ~5x o egress do Supabase free.
+// A página e os dados públicos têm cache; a comparação vem do snapshot do runner.
 export const revalidate = 1800;
 // Cache do render Next fica na página; o repositório também é usado em scripts Node.
 const cachedProduct = cache(obterProduto);
@@ -92,7 +91,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
                 <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
                   <Scale className="h-4 w-4 text-brand-2" /> Comparar entre lojas
                 </h2>
-                <Link href="/comparar" className="shrink-0 text-xs text-brand-2 hover:underline">ver todas →</Link>
+                <Link prefetch={false} href="/comparar" className="shrink-0 text-xs text-brand-2 hover:underline">ver todas →</Link>
               </div>
               <StorePriceBars ofertas={comp.ofertas} menorPreco={comp.menorPreco} maiorPreco={comp.maiorPreco} />
               <p className="mt-3 text-[10px] text-muted">Comparação por classe ({comp.rotulo}) — pode incluir marcas/variações diferentes.</p>

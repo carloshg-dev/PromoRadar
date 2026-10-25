@@ -58,13 +58,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         
         <footer className="mx-auto max-w-page px-4 py-10 text-center text-xs text-muted sm:px-6 lg:px-10">
           <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <Link href="/sobre" className="transition hover:text-zinc-200">Sobre</Link>
-            <Link href="/comparar" className="transition hover:text-zinc-200">Comparador</Link>
-            <Link href="/noticias" className="transition hover:text-zinc-200">Notícias</Link>
-            <Link href="/privacidade" className="transition hover:text-zinc-200">Privacidade</Link>
+            <Link prefetch={false} href="/sobre" className="transition hover:text-zinc-200">Sobre</Link>
+            <Link prefetch={false} href="/comparar" className="transition hover:text-zinc-200">Comparador</Link>
+            <Link prefetch={false} href="/noticias" className="transition hover:text-zinc-200">Notícias</Link>
+            <Link prefetch={false} href="/privacidade" className="transition hover:text-zinc-200">Privacidade</Link>
             <PrivacySettings />
-            <Link href="/termos" className="transition hover:text-zinc-200">Termos</Link>
-            <Link href="/contato" className="transition hover:text-zinc-200">Contato</Link>
+            <Link prefetch={false} href="/termos" className="transition hover:text-zinc-200">Termos</Link>
+            <Link prefetch={false} href="/contato" className="transition hover:text-zinc-200">Contato</Link>
           </nav>
           PromoDetec · detecte, compare, economize · {new Date().getFullYear()}
           <a href={`mailto:${SUPPORT_EMAIL}`} className="mt-2 block text-[11px] text-brand-2 transition hover:text-white">

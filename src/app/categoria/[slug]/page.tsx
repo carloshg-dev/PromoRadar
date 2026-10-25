@@ -1,4 +1,4 @@
-import { listarOfertasPaginado } from "@/infrastructure/repositories/produtos.repo";
+import { paginaOfertasPublica as listarOfertasPaginado } from "@/services/public-catalog-cache";
 import { GridProdutos } from "@/components/vitrine/grid-produtos";
 import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
