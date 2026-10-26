@@ -133,6 +133,13 @@ Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e preven
 
 Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transforme o procedimento em skill somente se ele for recorrente e verificável.
 
+## 2026-10-25: Tipagem da aplicação não incluía scripts de comparação
+
+- Fato observado: o typecheck da aplicação passou, mas a verificação explícita dos scripts detectou parâmetro mutável incompatível com as verticais readonly.
+- Causa: `scripts/` está fora do tsconfig principal; executar via tsx não faz checagem estática.
+- Correção: contrato do gerador aceita entradas readonly; `tsconfig.comparisons.json` e gate próprio no CI cobrem geração e retenção, com os tipos globais do Next para os imports compartilhados.
+- Regra preventiva: mudanças em runners exigem tipagem do entrypoint real, além de testes e typecheck do frontend.
+
 ## 2026-10-25: Build verde com dependências compartilhadas não provou o Worker
 - Fato observado: o pacote compilou, mas 17 dos 23 contratos HTTP falharam com require dinâmico de middleware-manifest.json no workerd.
 - Causa: a hipótese de caminho real das dependências compartilhadas foi confirmada operacionalmente pela repetição com npm ci no diretório próprio; não houve alteração funcional do manifesto.

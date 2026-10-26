@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false, "types": ["node", "next/types/global"] },
+  "include": ["scripts/build-comparison-snapshots.ts", "scripts/retain-comparison-snapshots.ts"],
+  "exclude": ["node_modules"]
+}

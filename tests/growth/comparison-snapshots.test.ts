@@ -39,10 +39,23 @@ test("geração por lotes encontra loja tardia, publica o índice por último e 
     write: async (path, body) => { output.set(path, JSON.parse(body)); },
   });
   assert.equal([...output.keys()].at(-1), "v1/index.json");
+  assert.deepEqual(output.get(`v1/${receipt.version}/index.json`), output.get("v1/index.json"));
   assert.equal(receipt.rows, 3); assert.equal(receipt.comparisons, 1); assert.equal(receipt.maxGroupStores, 2);
   const path = `v1/${receipt.version}/lists/${await snapshotHash("placas-de-video")}.json`;
   const result = output.get(path) as { comparacoes: typeof comparison[] };
   assert.equal(result.comparacoes.length, 1); assert.equal(result.comparacoes[0]!.menorPreco, 100);
+});
+
+test("falha no manifesto de geração completa preserva o ponteiro anterior", async () => {
+  const writes: string[] = [];
+  await assert.rejects(buildComparisonSnapshots({ categories: ["placas-de-video"], verticals: [], now,
+    batches: async function* () { yield [a, b]; },
+    write: async path => {
+      if (/^v1\/[^/]+\/index\.json$/.test(path)) throw new Error("manifest_failed");
+      writes.push(path);
+    },
+  }), /manifest_failed/);
+  assert.ok(writes.length > 0); assert.ok(!writes.includes("v1/index.json"));
 });
 
 test("erro de leitura, gravação, lote excessivo ou catálogo vazio preserva o índice anterior", async () => {

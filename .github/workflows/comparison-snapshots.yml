@@ -35,9 +35,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run cache:comparisons -- --publish
+      - name: Simular retenção do cache sem excluir objetos
+        run: npm run cache:comparisons:retention
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: comparison-snapshots-${{ github.run_id }}
-          path: reports/comparison-snapshots.json
+          path: |
+            reports/comparison-snapshots.json
+            reports/comparison-retention.json
           if-no-files-found: error
           retention-days: 14

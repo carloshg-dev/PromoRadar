@@ -11,8 +11,8 @@ import { SNAPSHOT_MAX_BYTES, snapshotHash, snapshotScope, snapshotSchema } from 
 import { hasRecentPrice } from "@/core/offer-freshness";
 
 interface SnapshotBuildOptions {
-  categories: string[];
-  verticals: { categorias: { slug: string }[] }[];
+  categories: readonly string[];
+  verticals: readonly { categorias: readonly { slug: string }[] }[];
   batches: (category: string, now: number) => AsyncIterable<Produto[]>;
   write: (path: string, body: string) => Promise<void>;
   now?: number;
@@ -96,6 +96,8 @@ export async function buildComparisonSnapshots(options: SnapshotBuildOptions) {
     }
     if (!scopes.has("all")) scopes.set("all", []);
     for (const [scope, items] of scopes) await writeSnapshot("lists", scope, items);
+    // O manifesto permite reter/limpar somente gerações comprovadamente completas.
+    await options.write(`v1/${index.version}/index.json`, JSON.stringify(index));
     // O ponteiro só muda após TODAS as leituras e gravações válidas; falhas preservam a versão anterior.
     await options.write("v1/index.json", JSON.stringify(index));
     return { ...index, rows, comparisons, scopes: scopes.size, maxBatch: 250, maxGroupStores };
