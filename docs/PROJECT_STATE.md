@@ -7,6 +7,7 @@
 - Simulação real com guard de rede somente leitura: três gerações legadas preservadas, zero candidatos e zero exclusões; sete GETs e duas listagens. HEAD público confirmou catálogo 200, bots Awario/MJ12 403 e alias 404. Conexões MCP atuais não listam os recursos alvo; leitura do Storage usa a configuração de servidor existente, sem alterar acessos ou recuperar o painel.
 - A melhoria nova depende de revisão e integração separadas: código no ramo de produção e somente workflow em `main`. O fluxo automático proposto executa apenas dry-run. Não houve merge, deploy, mudança WAF/DNS ou coleta nova nesta continuação. Produção permanece no release registrado abaixo; CPU comparável ainda aguarda acompanhamento.
 - Detalhes e limites em `docs/COMPARISON_RETENTION_2026-10-25.md`.
+- Entrega para revisão: [PR #5](https://github.com/carloshg-dev/PromoRadar/pull/5), código/manifestos, e [PR #6](https://github.com/carloshg-dev/PromoRadar/pull/6), somente workflow em `main`, dependente de #5. Ambas em rascunho. CI `40256036514` passou no código `d2fc5e3b0d81825e6154020dfbf26bf3cb858382`: tipos da aplicação e runners, 89 testes Linux e ensaio de memória de coleta. Vercel mantém bloqueio anterior da conta; não confundir esse status com o Cloudflare em produção. Documentação posterior não muda o código funcional validado.
 
 ## Proteção e CPU: publicação confirmada em 25/10/2026
 

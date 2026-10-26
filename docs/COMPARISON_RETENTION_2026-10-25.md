@@ -36,3 +36,12 @@ O procedimento respeita `CLAUDE.md`: “Não faça deploy, DNS, DDL, rotação d
 - [Supabase: exclusão de objetos](https://supabase.com/docs/guides/storage/management/delete-objects): usar Storage API; exclusão é permanente, não SQL.
 - [Supabase: listagem paginada](https://supabase.com/docs/reference/javascript/storage-from-list): a implementação usa o método estável `list`, com limite/offset e ordenação; não depende do `listV2` experimental.
 - Evidência agregada em `evidence/comparison-retention-2026-10-25.json`. A validação e as PRs são registradas ao concluir a revisão local.
+
+## Validação concluída e entrega para revisão
+
+- [PR #5: código](https://github.com/carloshg-dev/PromoRadar/pull/5) e [PR #6: workflow em main](https://github.com/carloshg-dev/PromoRadar/pull/6), ambas em rascunho, sem integração. #6 depende da integração de #5.
+- [CI 40256036514](https://github.com/carloshg-dev/PromoRadar/actions/runs/40256036514), código `d2fc5e3b0d81825e6154020dfbf26bf3cb858382`, Node 22/Linux: tipagem da aplicação e dos dois scripts, 67 testes de crescimento (dez de retenção), 22 de coleta e teste de memória da coleta aprovados. Os ensaios de 20 mil/200 mil linhas de coleta mediram 129,3/157,9 MiB; não são medição de RSS da retenção nem de CPU do Worker.
+- Windows: tipagem da aplicação/dos scripts aprovada; 88 contratos antes do último caso de retenção e dez casos de retenção após esse acréscimo. CLI `--help` funciona sem credencial; `--apply` sem UUID esperado é rejeitado antes de acessar o banco.
+- YAML válido; somente dry-run na etapa automática; zero valores de secrets conhecidos nos arquivos staged. Os quatro screenshots locais da etapa anterior ficaram fora dos commits.
+- Não foi repetido build/preview do Worker: os callers afetados são somente runners/testes, sem novo import em rotas. A validação de runtime público desta etapa usa o release já publicado. O status Vercel continua com o bloqueio anterior da conta; o CI de contratos é o gate aprovado, sem afirmar que todos os provedores estão verdes.
+- Nenhum merge, deploy ou comando de exclusão remota foi executado. O relatório e o diff foram abertos no Codex para revisão humana.
