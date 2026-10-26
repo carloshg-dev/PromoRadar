@@ -41,8 +41,8 @@ export function CollectAllButton({ adapters }: { adapters: readonly string[] }) 
       {rodando && atual && <span className="text-xs text-muted">agora: {atual}</span>}
       {(salvos > 0 || erros > 0) && (
         <span className="text-xs text-muted">
-          <span className="text-emerald-300">{salvos} salvos</span>
-          {erros > 0 && <span className="text-rose-300"> · {erros} lojas com erro</span>}
+          <span className="text-neon">{salvos} salvos</span>
+          {erros > 0 && <span className="text-danger"> · {erros} lojas com erro</span>}
         </span>
       )}
     </div>

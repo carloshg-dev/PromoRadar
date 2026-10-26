@@ -9,7 +9,7 @@ import { TrendingDown, ImageOff } from "lucide-react";
  */
 export function ComparacaoCard({ c }: { c: Comparacao }) {
   return (
-    <article className="glass hover-raise flex flex-col overflow-hidden rounded-2xl border border-line animate-fade-up">
+    <article className="catalog-card flex min-w-0 flex-col overflow-hidden">
       {/* header */}
       <div className="flex items-start gap-3 border-b border-line p-4">
         <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
@@ -22,10 +22,10 @@ export function ComparacaoCard({ c }: { c: Comparacao }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="label-mono mb-1 flex items-center gap-1.5 text-[10px] text-muted">
-            <span>{c.categoriaEmoji}</span>{c.categoriaNome ?? c.categoriaSlug}
+            {c.categoriaNome ?? c.categoriaSlug}
             <span className="text-line">·</span>{c.lojas} lojas
           </div>
-          <h3 className="truncate font-display text-lg font-bold tracking-tightest text-white">{c.rotulo}</h3>
+          <h3 className="line-clamp-2 font-display text-lg font-semibold tracking-tight text-ink">{c.rotulo}</h3>
         </div>
       </div>
 
@@ -38,9 +38,9 @@ export function ComparacaoCard({ c }: { c: Comparacao }) {
       {c.economia > 0 && (
         <div className="mt-auto flex items-center justify-between border-t border-line bg-neon/5 px-4 py-2.5">
           <span className="flex items-center gap-1.5 text-xs text-neon">
-            <TrendingDown className="h-3.5 w-3.5" /> economize até {formatBRL(c.economia)}
+            <TrendingDown className="h-3.5 w-3.5" /> diferença de {formatBRL(c.economia)}
           </span>
-          <span className="rounded-md bg-neon/15 px-1.5 py-0.5 text-[11px] font-bold text-neon">−{c.economiaPct}%</span>
+          <span className="rounded-md bg-neon/10 px-1.5 py-0.5 text-[11px] font-semibold text-neon">−{Math.round(c.economiaPct)}%</span>
         </div>
       )}
     </article>

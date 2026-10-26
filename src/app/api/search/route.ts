@@ -1,19 +1,28 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/infrastructure/supabase/server";
+import { createPublicClient } from "@/infrastructure/supabase/client";
 import { ehLinkMonetizado } from "@/lib/afiliados";
+import { searchTerm, titlePattern } from "@/core/search";
+import { recentPriceSince } from "@/core/offer-freshness";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const q = new URL(req.url).searchParams.get("q")?.trim() ?? "";
+  const q = searchTerm(new URL(req.url).searchParams.get("q"));
   if (q.length < 2) return NextResponse.json({ produtos: [] });
-  const sb = createServerSupabase();
-  const { data } = await sb
+  const now = Date.now();
+  const sb = createPublicClient();
+  const { data, error } = await sb
     .from("vw_ofertas")
     .select("id,titulo,loja_nome,preco_atual,promo_score,categoria_emoji,url")
-    .ilike("titulo", `%${q}%`)
+    .eq("em_estoque", true)
+    .gt("preco_atual", 0)
+    .gte("atualizado_em", recentPriceSince(now))
+    .lte("atualizado_em", new Date(now).toISOString())
+    .ilike("titulo", titlePattern(q))
     .order("promo_score", { ascending: false, nullsFirst: false })
-    .limit(40);
+    .limit(40)
+    .abortSignal(AbortSignal.timeout(5_000));
+  if (error) return NextResponse.json({ produtos: [], error: "search_unavailable" }, { status: 503 });
 
   // MONETIZADO PRIMEIRO: mesma regra do catálogo — a loja que paga comissão
   // aparece primeiro na busca, mesmo com nota menor.

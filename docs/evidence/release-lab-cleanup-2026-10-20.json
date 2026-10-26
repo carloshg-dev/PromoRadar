@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-20T23:41:40.057Z",
+  "localWorkerPort3215Listening": false,
+  "localInspectorPort9235Listening": false,
+  "portsVerifiedBy": "WSL ss -ltnp after stopping only the QA worker",
+  "localQaTabsRemaining": [
+    "7"
+  ],
+  "productionTabKept": "10",
+  "viewportReset": true,
+  "volumesDeleted": false,
+  "globalDockerOrBrowserReset": false
+}

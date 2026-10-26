@@ -96,10 +96,10 @@ export function PriceHistoryChart({
   }, null);
 
   return (
-    <div className="relative z-20 mt-12 rounded-[1.5rem] border border-emerald-400/35 bg-[#03111b]/82 p-5 shadow-[0_24px_80px_-42px_rgba(0,240,106,.7)] backdrop-blur-md lg:absolute lg:inset-x-9 lg:bottom-8 lg:mt-0 xl:inset-x-12">
-      <div className="grid gap-6 lg:grid-cols-[1.25fr_.85fr] lg:items-center">
+    <div className="relative z-20 mt-12 rounded-[1.5rem] border border-emerald-400/35 bg-[#03111b]/82 p-4 shadow-[0_24px_80px_-42px_rgba(0,240,106,.7)] backdrop-blur-md lg:absolute lg:inset-x-9 lg:bottom-4 lg:mt-0 xl:inset-x-12">
+      <div className="grid gap-4 lg:grid-cols-[1.25fr_.85fr] lg:items-center">
         <div className="min-w-0">
-          <div className="mb-3 flex items-center gap-3">
+          <div className="mb-2 flex items-center gap-3">
             <ChartNoAxesCombined className="h-6 w-6" style={{ color: accent }} />
             <h3 className="text-base font-black text-white">{title}</h3>
             <span className="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-2.5 py-1 text-[11px] font-extrabold text-emerald-300">
@@ -108,13 +108,13 @@ export function PriceHistoryChart({
           </div>
 
           <div className="grid grid-cols-[54px_1fr] gap-3">
-            <div className="flex h-32 flex-col justify-between text-[11px] text-zinc-300/80">
+            <div className="flex h-28 flex-col justify-between text-[11px] text-zinc-300/80">
               {[calculated.max, calculated.avg, calculated.min].map((value, index) => (
                 <span key={`${value}-${index}`}>{formatBRL(value)}</span>
               ))}
             </div>
 
-            <div className="relative h-32 overflow-hidden rounded-xl bg-[linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] bg-[size:100%_33.33%,12.5%_100%]">
+            <div className="relative h-28 overflow-hidden rounded-xl bg-[linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] bg-[size:100%_33.33%,12.5%_100%]">
               {path ? (
                 <svg aria-hidden="true" viewBox="0 0 100 90" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
                   <defs>
@@ -167,7 +167,7 @@ export function PriceHistoryChart({
               ["Médio", calculated.avg, "#ffffff"],
               ["Máximo", calculated.max, "#fb7185"],
             ].map(([label, value, color]) => (
-              <div key={label as string} className="rounded-2xl border border-white/12 bg-slate-950/42 px-4 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.04)]">
+              <div key={label as string} className="rounded-2xl border border-white/12 bg-slate-950/42 px-4 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.04)]">
                 <div className="text-xs text-zinc-300/80">{label}</div>
                 <div className="mt-1 text-lg font-black" style={{ color: color as string }}>{formatBRL(value as number | null)}</div>
                 <div className="mt-1 text-xs text-zinc-200/80">dados do produto</div>

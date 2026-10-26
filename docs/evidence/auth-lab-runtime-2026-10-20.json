@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-20T14:49:42.328Z",
+  "source": "Fresh local Supabase CLI project; reference fixture, no production data",
+  "docker": "29.9.1",
+  "ports": [
+    {
+      "container": "supabase_inbucket_promodetec-auth-lab",
+      "HostIp": "127.0.0.1",
+      "HostPort": "55324"
+    },
+    {
+      "container": "supabase_kong_promodetec-auth-lab",
+      "HostIp": "127.0.0.1",
+      "HostPort": "55321"
+    },
+    {
+      "container": "supabase_db_promodetec-auth-lab",
+      "HostIp": "127.0.0.1",
+      "HostPort": "55322"
+    }
+  ],
+  "issuer": "supabase-demo",
+  "postgresVersion": "17.11",
+  "images": [
+    {
+      "container": "supabase_rest_promodetec-auth-lab",
+      "image": "public.ecr.aws/supabase/postgrest:v16.4"
+    },
+    {
+      "container": "supabase_inbucket_promodetec-auth-lab",
+      "image": "public.ecr.aws/supabase/mailpit:v1.31.3"
+    },
+    {
+      "container": "supabase_auth_promodetec-auth-lab",
+      "image": "public.ecr.aws/supabase/gotrue:v2.197.0"
+    },
+    {
+      "container": "supabase_kong_promodetec-auth-lab",
+      "image": "public.ecr.aws/supabase/kong:2.8.1"
+    },
+    {
+      "container": "supabase_db_promodetec-auth-lab",
+      "image": "public.ecr.aws/supabase/postgres:17.11.0.004"
+    }
+  ],
+  "credentialsStoredOnlyInIgnoredLab": true
+}

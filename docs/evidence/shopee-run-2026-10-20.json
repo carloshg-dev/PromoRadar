@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-20T03:35:32Z",
+  "access": "Read-only GitHub run metadata and sanitized execution log summaries",
+  "run": {
+    "id": 39203743608,
+    "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/39203743608",
+    "event": "schedule",
+    "branch": "main",
+    "sha": "6d398524c171da9403c76bce01f6561ed743afc4",
+    "startedAt": "2026-10-19T05:17:06Z",
+    "updatedAt": "2026-10-19T05:18:55Z",
+    "conclusion": "success"
+  },
+  "logSummary": {
+    "rowsRead": 100000,
+    "validCandidates": 98513,
+    "selectedAndUpserted": 7955,
+    "batchErrors": 0,
+    "staleSweep": "failed",
+    "databaseError": "canceling statement due to statement timeout",
+    "staleCountReported": "nao executado"
+  },
+  "finding": "The scheduled run concluded success despite failing stale retirement. This is evidence of an operational reporting bug, not evidence that every old offer is unavailable at its merchant.",
+  "mutationsPerformedByThisInvestigation": 0
+}

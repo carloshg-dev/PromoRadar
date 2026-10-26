@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-20T23:26:34.991Z",
+  "buildId": "m-8-2gP_HoUmwmvU1WNSh",
+  "runtime": "Local workerd, analytics disabled, public Supabase reads",
+  "checks": {
+    "homeDesktop1440": true,
+    "homeMobile390": true,
+    "mobileMenuOpenClose": true,
+    "homeSearchSubmit": true,
+    "searchPricesWithin7Days": true,
+    "horizontalOverflow": false,
+    "consoleWarningsOrErrors": 0
+  },
+  "screenshots": [
+    "home-desktop.jpg",
+    "home-mobile.jpg",
+    "menu-mobile.jpg",
+    "search-mobile.jpg"
+  ],
+  "limits": [
+    "No real account login or OAuth",
+    "No synthetic production analytics event or merchant click",
+    "Navbar from release index; unrelated working-tree navbar preserved"
+  ]
+}

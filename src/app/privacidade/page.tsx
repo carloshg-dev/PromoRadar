@@ -11,21 +11,22 @@ export default function Privacidade() {
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Privacidade" }]} />
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Política de Privacidade</h1>
-      <p className="mt-2 text-xs text-muted">Última atualização: junho de 2026.</p>
+      <p className="mt-2 text-xs text-muted">Última atualização: outubro de 2026.</p>
 
-      <div className="mt-6 space-y-6 text-sm leading-relaxed text-zinc-300">
+      <div className="mt-6 space-y-6 text-sm leading-relaxed text-ink">
         <p>
-          O PromoDetec respeita a sua privacidade e segue a <strong className="text-zinc-200">Lei Geral de Proteção
+          O PromoDetec respeita a sua privacidade e segue a <strong className="text-ink">Lei Geral de Proteção
           de Dados (LGPD — Lei 13.709/2018)</strong>. Esta política explica, de forma simples, quais dados tratamos,
           para quê e quais são os seus direitos.
         </p>
 
         <Secao titulo="1. Dados que coletamos">
           <ul className="list-disc space-y-1 pl-5">
-            <li><strong className="text-zinc-200">Conta</strong> (se você se cadastrar): nome e e-mail, via login por e-mail ou Google.</li>
-            <li><strong className="text-zinc-200">Preferências</strong>: interesses escolhidos no onboarding, para personalizar o conteúdo.</li>
-            <li><strong className="text-zinc-200">Uso do site</strong>: eventos de navegação (páginas vistas, buscas, cliques em ofertas), de forma agregada.</li>
-            <li><strong className="text-zinc-200">Dados técnicos</strong>: tipo de dispositivo, navegador e localização aproximada (cidade/país), para estatísticas e segurança.</li>
+            <li><strong className="text-ink">Conta</strong> (se você se cadastrar): nome e e-mail, via login por e-mail ou Google.</li>
+            <li><strong className="text-ink">Preferências</strong>: interesses escolhidos no onboarding, para personalizar o conteúdo.</li>
+            <li><strong className="text-ink">Uso do site, com seu consentimento</strong>: páginas vistas, buscas, filtros, ofertas salvas, compartilhamentos e intenção de visitar a loja. Esses registros não incluem uma identidade de visitante no analytics próprio.</li>
+            <li><strong className="text-ink">Dados técnicos da medição</strong>: tipo de dispositivo, navegador e país aproximado. Não guardamos IP nem cidade nos novos eventos do analytics próprio.</li>
+            <li><strong className="text-ink">Seu radar</strong>: até 30 produtos salvos no armazenamento deste navegador, por sua escolha. Não sincroniza entre aparelhos nem envia alertas automáticos.</li>
           </ul>
           <p className="mt-2">Não coletamos dados sensíveis e não exigimos cadastro para navegar.</p>
         </Secao>
@@ -41,16 +42,17 @@ export default function Privacidade() {
 
         <Secao titulo="3. Cookies e analytics">
           <p>
-            Usamos cookies e ferramentas de medição para entender como o site é utilizado — entre elas o
-            <strong className="text-zinc-200"> Microsoft Clarity</strong> e o nosso analytics próprio. Esses dados são
-            usados de forma agregada e ajudam a melhorar a experiência. Você pode bloquear cookies no seu navegador.
+            O Google Analytics, o Microsoft Clarity (mapas de uso e gravações de sessão) e os eventos de comportamento
+            do analytics próprio só são ativados após sua aceitação. Você pode rejeitar a medição e continuar navegando,
+            ou rever a decisão em “Preferências de privacidade”, no rodapé. Respeitamos os sinais Do Not Track e Global Privacy Control no navegador.
           </p>
+          <p className="mt-2">O servidor também conta requisições de redirecionamento à loja para operação dos links afiliados, sem identificar o visitante. Essas requisições não representam pessoas únicas ou compras. Cookies de autenticação continuam necessários quando você entra na sua conta.</p>
         </Secao>
 
         <Secao titulo="4. Compartilhamento">
           <p>
-            <strong className="text-zinc-200">Não vendemos seus dados.</strong> Compartilhamos o mínimo necessário com
-            provedores que operam a plataforma (ex.: Supabase, Vercel) e, quando você clica em “Ir à loja”, você é
+            <strong className="text-ink">Não vendemos seus dados.</strong> Compartilhamos o mínimo necessário com
+            provedores que operam a plataforma (ex.: Supabase e Cloudflare) e, quando você clica em “Ir à loja”, você é
             direcionado ao site da loja/rede de afiliados — momento em que passam a valer as políticas dessas empresas.
           </p>
         </Secao>
@@ -58,7 +60,7 @@ export default function Privacidade() {
         <Secao titulo="5. Afiliados">
           <p>
             O PromoDetec participa de programas de afiliados. Podemos receber comissão quando você compra por meio dos
-            nossos links — <strong className="text-zinc-200">sem custo extra pra você</strong>. O preço e o histórico
+            nossos links — <strong className="text-ink">sem custo extra pra você</strong>. O preço e o histórico
             exibidos são os mesmos pra todo mundo — mas, entre ofertas equivalentes, lojas parceiras podem aparecer em
             posição de destaque na ordenação.
           </p>
@@ -99,7 +101,7 @@ export default function Privacidade() {
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 text-base font-semibold text-zinc-100">{titulo}</h2>
+      <h2 className="mb-2 text-base font-semibold text-ink">{titulo}</h2>
       {children}
     </section>
   );

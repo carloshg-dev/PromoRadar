@@ -36,7 +36,7 @@ export default async function Noticias() {
               {/* conteúdo */}
               <div className="flex flex-1 flex-col p-4">
                 <div className="label-mono text-[10px] text-muted">{timeAgo(n.publicado_em)}</div>
-                <h3 className="mt-1.5 line-clamp-3 text-sm font-semibold leading-snug text-zinc-100 group-hover:text-white">{decodeHtmlEntities(n.titulo)}</h3>
+                <h3 className="mt-1.5 line-clamp-3 text-sm font-semibold leading-snug text-ink group-hover:text-ink">{decodeHtmlEntities(n.titulo)}</h3>
                 {n.resumo && <p className="mt-1.5 line-clamp-2 text-xs text-muted">{decodeHtmlEntities(n.resumo)}</p>}
                 <div className="mt-auto flex items-center justify-between pt-3">
                   <div className="flex flex-wrap gap-1">

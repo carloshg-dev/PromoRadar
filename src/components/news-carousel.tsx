@@ -78,7 +78,7 @@ export function NewsCarousel({ items }: { items: NewsSlide[] }) {
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-bg/60 px-2.5 py-1 label-mono text-[10px] text-brand-2 backdrop-blur">
                   <Radio className="h-3 w-3" /> {s.fonte}
                 </span>
-                <span className="label-mono text-[10px] text-zinc-300">{timeAgo(s.publicado_em)}</span>
+              <span suppressHydrationWarning className="label-mono text-[10px] text-zinc-300">{timeAgo(s.publicado_em)}</span>
               </div>
               <h3 className="max-w-3xl font-display text-xl font-bold leading-tight tracking-tightest text-white drop-shadow sm:text-2xl lg:text-3xl">
                 {decodeHtmlEntities(s.titulo)}

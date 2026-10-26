@@ -31,14 +31,22 @@ const nextConfig = {
   },
   webpack(config, { isServer, webpack }) {
     if (isServer && cloudflareBuild) {
-      const disabled = path.join(
+      const playwrightDisabled = path.join(
         rootDir,
         "src/infrastructure/scraping/core/playwright-disabled.ts",
+      );
+      const collectionDisabled = path.join(
+        rootDir,
+        "src/services/collection-disabled.ts",
       );
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /playwright-loader$/,
-          disabled,
+          playwrightDisabled,
+        ),
+        new webpack.NormalModuleReplacementPlugin(
+          /collection-runtime$/,
+          collectionDisabled,
         ),
       );
     }

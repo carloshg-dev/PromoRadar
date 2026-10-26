@@ -18,12 +18,12 @@ export const revalidate = 60;
  */
 
 const CHIP: Record<StatusCampanha, string> = {
-  PENDING: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+  PENDING: "bg-zinc-500/15 text-ink border-zinc-500/30",
   CURATED: "bg-brand/15 text-brand-2 border-brand/30",
   RENDERED: "bg-cyan/15 text-cyan border-cyan/30",
-  READY: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  READY: "bg-amber-500/15 text-warn border-amber-500/30",
   PUBLISHED: "bg-neon/15 text-neon border-neon/30",
-  FAILED: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+  FAILED: "bg-rose-500/15 text-danger border-rose-500/30",
 };
 
 export default async function CampanhasAdmin() {
@@ -46,7 +46,7 @@ export default async function CampanhasAdmin() {
         </h1>
         <a href="https://github.com/carloshg-dev/PromoRadar/actions/workflows/conteudo.yml"
           target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-soft/60 px-4 py-2 text-xs font-semibold text-zinc-200 transition hover:border-brand hover:text-white">
+          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-soft/60 px-4 py-2 text-xs font-semibold text-ink transition hover:border-brand hover:text-ink">
           <PlayCircle className="h-4 w-4 text-neon" /> Rodar pipeline agora <ExternalLink className="h-3 w-3 text-muted" />
         </a>
       </div>
@@ -67,7 +67,7 @@ export default async function CampanhasAdmin() {
       </div>
 
       {erroCarga && (
-        <Card className="mt-6 border-rose-500/30 p-4 text-sm text-rose-300">
+        <Card className="mt-6 border-rose-500/30 p-4 text-sm text-danger">
           Não consegui ler a tabela campanhas: {erroCarga}
         </Card>
       )}
@@ -88,12 +88,12 @@ export default async function CampanhasAdmin() {
                   {c.lojaSlug && <span className="label-mono text-[10px] text-muted">{c.lojaSlug}</span>}
                   {c.scoreConteudo != null && <span className="label-mono text-[10px] text-brand-2">sc {c.scoreConteudo}</span>}
                 </div>
-                <div className="mt-1.5 truncate font-semibold text-zinc-100">{c.headline ?? "(sem headline)"}</div>
-                {c.erro && <div className="mt-1 text-xs text-rose-300">⚠ {c.erro}</div>}
+                <div className="mt-1.5 truncate font-semibold text-ink">{c.headline ?? "(sem headline)"}</div>
+                {c.erro && <div className="mt-1 text-xs text-danger">⚠ {c.erro}</div>}
                 {c.legenda && (
                   <details className="mt-2">
                     <summary className="cursor-pointer text-xs text-brand-2 hover:underline">ver legenda</summary>
-                    <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-bg-soft/60 p-3 text-xs text-zinc-300">{c.legenda}</pre>
+                    <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-bg-soft/60 p-3 text-xs text-ink">{c.legenda}</pre>
                   </details>
                 )}
               </div>

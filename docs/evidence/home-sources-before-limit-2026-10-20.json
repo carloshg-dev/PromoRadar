@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-10-20T05:33:32.414Z",
+  "mode": "Read-only public SDK queries, same shared render context and concurrency; not Next prerender or Cloudflare CPU",
+  "results": [
+    {
+      "source": "partners",
+      "status": "error",
+      "code": "57014",
+      "ms": 3701
+    },
+    {
+      "source": "showcase",
+      "status": "error",
+      "code": "57014",
+      "ms": 3680
+    },
+    {
+      "source": "beautyCarousel",
+      "status": "ok",
+      "rows": 40,
+      "ms": 5236
+    },
+    {
+      "source": "carrefour",
+      "status": "ok",
+      "rows": 0,
+      "ms": 1402
+    },
+    {
+      "source": "mercadolivre",
+      "status": "ok",
+      "rows": 0,
+      "ms": 621
+    },
+    {
+      "source": "highlights",
+      "status": "error",
+      "code": "57014",
+      "ms": 4098
+    },
+    {
+      "source": "featured",
+      "status": "error",
+      "code": "57014",
+      "ms": 3677
+    },
+    {
+      "source": "beauty",
+      "status": "error",
+      "code": "57014",
+      "ms": 3668
+    },
+    {
+      "source": "perfume",
+      "status": "error",
+      "code": "57014",
+      "ms": 3648
+    },
+    {
+      "source": "gadgets",
+      "status": "error",
+      "code": "57014",
+      "ms": 4359
+    },
+    {
+      "source": "fit",
+      "status": "error",
+      "code": "57014",
+      "ms": 4257
+    },
+    {
+      "source": "news",
+      "status": "ok",
+      "rows": 20,
+      "ms": 763
+    }
+  ]
+}

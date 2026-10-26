@@ -5,13 +5,14 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/infrastructure/supabase/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { safeAuthDestination } from "@/core/auth-redirect";
 
 type Modo = "login" | "cadastro" | "recuperar";
 
 export function AuthForm({ modo }: { modo: Modo }) {
   const sb = createBrowserSupabase();
   const router = useRouter();
-  const next = useSearchParams().get("next") ?? "/";
+  const next = safeAuthDestination(useSearchParams().get("next"));
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
@@ -69,15 +70,15 @@ export function AuthForm({ modo }: { modo: Modo }) {
       )}
 
       <form onSubmit={submit} className="space-y-3">
-        {modo === "cadastro" && <Input placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required />}
-        <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        {modo !== "recuperar" && <Input type="password" placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)} required minLength={6} />}
+        {modo === "cadastro" && <div><label htmlFor="auth-name" className="mb-1.5 block text-sm font-medium">Nome</label><Input id="auth-name" name="name" autoComplete="name" placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required /></div>}
+        <div><label htmlFor="auth-email" className="mb-1.5 block text-sm font-medium">E-mail</label><Input id="auth-email" name="email" autoComplete="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+        {modo !== "recuperar" && <div><label htmlFor="auth-password" className="mb-1.5 block text-sm font-medium">Senha</label><Input id="auth-password" name="password" autoComplete={modo === "cadastro" ? "new-password" : "current-password"} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required minLength={6} /></div>}
         <Button className="w-full" size="lg" disabled={!!load}>
           {load === "email" ? "Aguarde…" : titulo}
         </Button>
       </form>
 
-      {msg && <div className={`mt-4 rounded-lg border px-3 py-2 text-xs ${msg.tipo === "ok" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-rose-500/30 bg-rose-500/10 text-rose-300"}`}>{msg.texto}</div>}
+      {msg && <div role={msg.tipo === "ok" ? "status" : "alert"} aria-atomic="true" className={`mt-4 rounded-lg border px-3 py-2 text-xs ${msg.tipo === "ok" ? "border-emerald-500/30 bg-emerald-500/10 text-neon" : "border-rose-500/30 bg-rose-500/10 text-danger"}`}>{msg.texto}</div>}
 
       <div className="mt-6 space-y-1 text-xs text-muted">
         {modo === "login" && <><div>Não tem conta? <Link href="/cadastro" className="text-brand-2 hover:underline">Criar conta</Link></div><div><Link href="/recuperar" className="text-brand-2 hover:underline">Esqueceu a senha?</Link></div></>}

@@ -12,34 +12,34 @@ export default function Sobre() {
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Sobre" }]} />
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Sobre o PromoDetec</h1>
       <p className="mt-3 text-base text-muted">
-        Um radar de promoções com <strong className="text-zinc-200">memória de preços</strong> de verdade
+        Um radar de promoções com <strong className="text-ink">memória de preços</strong> de verdade
         — feito para você comprar no momento certo, com dados e não com vitrine.
       </p>
 
-      <div className="mt-8 space-y-6 text-sm leading-relaxed text-zinc-300">
+      <div className="mt-8 space-y-6 text-sm leading-relaxed text-ink">
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-zinc-100">O que é</h2>
+          <h2 className="mb-2 text-lg font-semibold text-ink">O que é</h2>
           <p>
             O PromoDetec monitora os preços das principais lojas do Brasil ao longo do dia, guarda o
             histórico de cada produto e compara com o preço de hoje pra mostrar se a promoção é real.
-            Cobrimos seis frentes: <strong className="text-zinc-200">tecnologia, casa &amp; eletro, ferramentas,
+            Cobrimos seis frentes: <strong className="text-ink">tecnologia, casa &amp; eletro, ferramentas,
             suplementos, gadgets e perfumes</strong>. É um site (não um app pra instalar): você abre pelo navegador,
             de qualquer lugar.
           </p>
         </section>
 
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-zinc-100">Por que existe</h2>
+          <h2 className="mb-2 text-lg font-semibold text-ink">Por que existe</h2>
           <p>
             A maioria dos comparadores só mostra o preço de agora. O PromoDetec responde uma pergunta melhor:
             <em> “esse preço é realmente uma boa oportunidade?”</em> Em vez de confiar no “de/por” anunciado pela
-            loja (que às vezes é inflado), comparamos o preço de hoje com o <strong className="text-zinc-200">histórico
+            loja (que às vezes é inflado), comparamos o preço de hoje com o <strong className="text-ink">histórico
             real</strong> do produto. Assim, desmascaramos o desconto falso e destacamos a oferta de verdade.
           </p>
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-zinc-100">Como funciona</h2>
+          <h2 className="mb-3 text-lg font-semibold text-ink">Como funciona</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             <Item Icon={LineChart} t="Histórico real de preços" d="Coletamos os preços várias vezes ao dia e guardamos tudo." />
             <Item Icon={Gauge} t="Coleta contínua" d="Preços atualizados várias vezes ao dia, direto das lojas." />
@@ -49,20 +49,20 @@ export default function Sobre() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-zinc-100">Quem está por trás</h2>
+          <h2 className="mb-2 text-lg font-semibold text-ink">Quem está por trás</h2>
           <p>
-            O PromoDetec é um projeto brasileiro independente, idealizado por <strong className="text-zinc-200">Carlos
+            O PromoDetec é um projeto brasileiro independente, idealizado por <strong className="text-ink">Carlos
             Henrique Garcia</strong>, com a missão de ajudar o consumidor a economizar de verdade. É um produto em
             constante evolução — novas lojas, categorias e recursos entram com frequência.
           </p>
         </section>
 
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-zinc-100">Transparência</h2>
+          <h2 className="mb-2 text-lg font-semibold text-ink">Transparência</h2>
           <p>
-            O PromoDetec <strong className="text-zinc-200">não vende produtos</strong>: comparamos preços de fontes
-            públicas e direcionamos você à loja oficial. Podemos ganhar uma <strong className="text-zinc-200">comissão
-            de afiliado</strong> quando você compra por meio dos nossos links — <strong className="text-zinc-200">sem
+            O PromoDetec <strong className="text-ink">não vende produtos</strong>: comparamos preços de fontes
+            públicas e direcionamos você à loja oficial. Podemos ganhar uma <strong className="text-ink">comissão
+            de afiliado</strong> quando você compra por meio dos nossos links — <strong className="text-ink">sem
             nenhum custo extra pra você</strong>. Isso é o que mantém o projeto no ar. Veja a{" "}
             <a href="/privacidade" className="text-brand-2 hover:underline">Política de Privacidade</a> e os{" "}
             <a href="/termos" className="text-brand-2 hover:underline">Termos de Uso</a>.
@@ -77,7 +77,7 @@ function Item({ Icon, t, d }: { Icon: typeof LineChart; t: string; d: string }) 
   return (
     <li className="glass rounded-xl border border-line p-3">
       <Icon className="h-5 w-5 text-brand-2" />
-      <div className="mt-1.5 font-semibold text-zinc-100">{t}</div>
+      <div className="mt-1.5 font-semibold text-ink">{t}</div>
       <div className="mt-0.5 text-xs text-muted">{d}</div>
     </li>
   );

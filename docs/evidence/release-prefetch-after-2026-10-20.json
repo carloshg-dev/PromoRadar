@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-20T23:23:49.305Z",
+  "startedAt": "2026-10-20T23:23:25.116Z",
+  "elapsedMs": 24189,
+  "route": "/ofertas?busca=fone",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "runtime": "Local final OpenNext candidate",
+  "buildId": "m-8-2gP_HoUmwmvU1WNSh",
+  "mode": "Navigation from robots.txt followed by idle without clicks or scroll",
+  "applicationRequests": 28,
+  "prefetchRequests": 4,
+  "offerRequests": 1,
+  "documentTargets": [
+    "/ofertas"
+  ],
+  "truncated": false,
+  "hasMore": false,
+  "limits": [
+    "Single local sample; browser cache and timing differ from baseline",
+    "Previous baseline was truncated and provides lower bounds only",
+    "Not a production CPU or throughput benchmark"
+  ],
+  "prefetchedPaths": [
+    "/",
+    "/login",
+    "/cadastro",
+    "/"
+  ]
+}

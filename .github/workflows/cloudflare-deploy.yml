@@ -10,6 +10,10 @@ on:
         description: "Publicar no Cloudflare depois da validacao"
         type: boolean
         default: false
+      preflight_only:
+        description: "Inspecionar Cloudflare sem build nem publicacao"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,7 +23,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  audit:
+    if: ${{ github.event.inputs.preflight_only == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/cloudflare-preflight.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudflare-preflight-${{ github.run_id }}
+          path: reports/cloudflare-preflight.json
+          retention-days: 14
+          if-no-files-found: error
   cloudflare:
+    if: ${{ github.event.inputs.preflight_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -30,6 +55,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }}
       ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
       ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
       ML_REDIRECT_URI: ${{ secrets.ML_REDIRECT_URI }}
@@ -55,6 +81,7 @@ jobs:
             "NEXT_PUBLIC_SITE_URL",
             "SUPABASE_SERVICE_ROLE_KEY",
             "CRON_SECRET",
+            "LOMADEE_API_KEY",
           ];
           const missing = required.filter((name) => !process.env[name]?.trim());
           if (missing.length > 0) {
@@ -70,8 +97,59 @@ jobs:
       - name: Build OpenNext Cloudflare Worker
         run: npm run cf:build
 
+      - name: Diagnosticar composicao do Worker
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const metaPath = ".open-next/server-functions/default/handler.mjs.meta.json";
+
+          if (!fs.existsSync(metaPath)) {
+            console.warn(`Metafile nao encontrado: ${metaPath}`);
+            process.exit(0);
+          }
+
+          const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+          const totals = new Map();
+          for (const output of Object.values(meta.outputs ?? {})) {
+            for (const [input, info] of Object.entries(output.inputs ?? {})) {
+              totals.set(input, (totals.get(input) ?? 0) + (info.bytesInOutput ?? 0));
+            }
+          }
+
+          console.log("Maiores entradas do Worker (KiB):");
+          [...totals.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 25)
+            .forEach(([input, bytes]) => {
+              console.log(`${(bytes / 1024).toFixed(1).padStart(9)}  ${input}`);
+            });
+          NODE
+
       - name: Validar pacote Cloudflare sem publicar
-        run: npx wrangler deploy --dry-run --outdir .wrangler/dry-run
+        shell: bash
+        run: |
+          set -o pipefail
+          npx wrangler deploy --dry-run --outdir .wrangler/dry-run 2>&1 | tee "$RUNNER_TEMP/wrangler-dry-run.log"
+          node <<'NODE'
+          const fs = require("node:fs");
+          const log = fs.readFileSync(`${process.env.RUNNER_TEMP}/wrangler-dry-run.log`, "utf8");
+          const match = log.match(/gzip:\s*([\d.]+)\s*(B|KiB|MiB)/i);
+          if (!match) {
+            console.error("Nao foi possivel medir o tamanho gzip informado pelo Wrangler.");
+            process.exit(1);
+          }
+
+          const value = Number(match[1]);
+          const unit = match[2].toLowerCase();
+          const bytes = unit === "mib" ? value * 1024 * 1024 : unit === "kib" ? value * 1024 : value;
+          const freeLimit = 3 * 1024 * 1024;
+          console.log(`Worker gzip: ${(bytes / 1024).toFixed(2)} KiB de 3072 KiB (plano Free).`);
+          if (bytes > freeLimit) {
+            console.error("Bundle acima do limite gratuito; deploy real bloqueado antes da API Cloudflare.");
+            process.exit(1);
+          }
+          NODE
 
       - name: Preparar bindings secretos de runtime
         if: ${{ github.event.inputs.deploy == 'true' }}
@@ -87,6 +165,7 @@ jobs:
             "NEXT_PUBLIC_SITE_URL",
             "SUPABASE_SERVICE_ROLE_KEY",
             "CRON_SECRET",
+            "LOMADEE_API_KEY",
           ];
           const mercadoLivre = ["ML_CLIENT_ID", "ML_CLIENT_SECRET", "ML_REDIRECT_URI"];
           const configuredMl = mercadoLivre.filter((name) => process.env[name]?.trim());

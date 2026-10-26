@@ -4,7 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 export interface ChartPoint { data: string; preco: number }
 
 /** Gráfico de histórico de preço. Verde neon (acento de "preço/oferta") + área preenchida. */
-export function PriceChart({ points, color = "#22E06B", height = 224 }:
+export function PriceChart({ points, color = "#1b6549", height = 224 }:
   { points: ChartPoint[]; color?: string; height?: number }) {
   if (points.length < 2) {
     return (
@@ -23,12 +23,12 @@ export function PriceChart({ points, color = "#22E06B", height = 224 }:
             <stop offset="100%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="#23232e" strokeDasharray="3 3" />
-        <XAxis dataKey="data" tick={{ fill: "#8b8b9a", fontSize: 11 }} stroke="#23232e" minTickGap={24} />
-        <YAxis tick={{ fill: "#8b8b9a", fontSize: 11 }} stroke="#23232e" width={56}
+        <CartesianGrid stroke="#dbe3d7" strokeDasharray="3 3" />
+        <XAxis dataKey="data" tick={{ fill: "#5b6b61", fontSize: 11 }} stroke="#dbe3d7" minTickGap={24} />
+        <YAxis tick={{ fill: "#5b6b61", fontSize: 11 }} stroke="#dbe3d7" width={56}
           tickFormatter={(v) => `R$${Math.round(v)}`} domain={["auto", "auto"]} />
         <Tooltip
-          contentStyle={{ background: "#16161f", border: "1px solid #23232e", borderRadius: 12, color: "#e7e7ee" }}
+          contentStyle={{ background: "#ffffff", border: "1px solid #dbe3d7", borderRadius: 12, color: "#20372d" }}
           formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Preço"]} />
         <Area type="monotone" dataKey="preco" stroke={color} strokeWidth={2.5} fill={`url(#${gid})`} dot={false}
           activeDot={{ r: 4, fill: color }} />

@@ -16,8 +16,8 @@ export function CollectButton({ adapter }: { adapter: AdapterKey }) {
     } catch (e) { setEstado("erro"); setMsg((e as Error).message); }
   }
 
-  const cor = estado === "ok" ? "border-emerald-500/40 text-emerald-300"
-    : estado === "erro" ? "border-rose-500/40 text-rose-300" : "border-line text-zinc-200";
+  const cor = estado === "ok" ? "border-emerald-500/40 text-neon"
+    : estado === "erro" ? "border-rose-500/40 text-danger" : "border-line text-ink";
 
   return (
     <button onClick={disparar} disabled={estado === "loading"}

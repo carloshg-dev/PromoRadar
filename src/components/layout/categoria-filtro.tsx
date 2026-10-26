@@ -16,14 +16,17 @@ const CHIP_ATIVO: Record<string, string> = {
   perfumes: "border-parfum bg-parfum/15 text-parfum-2",
 };
 
-export function CategoriaFiltro({ baseHref, ativo }: { baseHref: string; ativo: string }) {
+export function CategoriaFiltro({ baseHref, ativo, params = {} }: { baseHref: string; ativo: string; params?: Record<string, string | undefined> }) {
   const chip = (slug: string, label: string, vertical: string) => {
     const on = ativo === slug;
     const classe = on
       ? CHIP_ATIVO[vertical] ?? CHIP_ATIVO.tech!
-      : "border-line text-muted hover:bg-bg-soft hover:text-white";
+      : "border-line text-muted hover:bg-bg-soft hover:text-ink";
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) if (value) query.set(key, value);
+    query.set("categoria", slug);
     return (
-      <Link key={slug} href={`${baseHref}?categoria=${slug}`}
+      <Link prefetch={false} key={slug} href={`${baseHref}?${query.toString()}`} aria-current={on ? "page" : undefined}
         className={`rounded-full border px-3 py-1 text-xs transition ${classe}`}>
         {label}
       </Link>

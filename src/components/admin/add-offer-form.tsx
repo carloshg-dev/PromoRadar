@@ -121,7 +121,7 @@ export function AddOfferForm() {
     }
   }
 
-  const campo = "w-full rounded-lg border border-line bg-bg-soft/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-muted/70 outline-none transition-colors focus:border-brand/60";
+  const campo = "w-full rounded-lg border border-line bg-bg-soft/60 px-3 py-2.5 text-sm text-ink placeholder:text-muted outline-none transition-colors focus:border-brand/60";
 
   return (
     <form onSubmit={enviar} className="rounded-2xl border border-brand/25 bg-gradient-to-b from-brand/[0.07] to-transparent p-4 sm:p-5">
@@ -130,7 +130,7 @@ export function AddOfferForm() {
           <Sparkles className="h-4 w-4" />
         </span>
         <div>
-          <h3 className="text-sm font-bold text-zinc-100">Nova oferta</h3>
+          <h3 className="text-sm font-bold text-ink">Nova oferta</h3>
           <p className="text-[11px] text-muted">Cole o link, clique em Analisar — o resto é só conferir e salvar.</p>
         </div>
       </div>
@@ -147,13 +147,13 @@ export function AddOfferForm() {
               {analisando ? "Analisando…" : "Analisar"}
             </button>
           </div>
-          <p className="mt-1 text-[10px] text-muted/80">
+          <p className="mt-1 text-[10px] text-muted">
             {lojaDetectada ? `Loja detectada: ${lojaDetectada}. ` : ""}Cole o link já com seu afiliado — ele é gravado como está.
           </p>
         </div>
 
         {avisos.length > 0 && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-warn">
             {avisos.map((a, i) => <div key={i}>⚠ {a}</div>)}
           </div>
         )}
@@ -179,7 +179,7 @@ export function AddOfferForm() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block label-mono text-[10px] text-muted">Preço <span className="text-muted/60">(opcional)</span></label>
+            <label className="mb-1 block label-mono text-[10px] text-muted">Preço <span className="text-muted">(opcional)</span></label>
             <input className={campo} value={preco} onChange={(e) => setPreco(e.target.value)} inputMode="decimal"
               placeholder="Ex: 1299,90 — deixe vazio = 'preço no anúncio'" />
           </div>
@@ -187,27 +187,27 @@ export function AddOfferForm() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block label-mono text-[10px] text-muted">Marca <span className="text-muted/60">(opcional)</span></label>
+            <label className="mb-1 block label-mono text-[10px] text-muted">Marca <span className="text-muted">(opcional)</span></label>
             <input className={campo} value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="Ex: Acer, Diesel, L'Oréal" />
           </div>
           <div>
-            <label className="mb-1 block label-mono text-[10px] text-muted">Imagem (URL) <span className="text-muted/60">(opcional)</span></label>
+            <label className="mb-1 block label-mono text-[10px] text-muted">Imagem (URL) <span className="text-muted">(opcional)</span></label>
             <input className={campo} value={imagemUrl} onChange={(e) => setImagemUrl(e.target.value)} placeholder="Cole a URL da foto, se tiver" />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block label-mono text-[10px] text-muted">Descrição <span className="text-muted/60">(opcional)</span></label>
+          <label className="mb-1 block label-mono text-[10px] text-muted">Descrição <span className="text-muted">(opcional)</span></label>
           <textarea className={`${campo} min-h-[64px] resize-y`} value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={300} />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block label-mono text-[10px] text-muted">Slug <span className="text-muted/60">(opcional, SEO)</span></label>
+            <label className="mb-1 block label-mono text-[10px] text-muted">Slug <span className="text-muted">(opcional, SEO)</span></label>
             <input className={campo} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="gerado automaticamente" />
           </div>
           <div>
-            <label className="mb-1 block label-mono text-[10px] text-muted">Palavras-chave <span className="text-muted/60">(opcional, separadas por vírgula)</span></label>
+            <label className="mb-1 block label-mono text-[10px] text-muted">Palavras-chave <span className="text-muted">(opcional, separadas por vírgula)</span></label>
             <input className={campo} value={palavrasChave} onChange={(e) => setPalavrasChave(e.target.value)} />
           </div>
         </div>
@@ -228,7 +228,7 @@ export function AddOfferForm() {
             {estado === "enviando" ? "Adicionando…" : "Adicionar ao site"}
           </button>
           {estado === "ok" && <span className="inline-flex items-center gap-1.5 text-sm font-medium text-neon"><Check className="h-4 w-4" /> {msg}</span>}
-          {estado === "erro" && <span className="inline-flex items-center gap-1.5 text-sm font-medium text-rose-400"><AlertCircle className="h-4 w-4" /> {msg}</span>}
+          {estado === "erro" && <span className="inline-flex items-center gap-1.5 text-sm font-medium text-danger"><AlertCircle className="h-4 w-4" /> {msg}</span>}
         </div>
       </div>
     </form>

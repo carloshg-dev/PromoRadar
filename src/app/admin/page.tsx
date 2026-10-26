@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
+import { carregarMovimento } from "@/infrastructure/repositories/analytics.repo";
 import { papelAtual, ehStaff, podeColetar, podeGerirEquipe, PAPEL_LABEL, type Papel } from "@/infrastructure/auth/roles";
 import { Card } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -24,22 +25,9 @@ interface MembroEquipe { email: string | null; role: Papel }
 async function carregarAnalytics() {
   const sb = createAdminClient();
   const seteDias = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data } = await sb
-    .from("eventos")
-    .select("tipo,termo,produto_id,categoria_slug,dispositivo")
-    .gte("criado_em", seteDias)
-    .limit(5000);
-  const ev = data ?? [];
-
-  const topDe = (pred: (e: typeof ev[number]) => string | null, n: number) => {
-    const m = new Map<string, number>();
-    for (const e of ev) { const k = pred(e); if (k) m.set(k, (m.get(k) ?? 0) + 1); }
-    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
-  };
-
-  const topBuscas = topDe((e) => (e.tipo === "busca" ? (e.termo as string | null) : null), 8);
-  const topCategorias = topDe((e) => (e.tipo === "ver_categoria" ? (e.categoria_slug as string | null) : null), 6);
-  const viewIds = topDe((e) => (e.tipo === "ver_produto" ? (e.produto_id as string | null) : null), 5);
+  const summary = await carregarMovimento(seteDias, new Date().toISOString(), 5000);
+  if (!summary.complete) throw new Error("analytics_report_incomplete");
+  const viewIds = summary.topProdutoIds;
 
   let topProdutos: { titulo: string; lojaNome: string; views: number }[] = [];
   if (viewIds.length) {
@@ -50,9 +38,7 @@ async function carregarAnalytics() {
     });
   }
 
-  const mobile = ev.filter((e) => e.dispositivo === "mobile").length;
-  const desktop = ev.filter((e) => e.dispositivo === "desktop").length;
-  return { totalEventos: ev.length, topBuscas, topCategorias, topProdutos, mobile, desktop };
+  return { ...summary, topProdutos };
 }
 
 async function carregar() {
@@ -99,8 +85,12 @@ export default async function Admin() {
   try { d = await carregar(); } catch {}
   const ultimo = d.jobs[0];
 
-  let a: Awaited<ReturnType<typeof carregarAnalytics>> = { totalEventos: 0, topBuscas: [], topCategorias: [], topProdutos: [], mobile: 0, desktop: 0 };
-  try { a = await carregarAnalytics(); } catch {}
+  let analyticsAvailable = false;
+  let a: Awaited<ReturnType<typeof carregarAnalytics>> = {
+    totalEventos: 0, counts: {}, topBuscas: [], topCategorias: [], topProdutoIds: [], topProdutos: [], mobile: 0, desktop: 0,
+    rankingLimited: false, complete: false, since: "", until: "", redirectRequests: 0, registrations: 0,
+  };
+  try { a = await carregarAnalytics(); analyticsAvailable = true; } catch {}
   const totalDisp = a.mobile + a.desktop || 1;
 
   return (
@@ -134,15 +124,23 @@ export default async function Admin() {
       <section className="mt-8">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="label-mono text-[11px] text-muted">Analytics — comportamento (7 dias)</h2>
-          <span className="label-mono text-[10px] text-muted/70">{a.totalEventos.toLocaleString("pt-BR")} eventos · heatmaps/sessões no Microsoft Clarity</span>
+          <span className="text-xs text-muted">{analyticsAvailable ? `${a.totalEventos.toLocaleString("pt-BR")} ações registradas` : "Medição indisponível. Não interpretar como ausência de movimento."}</span>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <p className="mb-4 max-w-prose text-xs leading-relaxed text-muted">Ações não representam pessoas únicas ou vendas. Após a atualização, a medição do navegador depende do consentimento; compare períodos com essa diferença em mente. Receita confirmada vem dos relatórios das redes.</p>
+        {analyticsAvailable && <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Metric icon={<Eye className="h-4 w-4" />} label="Páginas vistas" value={String(a.counts.visita ?? 0)} />
+          <Metric icon={<Search className="h-4 w-4" />} label="Buscas sem resultado" value={String(a.counts.busca_sem_resultado ?? 0)} />
+          <Metric icon={<Activity className="h-4 w-4" />} label="Ofertas salvas" value={String(a.counts.salvar_produto ?? 0)} />
+          <Metric icon={<MousePointerClick className="h-4 w-4" />} label="Intenções de saída" value={String(a.counts.saida_loja ?? 0)} />
+        </div>}
+        {a.rankingLimited && <p className="mb-3 text-xs text-muted">Rankings limitados à diversidade analisada. Os totais de ações incluem todas as páginas lidas.</p>}
+        {analyticsAvailable && <div className="grid gap-4 lg:grid-cols-3">
           {/* Top buscas */}
           <Card className="glass p-4">
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Search className="h-3.5 w-3.5" /> Buscas mais feitas</div>
             {a.topBuscas.length ? a.topBuscas.map(([termo, n]) => (
               <div key={termo} className="flex items-center justify-between border-t border-line py-1.5 text-sm first:border-0">
-                <span className="line-clamp-1 text-zinc-200">{termo}</span><span className="tabular-nums text-brand-2">{n}</span>
+                <span className="line-clamp-1 text-ink">{termo}</span><span className="tabular-nums text-brand-2">{n}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem buscas ainda.</p>}
           </Card>
@@ -151,7 +149,7 @@ export default async function Admin() {
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Eye className="h-3.5 w-3.5" /> Produtos mais vistos</div>
             {a.topProdutos.length ? a.topProdutos.map((p, i) => (
               <div key={i} className="flex items-center justify-between gap-2 border-t border-line py-1.5 text-sm first:border-0">
-                <span className="line-clamp-1 text-zinc-200">{p.titulo}</span><span className="shrink-0 tabular-nums text-neon">{p.views}</span>
+                <span className="line-clamp-1 text-ink">{p.titulo}</span><span className="shrink-0 tabular-nums text-neon">{p.views}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem views ainda.</p>}
           </Card>
@@ -159,17 +157,17 @@ export default async function Admin() {
           <Card className="glass p-4">
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Smartphone className="h-3.5 w-3.5" /> Dispositivo &amp; categorias</div>
             <div className="mb-3 flex items-center gap-3 text-sm">
-              <span className="text-zinc-200">📱 {Math.round((a.mobile / totalDisp) * 100)}%</span>
+              <span className="text-ink">📱 {Math.round((a.mobile / totalDisp) * 100)}%</span>
               <span className="text-muted">·</span>
-              <span className="text-zinc-200">🖥️ {Math.round((a.desktop / totalDisp) * 100)}%</span>
+              <span className="text-ink">🖥️ {Math.round((a.desktop / totalDisp) * 100)}%</span>
             </div>
             {a.topCategorias.length ? a.topCategorias.map(([cat, n]) => (
               <div key={cat} className="flex items-center justify-between border-t border-line py-1 text-xs first:border-0">
-                <span className="capitalize text-zinc-300">{cat.replace(/-/g, " ")}</span><span className="tabular-nums text-muted">{n}</span>
+                <span className="capitalize text-ink">{cat.replace(/-/g, " ")}</span><span className="tabular-nums text-muted">{n}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem categorias ainda.</p>}
           </Card>
-        </div>
+        </div>}
       </section>
 
       {podeColetar(papel) && (
@@ -194,7 +192,7 @@ export default async function Admin() {
       )}
 
       <section className="mt-8">
-        <h2 className="mb-3 label-mono text-[11px] text-muted">Top clicados (7 dias)</h2>
+        <h2 className="mb-3 label-mono text-[11px] text-muted">Produtos na amostra de redirecionamentos (7 dias)</h2>
         <Card className="glass overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-bg-soft/60 label-mono text-[10px] text-muted">
@@ -211,7 +209,7 @@ export default async function Admin() {
               ))}
               {!d.topClicados.length && (
                 <tr><td colSpan={3} className="px-4 py-6 text-center text-muted">
-                  Nenhum clique ainda — os botões &quot;Ir à loja&quot; passaram a contar a partir de agora.
+                  Nenhum redirecionamento disponível nesta amostra.
                 </td></tr>
               )}
             </tbody>
@@ -263,7 +261,7 @@ export default async function Admin() {
                   <td className="px-4 py-2.5 font-medium">{j.adapter_key}</td>
                   <td className="px-4 py-2.5"><StatusPill status={j.status} /></td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-neon">{j.itens_salvos ?? 0}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-rose-400">{j.erros ?? 0}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-danger">{j.erros ?? 0}</td>
                   <td className="px-4 py-2.5 text-right text-muted">{timeAgo(j.criado_em)}</td>
                 </tr>
               ))}
@@ -283,7 +281,7 @@ function Metric({ icon, label, value, accent, isText, sub }:
       <div className="flex items-center gap-1.5 label-mono text-[10px] text-muted">
         <span className="text-muted/80">{icon}</span>{label}
       </div>
-      <div className={`mt-1.5 font-display font-extrabold ${isText ? "text-lg capitalize" : "text-2xl tabular-nums"} ${accent ?? "text-zinc-100"}`}>{value}</div>
+      <div className={`mt-1.5 font-display font-extrabold ${isText ? "text-lg capitalize" : "text-2xl tabular-nums"} ${accent ?? "text-ink"}`}>{value}</div>
       {sub && <div className="label-mono text-[10px] text-muted">{sub}</div>}
     </Card>
   );
@@ -292,10 +290,10 @@ function Metric({ icon, label, value, accent, isText, sub }:
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     success: "bg-neon/15 text-neon",
-    partial: "bg-amber-500/15 text-amber-300",
-    failed: "bg-rose-500/15 text-rose-300",
+    partial: "bg-amber-500/15 text-warn",
+    failed: "bg-rose-500/15 text-danger",
     running: "bg-brand/15 text-brand-2",
-    pending: "bg-zinc-500/15 text-zinc-400",
+    pending: "bg-zinc-500/15 text-muted",
   };
   return <span className={`rounded-md px-2 py-0.5 label-mono text-[10px] ${map[status] ?? map.pending}`}>{status}</span>;
 }

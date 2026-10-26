@@ -58,7 +58,8 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   const flushLogs = async () => {
     if (!logBuffer.length) return;
     const batch = logBuffer.splice(0, logBuffer.length);
-    await sb.from("scrape_logs").insert(batch);
+    const { error } = await sb.from("scrape_logs").insert(batch);
+    if (error) throw new Error("collection_log_persistence_failed");
   };
 
   for (const adapter of adapters) {
@@ -66,6 +67,10 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
     const ctx: AdapterContext = {
       log: (nivel, msg) => {
         logBuffer.push({ job_id: jobId, adapter_key: adapter.key, nivel, mensagem: msg });
+      },
+      reportFailure: (code) => {
+        stats.erros++;
+        logBuffer.push({ job_id: jobId, adapter_key: adapter.key, nivel: "error", mensagem: code });
       },
     };
     try {
@@ -128,7 +133,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
 
   await flushLogs();
 
-  await sb
+  const { error: finalizeError } = await sb
     .from("scrape_jobs")
     .update({
       status: result.erros > 0 && result.salvos > 0 ? "partial" : result.salvos > 0 ? "success" : "failed",
@@ -138,6 +143,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
       erros: result.erros,
     })
     .eq("id", jobId);
+  if (finalizeError) throw new Error("collection_job_finalize_failed");
 
   await notificarColeta(result); // avisa o DONO (Discord + Telegram): saúde da coleta
   await avisarPromocoesNovas(novosDeals); // feed PÚBLICO de ofertas (chaves próprias; no-op se não configurado)
@@ -155,6 +161,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   const MIN_VOLUME = Number(process.env.GUILHOTINA_MIN_PRODUTOS) || 200;
   const guilhotinadas: string[] = [];
   try {
+    if (result.erros > 0) return result; // rodada parcial não autoriza manutenção destrutiva
     const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
     for (const l of ls ?? []) {
       const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })

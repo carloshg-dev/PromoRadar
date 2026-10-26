@@ -1,0 +1,211 @@
+{
+  "checkedAt": "2026-10-20T14:16:08.917Z",
+  "target": "sksjukjkxkptresysbno",
+  "mode": "Read-only OpenAPI metadata; no row contents",
+  "status": 200,
+  "definitions": {
+    "eventos": {
+      "required": [
+        "id",
+        "tipo",
+        "criado_em"
+      ],
+      "columns": {
+        "id": {
+          "type": "integer",
+          "format": "bigint"
+        },
+        "tipo": {
+          "type": "string",
+          "format": "text"
+        },
+        "termo": {
+          "type": "string",
+          "format": "text"
+        },
+        "produto_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "loja_slug": {
+          "type": "string",
+          "format": "text"
+        },
+        "categoria_slug": {
+          "type": "string",
+          "format": "text"
+        },
+        "origem": {
+          "type": "string",
+          "format": "text"
+        },
+        "referer": {
+          "type": "string",
+          "format": "text"
+        },
+        "dispositivo": {
+          "type": "string",
+          "format": "text"
+        },
+        "navegador": {
+          "type": "string",
+          "format": "text"
+        },
+        "cidade": {
+          "type": "string",
+          "format": "text"
+        },
+        "pais": {
+          "type": "string",
+          "format": "text"
+        },
+        "criado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        }
+      }
+    },
+    "usuarios": {
+      "required": [
+        "id",
+        "email",
+        "criado_em",
+        "interesses",
+        "onboarding_completo",
+        "is_admin",
+        "role"
+      ],
+      "columns": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "auth_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "text"
+        },
+        "nome": {
+          "type": "string",
+          "format": "text"
+        },
+        "criado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "interesses": {
+          "type": "array",
+          "format": "text[]"
+        },
+        "onboarding_completo": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "avatar_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "criado_via": {
+          "type": "string",
+          "format": "text"
+        },
+        "is_admin": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "role": {
+          "type": "string",
+          "format": "text"
+        }
+      }
+    },
+    "cliques": {
+      "required": [
+        "id",
+        "criado_em"
+      ],
+      "columns": {
+        "id": {
+          "type": "integer",
+          "format": "bigint"
+        },
+        "produto_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "loja_slug": {
+          "type": "string",
+          "format": "text"
+        },
+        "origem": {
+          "type": "string",
+          "format": "text"
+        },
+        "movel": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "criado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        }
+      }
+    },
+    "scrape_jobs": {
+      "required": [
+        "id",
+        "adapter_key",
+        "status",
+        "criado_em"
+      ],
+      "columns": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "adapter_key": {
+          "type": "string",
+          "format": "text"
+        },
+        "status": {
+          "type": "string",
+          "format": "public.scrape_status",
+          "enum": [
+            "pending",
+            "running",
+            "success",
+            "partial",
+            "failed"
+          ]
+        },
+        "iniciado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "finalizado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "itens_coletados": {
+          "type": "integer",
+          "format": "integer"
+        },
+        "itens_salvos": {
+          "type": "integer",
+          "format": "integer"
+        },
+        "erros": {
+          "type": "integer",
+          "format": "integer"
+        },
+        "criado_em": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        }
+      }
+    }
+  }
+}

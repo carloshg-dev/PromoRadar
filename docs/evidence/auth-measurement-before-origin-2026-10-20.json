@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-10-20T14:50:55.452Z",
+  "mode": "Real local Supabase Auth/PostgREST/Postgres and Next dev HTTP; synthetic accounts only",
+  "databaseOrigin": "http://127.0.0.1:55321",
+  "schema": "Reference fixture informed by current OpenAPI columns; production constraints, grants and triggers were not exported",
+  "checks": [
+    {
+      "name": "all-14-event-types-persist",
+      "passed": false,
+      "error": "AssertionError"
+    },
+    {
+      "name": "privacy-fields-are-not-persisted",
+      "passed": false,
+      "error": "AssertionError"
+    },
+    {
+      "name": "denied-events-do-not-change-database",
+      "passed": true
+    },
+    {
+      "name": "database-error-is-503-and-batch-is-atomic",
+      "passed": false,
+      "error": "AssertionError"
+    },
+    {
+      "name": "anonymous-cannot-insert-events-directly",
+      "passed": true
+    },
+    {
+      "name": "metadata-cannot-promote-new-account",
+      "passed": true
+    },
+    {
+      "name": "authenticated-cannot-promote-profile-or-insert-event",
+      "passed": true
+    },
+    {
+      "name": "anonymous-admin-redirects-to-login",
+      "passed": true
+    },
+    {
+      "name": "real-password-session-user-cannot-open-admin",
+      "passed": false,
+      "error": "TypeError"
+    },
+    {
+      "name": "real-password-session-staff-can-open-admin",
+      "passed": true
+    },
+    {
+      "name": "ordinary-user-cannot-use-admin-write-api",
+      "passed": true
+    },
+    {
+      "name": "staff-reaches-admin-body-validation",
+      "passed": true
+    },
+    {
+      "name": "forged-session-is-rejected-by-real-auth",
+      "passed": true
+    },
+    {
+      "name": "affiliate-redirect-persists-local-click-without-following-merchant",
+      "passed": true
+    },
+    {
+      "name": "persisted-events-are-readable-by-report",
+      "passed": false,
+      "error": "AssertionError"
+    },
+    {
+      "name": "service-role-is-not-in-browser-assets",
+      "passed": true
+    }
+  ],
+  "passed": 11,
+  "failed": 5,
+  "productionWrites": false,
+  "externalFetchAllowed": false,
+  "browserTest": false,
+  "limits": [
+    "Local reference policies do not prove production policy parity",
+    "Password login exercised via Supabase SSR SDK and HTTP cookies, not a browser",
+    "OAuth, password recovery and production Cloudflare runtime not covered"
+  ]
+}

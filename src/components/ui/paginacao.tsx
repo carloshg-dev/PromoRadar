@@ -29,7 +29,7 @@ export function Paginacao({ pagina, total, porPagina, baseHref, params }: {
   return (
     <nav className="mt-8 flex flex-wrap items-center justify-center gap-3" aria-label="Paginação">
       {pagina > 1 ? (
-        <Link href={href(pagina - 1)} className={`${btn} text-zinc-200 hover:border-brand/50 hover:bg-bg-soft`}>
+        <Link prefetch={false} href={href(pagina - 1)} className={`${btn} text-ink hover:border-brand/50 hover:bg-bg-soft`}>
           <ChevronLeft className="h-3.5 w-3.5" /> Anterior
         </Link>
       ) : (
@@ -41,7 +41,7 @@ export function Paginacao({ pagina, total, porPagina, baseHref, params }: {
       </span>
 
       {pagina < paginas ? (
-        <Link href={href(pagina + 1)} className={`${btn} text-zinc-200 hover:border-brand/50 hover:bg-bg-soft`}>
+        <Link prefetch={false} href={href(pagina + 1)} className={`${btn} text-ink hover:border-brand/50 hover:bg-bg-soft`}>
           Próxima <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       ) : (

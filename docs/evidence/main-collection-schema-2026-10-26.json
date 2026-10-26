@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-26T05:29:54.768Z",
+  "method": "GET only; limit=0; no writes or DDL",
+  "checks": [
+    {
+      "table": "scrape_jobs",
+      "status": 200,
+      "columnsConfirmed": true,
+      "returnedRows": 0
+    },
+    {
+      "table": "produtos",
+      "status": 200,
+      "columnsConfirmed": true,
+      "returnedRows": 0
+    }
+  ]
+}

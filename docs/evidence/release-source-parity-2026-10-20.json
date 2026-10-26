@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-20T23:26:23.370Z",
+  "mode": "Git index blobs versus final Linux build source; streaming 64 KiB; CRLF normalized to LF for text",
+  "filesChecked": 269,
+  "lineEndingNormalizations": 249,
+  "mismatches": [],
+  "buildId": "m-8-2gP_HoUmwmvU1WNSh",
+  "workerChecksPassed": 23,
+  "workerChecksFailed": 0,
+  "preservedUnstaged": [
+    ".gitignore",
+    "src/components/layout/navbar.tsx",
+    "cronograma-site/**"
+  ],
+  "limit": "Build source parity with the release index, not the unrelated unstaged working tree. Windows git archive emitted CRLF; only line endings normalized."
+}
