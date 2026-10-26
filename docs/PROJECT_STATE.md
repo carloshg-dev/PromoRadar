@@ -1,5 +1,13 @@
 # Estado operacional do PromoDetec
 
+## Continuação de manutenção em 25/10/2026: candidato local
+
+- Confirmada a primeira atualização automática por `workflow_run`: Actions `40201873261`, sucesso às 11:24:59 BRT, checkout `675b9d318f7a23cf1d24d598d188750be0f8a710`, 38.159 ofertas, 211 comparações e 45 escopos. Índice publicado `2882b9cb-2047-40dc-8e71-171a3a6dbd80`, relido no Storage. Uma execução automática não comprova continuidade diária de `schedule`.
+- Retenção preparada em `codex/comparison-retention`: manifesto por geração completa, simulação padrão, sete dias + ativo + três gerações completas recentes, páginas/lotes de 100 e spool NDJSON. `--apply` exige versão esperada e revalida índice/elegibilidade. Legados sem manifesto são preservados. Não foi executada exclusão remota.
+- Simulação real com guard de rede somente leitura: três gerações legadas preservadas, zero candidatos e zero exclusões; sete GETs e duas listagens. HEAD público confirmou catálogo 200, bots Awario/MJ12 403 e alias 404. Conexões MCP atuais não listam os recursos alvo; leitura do Storage usa a configuração de servidor existente, sem alterar acessos ou recuperar o painel.
+- A melhoria nova depende de revisão e integração separadas: código no ramo de produção e somente workflow em `main`. O fluxo automático proposto executa apenas dry-run. Não houve merge, deploy, mudança WAF/DNS ou coleta nova nesta continuação. Produção permanece no release registrado abaixo; CPU comparável ainda aguarda acompanhamento.
+- Detalhes e limites em `docs/COMPARISON_RETENTION_2026-10-25.md`.
+
 ## Proteção e CPU: publicação confirmada em 25/10/2026
 
 - PRs #2 e #4 integradas em `codex/cloudflare-migration`; SHA publicado **`675b9d318f7a23cf1d24d598d188750be0f8a710`**, Worker **`f6e91608`**, Ready, **100% do tráfego**, build **`cf5fcd66-04f9-474c-9761-0f6dd61466a7`**. A primeira publicação desta rodada foi `f3f055e`/`fc8a5f07`; a final inclui o fechamento de aliases.

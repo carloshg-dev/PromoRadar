@@ -9,11 +9,13 @@ on:
       - "scripts/ingest-shopee-feed.ts"
       - "scripts/catalog-health.ts"
       - "scripts/build-comparison-snapshots.ts"
+      - "scripts/retain-comparison-snapshots.ts"
       - ".github/workflows/comparison-snapshots.yml"
       - "scripts/run-scraper.ts"
       - "scripts/validate-collection-memory.ts"
       - "middleware.ts"
       - "package*.json"
+      - "tsconfig.comparisons.json"
       - ".github/workflows/growth-checks.yml"
   workflow_dispatch:
 
@@ -32,6 +34,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run typecheck:comparisons
       - run: npm run test:growth
       - run: npm run test:collection
       - run: npm run test:collection:memory

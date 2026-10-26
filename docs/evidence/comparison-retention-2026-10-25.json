@@ -1,0 +1,19 @@
+{
+  "active": {
+    "schema": 1,
+    "version": "2882b9cb-2047-40dc-8e71-171a3a6dbd80",
+    "generatedAt": "2026-10-25T14:22:19.081Z"
+  },
+  "protectedVersions": [
+    "2882b9cb-2047-40dc-8e71-171a3a6dbd80"
+  ],
+  "versions": 3,
+  "legacyVersions": 3,
+  "candidateVersions": 0,
+  "candidateObjects": 0,
+  "candidateBytes": 0,
+  "retentionDays": 7,
+  "dryRun": true,
+  "removedObjects": 0,
+  "checkedAt": "2026-10-26T01:37:32.912Z"
+}
