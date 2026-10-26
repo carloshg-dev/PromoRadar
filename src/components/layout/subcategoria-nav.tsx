@@ -29,7 +29,7 @@ export function SubcategoriaNav({ slugAtivo }: { slugAtivo: string }) {
             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
               ativo
                 ? `bg-gradient-to-br text-white ${accent.grad} border-transparent ${accent.glow}`
-                : `border-line text-muted hover:bg-bg-soft hover:text-white ${accent.border}`
+                : `border-line text-muted hover:bg-bg-soft hover:text-ink ${accent.border}`
             }`}
           >
             <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />{nome}

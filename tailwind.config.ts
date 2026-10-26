@@ -1,31 +1,28 @@
 import type { Config } from "tailwindcss";
 
-/** Design System: "Radical Precision Dark" (Google Stitch). */
+/** Identidade clara; cores das verticais orientam a navegação do catálogo. */
 const config: Config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        bg:    { DEFAULT: "#0A0A0C", soft: "#131315", card: "#161618", over: "#1E1E20", input: "#0F0F11" },
-        line:  "#26262b",
-        brand: { DEFAULT: "#7C5DFF", 2: "#cabeff" },     // mauve (signal primário)
-        cyan:  { DEFAULT: "#00dbe7", 2: "#74f5ff" },     // secondary
-        neon:  { DEFAULT: "#22E06B", 2: "#7CF0A8" },     // verde da logo — acento de "oferta/economia"
-        fit:   { DEFAULT: "#FF4D6D", 2: "#FF8FA3" },     // coral — vertical Mundo Fit (suplementos)
-        eletro:{ DEFAULT: "#FFB020", 2: "#FFD37A" },     // âmbar — vertical Casa & Eletro
-        tool:  { DEFAULT: "#2563EB", 2: "#7DA8FF" },     // azul industrial — vertical Ferramentas
-        gadget:{ DEFAULT: "#14B8A6", 2: "#5EEAD4" },     // teal — vertical Gadgets
-        parfum:{ DEFAULT: "#9333EA", 2: "#C99DF5" },     // violeta — vertical Perfumes
-        ok:    "#22c55e",
-        warn:  "#f59e0b",
-        danger:"#ff5449",
-        muted: "#938ea1",
+        bg: { DEFAULT: "#f6f7f3", soft: "#edf1e8", card: "#ffffff", over: "#e5ecdf", input: "#ffffff" },
+        ink: "#20372d", line: "#dbe3d7",
+        brand: { DEFAULT: "#1b6549", 2: "#164b35" }, lime: "#d9efb9",
+        cyan: { DEFAULT: "#216678", 2: "#216678" },
+        neon: { DEFAULT: "#1a7045", 2: "#1a7045" },
+        fit: { DEFAULT: "#a64350", 2: "#a64350" },
+        eletro: { DEFAULT: "#825917", 2: "#825917" },
+        tool: { DEFAULT: "#285d96", 2: "#285d96" },
+        gadget: { DEFAULT: "#28685f", 2: "#28685f" },
+        parfum: { DEFAULT: "#7a4a78", 2: "#7a4a78" },
+        ok: "#1a7045", warn: "#865b13", danger: "#b33c3c", muted: "#5b6b61",
         // "Signal accents" das lojas (DESIGN.md › Retail Integration)
         loja:  { kabum: "#FF6500", terabyte: "#00D35E", pichau: "#E3000F", mercadolivre: "#FFE600", amazon: "#FF9900" },
       },
-      maxWidth: { page: "1760px" },
-      borderRadius: { DEFAULT: "0.5rem", md: "0.75rem", lg: "1rem", xl: "1.5rem" },
+      maxWidth: { page: "1400px" },
+      borderRadius: { DEFAULT: "0.5rem", md: "0.625rem", lg: "0.75rem", xl: "0.875rem", "2xl": "1rem", "3xl": "1rem" },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "var(--font-sans)", "sans-serif"],

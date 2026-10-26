@@ -48,19 +48,19 @@ export function OnboardingClient() {
                   <Check className="h-3 w-3" strokeWidth={3} />
                 </span>
               )}
-              <span className={`grid h-12 w-12 place-items-center rounded-2xl text-white transition-transform duration-300 group-hover:scale-110
+              <span className={`grid h-12 w-12 place-items-center rounded-2xl text-ink transition-transform duration-300 group-hover:scale-110
                 ${on ? "bg-gradient-to-br from-neon to-cyan shadow-[0_8px_24px_-8px_rgba(34,224,107,.6)]"
                      : "bg-gradient-to-br from-brand to-cyan shadow-[0_8px_24px_-8px_rgba(124,93,255,.55)]"}`}>
                 <Icon className="h-6 w-6" strokeWidth={1.75} />
               </span>
-              <span className={`text-sm font-medium ${on ? "text-white" : "text-zinc-300"}`}>{nome}</span>
+              <span className={`text-sm font-medium ${on ? "text-ink" : "text-ink"}`}>{nome}</span>
             </button>
           );
         })}
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <button onClick={() => start(() => salvarInteresses([]))} className="text-xs text-muted hover:text-zinc-300">
+        <button onClick={() => start(() => salvarInteresses([]))} className="text-xs text-muted hover:text-ink">
           Pular por agora
         </button>
         <Button size="lg" disabled={sel.size === 0 || pending} onClick={() => start(() => salvarInteresses([...sel]))}>

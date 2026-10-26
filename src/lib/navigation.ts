@@ -37,8 +37,8 @@ export interface Vertical {
 
 const ACCENT_TECH: Accent = {
   dot: "bg-brand",
-  text: "text-zinc-200",
-  textHover: "hover:text-white",
+  text: "text-ink",
+  textHover: "hover:text-brand",
   grad: "from-brand to-cyan",
   glow: "shadow-[0_8px_24px_-8px_rgba(124,93,255,.55)] group-hover:shadow-[0_10px_30px_-6px_rgba(0,219,231,.6)]",
   border: "hover:border-brand/50",

@@ -36,7 +36,7 @@ export function ComparadorNav({ verticalAtiva, categoriaAtiva }: { verticalAtiva
           return (
             <Link prefetch={false} key={v.slug} href={`/comparar?vertical=${v.slug}`}
               className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                on ? ABA_ATIVA[v.slug] ?? ABA_ATIVA.tech : "border-line text-muted hover:bg-bg-soft hover:text-white"}`}>
+                on ? ABA_ATIVA[v.slug] ?? ABA_ATIVA.tech : "border-line text-muted hover:bg-bg-soft hover:text-ink"}`}>
               <span className={`h-2 w-2 rounded-full ${v.accent.dot}`} />{v.label}
             </Link>
           );
@@ -56,7 +56,7 @@ export function ComparadorNav({ verticalAtiva, categoriaAtiva }: { verticalAtiva
 
 function CategoriaChip({ vertical, slug, label, ativo }: { vertical: string; slug: string; label: string; ativo: boolean }) {
   const href = slug === "all" ? `/comparar?vertical=${vertical}` : `/comparar?vertical=${vertical}&categoria=${slug}`;
-  const classe = ativo ? CHIP_ATIVO[vertical] ?? CHIP_ATIVO.tech : "border-line text-muted hover:bg-bg-soft hover:text-white";
+  const classe = ativo ? CHIP_ATIVO[vertical] ?? CHIP_ATIVO.tech : "border-line text-muted hover:bg-bg-soft hover:text-ink";
   return (
     <Link prefetch={false} href={href} className={`rounded-full border px-3 py-1 text-xs transition ${classe}`}>{label}</Link>
   );

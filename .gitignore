@@ -29,3 +29,7 @@ achados-do-dia/
 
 # Relatorios operacionais regeneraveis
 /reports/
+/.impeccable/lab/
+/.impeccable/review/
+/.impeccable/references/
+/.impeccable/mocks/

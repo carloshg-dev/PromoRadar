@@ -17,7 +17,7 @@ export default function Contato() {
       </p>
 
       <a href={`mailto:${SUPPORT_EMAIL}`}
-        className="glass hover-raise mt-6 inline-flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-5 py-4 text-base font-semibold text-white transition hover:bg-brand/20">
+        className="glass hover-raise mt-6 inline-flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-5 py-4 text-base font-semibold text-ink transition hover:bg-brand/20">
         <Mail className="h-5 w-5 text-brand-2" /> {SUPPORT_EMAIL}
       </a>
 
@@ -40,7 +40,7 @@ function Card({ Icon, t, d }: { Icon: typeof Mail; t: string; d: string }) {
   return (
     <div className="glass rounded-xl border border-line p-4">
       <Icon className="h-5 w-5 text-brand-2" />
-      <div className="mt-1.5 font-semibold text-zinc-100">{t}</div>
+      <div className="mt-1.5 font-semibold text-ink">{t}</div>
       <div className="mt-0.5 text-xs text-muted">{d}</div>
     </div>
   );

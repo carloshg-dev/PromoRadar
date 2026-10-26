@@ -15,7 +15,8 @@ import { TrackView } from "@/components/analytics/track-view";
 import { ProductActions } from "@/components/product-actions";
 import { productMetadata, productStructuredData, safeJsonLd } from "@/lib/product-seo";
 import { hasRecentPrice } from "@/core/offer-freshness";
-import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles } from "lucide-react";
+import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles, ShoppingBag, CheckCircle2, TriangleAlert } from "lucide-react";
+import { TODAS_CATEGORIAS } from "@/lib/navigation";
 
 // A página e os dados públicos têm cache; a comparação vem do snapshot do runner.
 export const revalidate = 1800;
@@ -44,8 +45,9 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
   const insights = gerarInsights(p, hist);
   const tend = calcularTendencia(p, hist);
   const TrendIcon = tend.direcao === "queda" ? TrendingDown : tend.direcao === "alta" ? TrendingUp : Minus;
-  const trendColor = tend.direcao === "queda" ? "text-neon" : tend.direcao === "alta" ? "text-rose-400" : "text-muted";
+  const trendColor = tend.direcao === "queda" ? "text-neon" : tend.direcao === "alta" ? "text-danger" : "text-muted";
   const cor = corLoja(p.lojaSlug ?? p.lojaNome);
+  const CategoryIcon = TODAS_CATEGORIAS.find(category => category.slug === p.categoriaSlug)?.Icon ?? ShoppingBag;
   const recentPrice = hasRecentPrice(p.atualizadoEm);
   const historicalDiscount = hist.length >= 2 && p.precoAtual && p.precoAvgHist && p.precoAvgHist > p.precoAtual
     ? Math.round((1 - p.precoAtual / p.precoAvgHist) * 100) : null;
@@ -63,20 +65,20 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
       ]} />
 
       <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-        <span className="rounded-md bg-bg-soft px-2 py-1 text-muted">{p.categoriaEmoji} {p.categoriaNome}</span>
-        <span className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 label-mono text-[10px]" style={{ borderColor: `${cor}40`, color: cor }}>
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-bg-soft px-2 py-1 text-muted"><CategoryIcon className="h-3.5 w-3.5" aria-hidden="true" />{p.categoriaNome}</span>
+        <span className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 label-mono text-[10px] text-ink" style={{ borderColor: `${cor}40` }}>
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: cor }} />{p.lojaNome}
         </span>
       </div>
       <h1 className="mt-2 text-2xl font-bold leading-snug">{p.titulo}</h1>
-      {!recentPrice && <div role="note" className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-amber-100">
+      {!recentPrice && <div role="note" className="mt-4 rounded-xl border border-warn/30 bg-warn/5 p-3 text-sm leading-relaxed text-warn">
         <strong className="block">Preço sem atualização recente</strong>
         O valor e o estoque podem ter mudado desde a última coleta. Confira as condições atuais na loja.
       </div>}
 
       {/* KPIs */}
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi label={recentPrice ? "Preço coletado" : "Último preço coletado"} value={formatBRL(p.precoAtual)} accent={recentPrice ? "text-neon" : "text-zinc-200"} />
+        <Kpi label={recentPrice ? "Preço coletado" : "Último preço coletado"} value={formatBRL(p.precoAtual)} accent={recentPrice ? "text-neon" : "text-ink"} />
         <Kpi label="Menor histórico" value={formatBRL(p.precoMinHist)} hint="O menor preço já coletado." />
         <Kpi label="Média histórica" value={formatBRL(p.precoAvgHist)} hint="Média de todos os preços coletados." />
         <Kpi label={recentPrice ? "Tendência" : "Variação histórica"} value={`${tend.variacaoPct > 0 ? "+" : ""}${tend.variacaoPct}%`} icon={<TrendIcon className={`h-4 w-4 ${recentPrice ? trendColor : "text-muted"}`} />} accent={recentPrice ? trendColor : "text-muted"} hint="Variação vs. a média histórica." />
@@ -88,7 +90,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
           {comp && comp.lojas > 1 && (
             <Card className="glass p-5">
               <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
                   <Scale className="h-4 w-4 text-brand-2" /> Comparar entre lojas
                 </h2>
                 <Link prefetch={false} href="/comparar" className="shrink-0 text-xs text-brand-2 hover:underline">ver todas →</Link>
@@ -101,7 +103,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
           {/* Histórico de preços */}
           <Card className="glass p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
                 <LineChartIcon className="h-4 w-4 text-neon" /> Histórico de preços
               </h2>
               <span className="label-mono text-[10px] text-muted">{points.length} ponto(s)</span>
@@ -112,7 +114,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
                 <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
                   <Stat label="Mínimo" value={formatBRL(p.precoMinHist)} accent="text-neon" />
                   <Stat label="Médio" value={formatBRL(p.precoAvgHist)} />
-                  <Stat label="Máximo" value={formatBRL(p.precoMaxHist)} accent="text-rose-400" />
+                  <Stat label="Máximo" value={formatBRL(p.precoMaxHist)} accent="text-danger" />
                 </div>
               </>
             ) : (
@@ -134,7 +136,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
               <ImageOff className="h-10 w-10 text-muted/40" />
             )}
           </div>
-          <div className={`mt-4 font-display text-3xl font-extrabold ${recentPrice ? "text-neon" : "text-zinc-200"}`}>{formatBRL(p.precoAtual)}</div>
+          <div className={`mt-4 font-display text-3xl font-extrabold ${recentPrice ? "text-neon" : "text-ink"}`}>{formatBRL(p.precoAtual)}</div>
           {p.precoOriginal && p.precoAtual && p.precoOriginal > p.precoAtual && (
             <div className="text-sm text-muted line-through">{formatBRL(p.precoOriginal)}</div>
           )}
@@ -151,14 +153,14 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
 
       {/* Insights automáticos */}
       <Card className="glass mt-4 p-5">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-200"><Info className="h-4 w-4" />{recentPrice ? "Insights do histórico" : "Histórico como referência"}</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink"><Info className="h-4 w-4" />{recentPrice ? "Insights do histórico" : "Histórico como referência"}</h2>
         {recentPrice ? <div className="grid gap-2 sm:grid-cols-2">
           {insights.map((i, idx) => (
             <div key={idx} className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${
               i.tipo === "positivo" ? "border-neon/20 bg-neon/5 text-neon-2"
-              : i.tipo === "alerta" ? "border-amber-500/20 bg-amber-500/5 text-amber-100"
-              : "border-line bg-bg-soft text-zinc-300"}`}>
-              <span className="text-base leading-none">{i.icon}</span>
+              : i.tipo === "alerta" ? "border-warn/20 bg-warn/5 text-warn"
+              : "border-line bg-bg-soft text-ink"}`}>
+              <span className="mt-0.5 shrink-0" aria-hidden="true">{i.tipo === "positivo" ? <CheckCircle2 className="h-4 w-4" /> : i.tipo === "alerta" ? <TriangleAlert className="h-4 w-4" /> : <Info className="h-4 w-4" />}</span>
               <span className="leading-snug">{i.texto}</span>
             </div>
           ))}
@@ -187,7 +189,7 @@ function Kpi({ label, value, accent, icon, hint }: { label: string; value: strin
         {label}
         {hint && <Tooltip label={hint}><Info className="h-3 w-3 opacity-60" /></Tooltip>}
       </div>
-      <div className={`mt-1 flex items-center gap-1.5 font-display text-lg font-extrabold ${accent ?? "text-zinc-100"}`}>{icon}{value}</div>
+      <div className={`mt-1 flex items-center gap-1.5 font-display text-lg font-extrabold ${accent ?? "text-ink"}`}>{icon}{value}</div>
     </Card>
   );
 }
@@ -195,7 +197,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div className="rounded-lg bg-bg-soft p-2.5">
       <div className="text-muted">{label}</div>
-      <div className={`mt-0.5 font-semibold ${accent ?? "text-zinc-100"}`}>{value}</div>
+      <div className={`mt-0.5 font-semibold ${accent ?? "text-ink"}`}>{value}</div>
     </div>
   );
 }

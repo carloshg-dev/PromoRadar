@@ -13,7 +13,7 @@ export default function Termos() {
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Termos de Uso</h1>
       <p className="mt-2 text-xs text-muted">Última atualização: junho de 2026.</p>
 
-      <div className="mt-6 space-y-6 text-sm leading-relaxed text-zinc-300">
+      <div className="mt-6 space-y-6 text-sm leading-relaxed text-ink">
         <Secao titulo="1. Aceitação">
           <p>Ao usar o PromoDetec, você concorda com estes Termos e com a nossa{" "}
             <a href="/privacidade" className="text-brand-2 hover:underline">Política de Privacidade</a>.</p>
@@ -21,18 +21,18 @@ export default function Termos() {
 
         <Secao titulo="2. O que o PromoDetec é (e o que não é)">
           <p>
-            O PromoDetec é um <strong className="text-zinc-200">comparador e agregador de ofertas</strong> que reúne
-            preços de <strong className="text-zinc-200">fontes públicas</strong> de diversas lojas e os apresenta com
-            histórico de preços. <strong className="text-zinc-200">Não vendemos produtos</strong> nem processamos
+            O PromoDetec é um <strong className="text-ink">comparador e agregador de ofertas</strong> que reúne
+            preços de <strong className="text-ink">fontes públicas</strong> de diversas lojas e os apresenta com
+            histórico de preços. <strong className="text-ink">Não vendemos produtos</strong> nem processamos
             pagamentos: ao escolher uma oferta, você é direcionado ao site oficial da loja, onde a compra acontece.
           </p>
         </Secao>
 
         <Secao titulo="3. Preços e disponibilidade">
           <p>
-            Os preços e a disponibilidade são <strong className="text-zinc-200">da loja</strong> e podem mudar a
+            Os preços e a disponibilidade são <strong className="text-ink">da loja</strong> e podem mudar a
             qualquer momento; ofertas são válidas enquanto durarem os estoques. Apesar do nosso esforço, pode haver
-            atraso ou divergência entre o valor exibido aqui e o da loja. <strong className="text-zinc-200">Confirme
+            atraso ou divergência entre o valor exibido aqui e o da loja. <strong className="text-ink">Confirme
             sempre o preço final no site da loja antes de comprar.</strong>
           </p>
         </Secao>
@@ -40,7 +40,7 @@ export default function Termos() {
         <Secao titulo="4. Afiliados">
           <p>
             Participamos de programas de afiliados e podemos receber comissão por compras feitas via nossos links,
-            <strong className="text-zinc-200"> sem custo extra pra você</strong>. O preço e o histórico exibidos são
+            <strong className="text-ink"> sem custo extra pra você</strong>. O preço e o histórico exibidos são
             os mesmos pra todo mundo — mas, entre ofertas equivalentes, lojas parceiras podem aparecer em posição de
             destaque na ordenação.
           </p>
@@ -74,7 +74,7 @@ export default function Termos() {
 
         <Secao titulo="9. Lei aplicável e contato">
           <p>
-            Estes Termos seguem as leis do <strong className="text-zinc-200">Brasil</strong>. Dúvidas?{" "}
+            Estes Termos seguem as leis do <strong className="text-ink">Brasil</strong>. Dúvidas?{" "}
             <a href={`mailto:${SUPPORT_EMAIL}`} className="text-brand-2 hover:underline">{SUPPORT_EMAIL}</a>.
           </p>
         </Secao>
@@ -86,7 +86,7 @@ export default function Termos() {
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 text-base font-semibold text-zinc-100">{titulo}</h2>
+      <h2 className="mb-2 text-base font-semibold text-ink">{titulo}</h2>
       {children}
     </section>
   );

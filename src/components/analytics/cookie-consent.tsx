@@ -45,12 +45,12 @@ export function CookieConsent() {
           <p className="text-xs leading-snug text-muted">
             Podemos medir buscas, ofertas vistas e cliques para melhorar o PromoDetec?
             Google Analytics e Clarity só carregam se você aceitar. Sua escolha pode ser revista no rodapé. Veja a{" "}
-            <Link href="/privacidade" className="text-brand-2 underline hover:text-white">Política de Privacidade</Link>.
+            <Link href="/privacidade" className="text-brand-2 underline hover:text-ink">Política de Privacidade</Link>.
           </p>
         </div>
         <div className="flex shrink-0 gap-2 sm:ml-auto">
           <button type="button" onClick={() => decidir("rejected")}
-            className="min-h-11 flex-1 rounded-lg border border-line px-4 py-2 text-xs font-semibold text-muted transition-colors hover:bg-bg-soft hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand sm:flex-none">
+            className="min-h-11 flex-1 rounded-lg border border-line px-4 py-2 text-xs font-semibold text-muted transition-colors hover:bg-bg-soft hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand sm:flex-none">
             Rejeitar
           </button>
           <button type="button" onClick={() => decidir("accepted")}
@@ -65,7 +65,7 @@ export function CookieConsent() {
 
 export function PrivacySettings() {
   return <button type="button" onClick={() => window.dispatchEvent(new Event("pd-consent-open"))}
-    className="min-h-11 px-1 text-muted underline-offset-4 hover:text-zinc-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">
+    className="min-h-11 px-1 text-muted underline-offset-4 hover:text-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">
     Preferências de privacidade
   </button>;
 }

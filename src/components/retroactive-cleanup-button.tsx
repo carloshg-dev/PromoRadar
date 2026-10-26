@@ -42,7 +42,7 @@ export function RetroactiveCleanupButton() {
 
   return (
     <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-      <div className="flex items-center gap-2 label-mono text-[11px] text-amber-300">
+      <div className="flex items-center gap-2 label-mono text-[11px] text-warn">
         <AlertTriangle className="h-3.5 w-3.5" /> Limpeza retroativa de nicho (B2B)
       </div>
       <p className="mt-1 text-xs text-muted">
@@ -52,24 +52,24 @@ export function RetroactiveCleanupButton() {
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button onClick={analisar} disabled={estado === "analisando" || estado === "removendo"}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-medium text-zinc-200 transition hover:bg-bg-soft disabled:opacity-50">
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink transition hover:bg-bg-soft disabled:opacity-50">
           {estado === "analisando" ? "Analisando…" : "Analisar"}
         </button>
         {estado === "previa" && (
           <button onClick={remover}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20">
+            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-rose-500/20">
             <Trash2 className="h-3.5 w-3.5" /> Confirmar remoção de {total}
           </button>
         )}
         {estado === "removendo" && <span className="text-xs text-muted">Removendo…</span>}
-        {msg && <span className={`text-xs ${estado === "erro" ? "text-rose-300" : "text-emerald-300"}`}>{msg}</span>}
+        {msg && <span className={`text-xs ${estado === "erro" ? "text-danger" : "text-neon"}`}>{msg}</span>}
       </div>
 
       {estado === "previa" && amostra.length > 0 && (
         <div className="mt-3 max-h-40 overflow-auto rounded-lg border border-line bg-bg-card/60 p-2">
           <div className="mb-1 label-mono text-[10px] text-muted">{total} itens · exemplos:</div>
           {amostra.map((titulo, i) => (
-            <div key={i} className="line-clamp-1 py-0.5 text-[11px] text-zinc-300">{titulo}</div>
+            <div key={i} className="line-clamp-1 py-0.5 text-[11px] text-ink">{titulo}</div>
           ))}
         </div>
       )}

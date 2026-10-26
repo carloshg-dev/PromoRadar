@@ -15,7 +15,7 @@ const DIRETOS = [
 /** Menu mobile: links diretos + verticais em accordion (mesma fonte do desktop). */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
-  const [aberta, setAberta] = useState<string | null>("fit"); // Mundo Fit aberto por padrão (novidade)
+  const [aberta, setAberta] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const fechar = () => setOpen(false);
 
@@ -24,7 +24,7 @@ export function MobileMenu() {
 
   useEffect(() => {
     if (!open) return;
-    const desktop = window.matchMedia("(min-width: 1720px)");
+    const desktop = window.matchMedia("(min-width: 1024px)");
     const onResize = () => { if (desktop.matches) setOpen(false); };
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
     desktop.addEventListener("change", onResize);
@@ -36,13 +36,13 @@ export function MobileMenu() {
   }, [open]);
 
   return (
-    <div className="min-[1720px]:hidden">
+    <div className="lg:hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Fechar menu" : "Abrir menu"}
         aria-expanded={open}
         aria-controls="navegacao-compacta"
-        className="grid h-11 w-11 place-items-center rounded-lg border border-line text-zinc-200 transition hover:bg-bg-soft hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+        className="grid h-11 w-11 place-items-center rounded-lg border border-line text-ink transition hover:bg-bg-soft hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -65,14 +65,14 @@ export function MobileMenu() {
       {open && (
         <nav id="navegacao-compacta" aria-label="Navegação principal" className="absolute left-0 right-0 top-full z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto border-b border-line bg-bg-card shadow-2xl">
           <div className="mx-auto flex max-w-page flex-col gap-1 px-4 py-3">
-            <Link prefetch={false} href={DIRETOS[0].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[0].label}</Link>
+            <Link prefetch={false} href={DIRETOS[0].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition hover:bg-bg-soft hover:text-ink">{DIRETOS[0].label}</Link>
 
             {/* Comparador — accordion com as seções (comparar por vertical) */}
             <div className="rounded-lg">
               <button
                 onClick={() => setAberta(aberta === "comparador" ? null : "comparador")}
                 aria-expanded={aberta === "comparador"}
-                className="flex w-full items-center justify-between rounded-lg border border-brand/40 bg-brand/10 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-brand/20"
+                className="flex w-full items-center justify-between rounded-lg border border-brand/40 bg-brand/10 px-3 py-2.5 text-sm font-semibold text-ink transition hover:bg-brand/20"
               >
                 <span className="inline-flex items-center gap-2"><Scale className="h-4 w-4 text-brand-2" /> Comparador</span>
                 <ChevronDown className={`h-4 w-4 text-brand-2 transition-transform ${aberta === "comparador" ? "rotate-180" : ""}`} />
@@ -84,7 +84,7 @@ export function MobileMenu() {
                       key={v.slug}
                       href={`/comparar?vertical=${v.slug}`}
                       onClick={fechar}
-                      className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-zinc-300 transition hover:bg-bg-soft hover:text-white"
+                      className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-ink transition hover:bg-bg-soft hover:text-ink"
                     >
                       <span className={`h-2 w-2 shrink-0 rounded-full ${v.accent.dot}`} />{v.label}
                     </Link>
@@ -114,9 +114,9 @@ export function MobileMenu() {
                           key={slug}
                           href={`/categoria/${slug}`}
                           onClick={fechar}
-                          className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-zinc-300 transition hover:bg-bg-soft hover:text-white"
+                          className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-ink transition hover:bg-bg-soft hover:text-ink"
                         >
-                          <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-md bg-gradient-to-br text-white ${v.accent.grad}`}>
+                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-bg-soft text-brand">
                             <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
                           </span>
                           {nome}
@@ -128,7 +128,7 @@ export function MobileMenu() {
               );
             })}
 
-            <Link prefetch={false} href={DIRETOS[2].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-bg-soft hover:text-white">{DIRETOS[2].label}</Link>
+            <Link prefetch={false} href={DIRETOS[2].href} onClick={fechar} className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition hover:bg-bg-soft hover:text-ink">{DIRETOS[2].label}</Link>
           </div>
         </nav>
       )}

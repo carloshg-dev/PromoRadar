@@ -26,38 +26,35 @@ export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
     : null;
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-line bg-bg-card/70 p-4 transition hover:border-zinc-600"
-      style={cupom.destaque ? { borderColor: `${cor}66`, boxShadow: `0 0 18px ${cor}22` } : undefined}>
+    <div className="flex h-full flex-col rounded-xl border border-line bg-bg-card p-5 transition-colors hover:border-brand/40">
       <div className="flex items-center gap-2.5">
         {cupom.marcaLogo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cupom.marcaLogo} alt="" loading="lazy"
             className="h-8 w-8 shrink-0 rounded-full bg-white/95 object-contain p-0.5" />
         ) : (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-ink"
             style={{ backgroundColor: cor }}>
             {cupom.marca.charAt(0)}
           </span>
         )}
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-zinc-100">{cupom.marca}</div>
+          <div className="truncate text-sm font-semibold text-ink">{cupom.marca}</div>
           {validade && <div className="label-mono text-[10px] text-muted">válido até {validade}</div>}
         </div>
         {cupom.destaque && (
-          <span className="label-mono ml-auto rounded-full px-2 py-0.5 text-[9px]"
-            style={{ backgroundColor: `${cor}26`, color: cor }}>
+          <span className="ml-auto rounded-md bg-bg-soft px-2 py-1 text-[11px] text-brand">
             destaque
           </span>
         )}
       </div>
 
-      <p className="mt-3 line-clamp-2 flex-1 text-sm text-zinc-300">{cupom.titulo}</p>
+      <p className="mt-3 line-clamp-2 flex-1 text-sm text-ink">{cupom.titulo}</p>
 
       <div className="mt-4 flex items-center gap-2">
         {cupom.codigo ? (
           <button onClick={copiar}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-xs font-bold tracking-wider transition hover:bg-bg-soft"
-            style={{ borderColor: `${cor}88`, color: cor }}
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-dashed border-brand/40 px-3 py-2 text-xs font-semibold tracking-wide text-brand transition-colors hover:bg-bg-soft"
             title="Copiar código">
             {copiado ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             {copiado ? "COPIADO!" : cupom.codigo}
@@ -68,7 +65,7 @@ export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
           </span>
         )}
         <a href={cupom.link} target="_blank" rel="nofollow sponsored noopener"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90">
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-2">
           Usar <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>

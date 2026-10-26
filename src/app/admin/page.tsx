@@ -140,7 +140,7 @@ export default async function Admin() {
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Search className="h-3.5 w-3.5" /> Buscas mais feitas</div>
             {a.topBuscas.length ? a.topBuscas.map(([termo, n]) => (
               <div key={termo} className="flex items-center justify-between border-t border-line py-1.5 text-sm first:border-0">
-                <span className="line-clamp-1 text-zinc-200">{termo}</span><span className="tabular-nums text-brand-2">{n}</span>
+                <span className="line-clamp-1 text-ink">{termo}</span><span className="tabular-nums text-brand-2">{n}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem buscas ainda.</p>}
           </Card>
@@ -149,7 +149,7 @@ export default async function Admin() {
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Eye className="h-3.5 w-3.5" /> Produtos mais vistos</div>
             {a.topProdutos.length ? a.topProdutos.map((p, i) => (
               <div key={i} className="flex items-center justify-between gap-2 border-t border-line py-1.5 text-sm first:border-0">
-                <span className="line-clamp-1 text-zinc-200">{p.titulo}</span><span className="shrink-0 tabular-nums text-neon">{p.views}</span>
+                <span className="line-clamp-1 text-ink">{p.titulo}</span><span className="shrink-0 tabular-nums text-neon">{p.views}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem views ainda.</p>}
           </Card>
@@ -157,13 +157,13 @@ export default async function Admin() {
           <Card className="glass p-4">
             <div className="mb-2 flex items-center gap-1.5 label-mono text-[10px] text-muted"><Smartphone className="h-3.5 w-3.5" /> Dispositivo &amp; categorias</div>
             <div className="mb-3 flex items-center gap-3 text-sm">
-              <span className="text-zinc-200">📱 {Math.round((a.mobile / totalDisp) * 100)}%</span>
+              <span className="text-ink">📱 {Math.round((a.mobile / totalDisp) * 100)}%</span>
               <span className="text-muted">·</span>
-              <span className="text-zinc-200">🖥️ {Math.round((a.desktop / totalDisp) * 100)}%</span>
+              <span className="text-ink">🖥️ {Math.round((a.desktop / totalDisp) * 100)}%</span>
             </div>
             {a.topCategorias.length ? a.topCategorias.map(([cat, n]) => (
               <div key={cat} className="flex items-center justify-between border-t border-line py-1 text-xs first:border-0">
-                <span className="capitalize text-zinc-300">{cat.replace(/-/g, " ")}</span><span className="tabular-nums text-muted">{n}</span>
+                <span className="capitalize text-ink">{cat.replace(/-/g, " ")}</span><span className="tabular-nums text-muted">{n}</span>
               </div>
             )) : <p className="text-xs text-muted">Sem categorias ainda.</p>}
           </Card>
@@ -261,7 +261,7 @@ export default async function Admin() {
                   <td className="px-4 py-2.5 font-medium">{j.adapter_key}</td>
                   <td className="px-4 py-2.5"><StatusPill status={j.status} /></td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-neon">{j.itens_salvos ?? 0}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-rose-400">{j.erros ?? 0}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-danger">{j.erros ?? 0}</td>
                   <td className="px-4 py-2.5 text-right text-muted">{timeAgo(j.criado_em)}</td>
                 </tr>
               ))}
@@ -281,7 +281,7 @@ function Metric({ icon, label, value, accent, isText, sub }:
       <div className="flex items-center gap-1.5 label-mono text-[10px] text-muted">
         <span className="text-muted/80">{icon}</span>{label}
       </div>
-      <div className={`mt-1.5 font-display font-extrabold ${isText ? "text-lg capitalize" : "text-2xl tabular-nums"} ${accent ?? "text-zinc-100"}`}>{value}</div>
+      <div className={`mt-1.5 font-display font-extrabold ${isText ? "text-lg capitalize" : "text-2xl tabular-nums"} ${accent ?? "text-ink"}`}>{value}</div>
       {sub && <div className="label-mono text-[10px] text-muted">{sub}</div>}
     </Card>
   );
@@ -290,10 +290,10 @@ function Metric({ icon, label, value, accent, isText, sub }:
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     success: "bg-neon/15 text-neon",
-    partial: "bg-amber-500/15 text-amber-300",
-    failed: "bg-rose-500/15 text-rose-300",
+    partial: "bg-amber-500/15 text-warn",
+    failed: "bg-rose-500/15 text-danger",
     running: "bg-brand/15 text-brand-2",
-    pending: "bg-zinc-500/15 text-zinc-400",
+    pending: "bg-zinc-500/15 text-muted",
   };
   return <span className={`rounded-md px-2 py-0.5 label-mono text-[10px] ${map[status] ?? map.pending}`}>{status}</span>;
 }

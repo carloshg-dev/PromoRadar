@@ -1,5 +1,14 @@
 # Estado operacional do PromoDetec
 
+## 26/10/2026: manutenção integrada e identidade em prévia
+
+- PR #5 integrada no ramo de produção `codex/cloudflare-migration`, commit `2878a44c65e7fef3b782587eed89bbdffaed219b`; PR #6 integrada em `main`, commit `8dd476d24bc7fe25dd30103d02103c34521acbb9`. A primeira contém manifestos/retenção; a segunda somente o workflow de simulação. A aplicação completa ainda não foi unificada em `main`.
+- Execução manual Actions [40260038272](https://github.com/carloshg-dev/PromoRadar/actions/runs/40260038272) aprovada após as integrações: 38.159 linhas, 211 comparações e 45 escopos, versão publicada no Storage `714e2b3b-96e7-4d2c-8b10-0de4eb06a9db`. Retenção executada em **dry-run**, quatro versões observadas, três legadas, zero objetos candidatos e zero exclusões. Isso valida o workflow integrado; não comprova dias consecutivos de agendamento.
+- Actions de empacotamento [40259294608](https://github.com/carloshg-dev/PromoRadar/actions/runs/40259294608) aprovado; a etapa de publicação ficou **skipped**. Não é prova de nova versão atendendo tráfego no Cloudflare. A última versão pública comprovada continua sendo a registrada abaixo; não foi revalidada nesta etapa.
+- Modernização visual implementada em `codex/theme-refresh`, baseada em `2878a44`, com prévia local antes da publicação, conforme escolha explícita do usuário. Tema claro, navegação, busca e catálogo recompostos; consultas compartilhadas, cache, redirects afiliados e consentimento preservados. A prévia usa dados reais somente para leitura; nenhum deploy do novo visual, WAF, DNS ou DDL nesta etapa.
+- Build Next de produção aprovado, home com 122 kB de JS inicial reportado pelo Next. QA de home, ofertas, comparador, produto e login em desktop/celular, busca enviada e radar salvo/removido no navegador local. Detalhes e limites em `docs/THEME_REFRESH_2026-10-26.md`.
+- A queda sustentada de CPU/1102 depende da comparação de janelas reais. Não converter o novo layout ou o build aprovado em prova de eliminação dos erros.
+
 ## Continuação de manutenção em 25/10/2026: candidato local
 
 - Confirmada a primeira atualização automática por `workflow_run`: Actions `40201873261`, sucesso às 11:24:59 BRT, checkout `675b9d318f7a23cf1d24d598d188750be0f8a710`, 38.159 ofertas, 211 comparações e 45 escopos. Índice publicado `2882b9cb-2047-40dc-8e71-171a3a6dbd80`, relido no Storage. Uma execução automática não comprova continuidade diária de `schedule`.

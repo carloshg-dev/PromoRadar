@@ -44,7 +44,7 @@ export function CleanupButton() {
 
   return (
     <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-      <div className="flex items-center gap-2 label-mono text-[11px] text-amber-300">
+      <div className="flex items-center gap-2 label-mono text-[11px] text-warn">
         <AlertTriangle className="h-3.5 w-3.5" /> Limpeza de peças &amp; acessórios
       </div>
       <p className="mt-1 text-xs text-muted">
@@ -54,17 +54,17 @@ export function CleanupButton() {
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button onClick={analisar} disabled={estado === "analisando" || estado === "removendo"}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-medium text-zinc-200 transition hover:bg-bg-soft disabled:opacity-50">
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink transition hover:bg-bg-soft disabled:opacity-50">
           {estado === "analisando" ? "Analisando…" : "Analisar"}
         </button>
         {estado === "previa" && (
           <button onClick={remover}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20">
+            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-rose-500/20">
             <Trash2 className="h-3.5 w-3.5" /> Confirmar remoção de {total}
           </button>
         )}
         {estado === "removendo" && <span className="text-xs text-muted">Removendo…</span>}
-        {msg && <span className={`text-xs ${estado === "erro" ? "text-rose-300" : "text-emerald-300"}`}>{msg}</span>}
+        {msg && <span className={`text-xs ${estado === "erro" ? "text-danger" : "text-neon"}`}>{msg}</span>}
       </div>
 
       {estado === "previa" && amostra.length > 0 && (
@@ -72,7 +72,7 @@ export function CleanupButton() {
           <div className="mb-1 label-mono text-[10px] text-muted">{total} itens · exemplos (mais baratos primeiro):</div>
           {amostra.map((a, i) => (
             <div key={i} className="flex items-center justify-between gap-3 py-0.5 text-[11px]">
-              <span className="line-clamp-1 text-zinc-300">{a.titulo}</span>
+              <span className="line-clamp-1 text-ink">{a.titulo}</span>
               <span className="shrink-0 tabular-nums text-muted">{formatBRL(a.preco_atual)}</span>
             </div>
           ))}

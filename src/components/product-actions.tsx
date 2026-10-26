@@ -35,11 +35,11 @@ export function ProductActions({ item }: { item: RadarItem }) {
   return <div className="mt-4">
     <div className="flex flex-wrap gap-2">
       <button type="button" disabled={!ready} aria-pressed={saved} onClick={save}
-        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line px-3 py-2 text-sm text-zinc-200 hover:bg-bg-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50">
+        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line px-3 py-2 text-sm text-ink hover:bg-bg-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50">
         {saved ? <Check className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}{saved ? "Salvo no radar" : "Salvar oferta"}
       </button>
       <button type="button" disabled={sharing} onClick={() => void share()}
-        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line px-3 py-2 text-sm text-zinc-200 hover:bg-bg-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50">
+        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line px-3 py-2 text-sm text-ink hover:bg-bg-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50">
         <Share2 className="h-4 w-4" />{sharing ? "Compartilhando…" : "Compartilhar"}
       </button>
     </div>

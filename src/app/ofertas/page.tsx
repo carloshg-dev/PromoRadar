@@ -5,12 +5,15 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Paginacao } from "@/components/ui/paginacao";
 import { CategoriaFiltro } from "@/components/layout/categoria-filtro";
+import { CatalogFilters } from "@/components/catalog-filters";
 import { TrackView } from "@/components/analytics/track-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { pageNumber, searchTerm } from "@/core/search";
 import { MAX_PRICE_AGE_DAYS } from "@/core/offer-freshness";
+import { Search } from "lucide-react";
+import { TODAS_CATEGORIAS } from "@/lib/navigation";
 
 const POR_PAGINA = 60;
 
@@ -22,6 +25,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
   const busca = searchTerm(searchParams.busca);
   const loja = searchParams.loja ?? "";
   const pagina = pageNumber(searchParams.pagina);
+  const selection = `${TODAS_CATEGORIAS.find(item => item.slug === categoria)?.nome ?? "Todas as categorias"} · ${loja ? loja.replace(/-/g, " ").slice(0, 60) : "Todas as lojas"}`;
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
   let total = 0;
   let available = true;
@@ -34,7 +38,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
       {busca && <TrackView tipo="busca" termo={busca} origem="ofertas" />}
       {available && busca && produtos.length === 0 && <TrackView tipo="busca_sem_resultado" termo={busca} origem="ofertas" />}
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas" }]} />
-      <h1 className="mt-3 text-2xl font-bold">Melhores ofertas</h1>
+      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Encontre a sua próxima oferta.</h1>
       <p className="mt-1 text-sm text-muted">
         Preços coletados nos últimos {MAX_PRICE_AGE_DAYS} dias. Confira o valor final e a disponibilidade na loja.
         {total > 0 && <span className="label-mono ml-2 text-[11px]">{total.toLocaleString("pt-BR")} produtos no radar</span>}
@@ -48,9 +52,11 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
         <Button>Buscar</Button>
       </form>
 
-      <CategoriaFiltro baseHref="/ofertas" ativo={categoria} />
-      <BarraLojas baseHref="/ofertas" ativa={loja}
-        params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
+      <CatalogFilters selection={selection}>
+        <CategoriaFiltro baseHref="/ofertas" ativo={categoria} params={{ busca: busca || undefined, loja: loja || undefined }} />
+        <BarraLojas baseHref="/ofertas" ativa={loja}
+          params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
+      </CatalogFilters>
 
       {produtos.length ? (
         <>
@@ -59,7 +65,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
             params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined }} />
         </>
       ) : (
-        <EmptyState className="mt-8" icon="🔍" title={available ? "Nenhuma oferta neste filtro" : "Não foi possível carregar as ofertas"}
+        <EmptyState className="mt-8" icon={<Search className="h-6 w-6 text-brand" />} title={available ? "Nenhuma oferta neste filtro" : "Não foi possível carregar as ofertas"}
           hint={available ? "Tente outra categoria, limpe a busca, ou aguarde a próxima coleta automática." : "A consulta está temporariamente indisponível. Tente novamente em alguns instantes."}
           action={<Link href="/ofertas"><Button variant="outline" size="sm">Limpar filtros</Button></Link>} />
       )}

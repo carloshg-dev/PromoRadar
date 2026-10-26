@@ -147,6 +147,13 @@ Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transf
 - Regra preventiva: para homologar o pacote OpenNext, instalar dependências no próprio checkout saneado e verificar o runtime; symlink de node_modules não comprova paridade de empacotamento.
 - Evidência: docs/evidence/worker-lab-2026-10-25.json.
 
+## 2026-10-26: auxiliares locais desaparecem dentro de .next
+
+- Fato observado: o início do Next dev removeu os auxiliares de prévia gravados em `.next`, invalidando o guard de leitura do laboratório.
+- Causa: `.next` é saída descartável e pertence ao compilador.
+- Correção: auxiliares movidos para `.impeccable/lab/`, ignorados pelo Git, e build/servidor reiniciados com o guard explícito.
+- Regra preventiva: não guardar scripts de inicialização, recibos ou configuração do laboratório em diretórios gerados pelo build. Ler secrets somente no processo, sem incluí-los nos artefatos.
+
 ## 2026-10-25: Ordenação global do sitemap interrompeu publicação
 - Fato observado: dois builds falharam com 57014 ao ordenar produtos por atualização; a consulta isolada também falhou.
 - Causa: o plano SQL não foi perfilado; a forma de consulta é o gargalo observado, sem atribuir a um índice inexistente não verificado.

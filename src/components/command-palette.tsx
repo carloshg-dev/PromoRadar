@@ -96,8 +96,8 @@ export function CommandPalette() {
         <Search className="h-4 w-4 shrink-0 text-muted" />
         <input ref={inputRef} value={q} maxLength={80} onChange={(event) => setQ(event.target.value)} placeholder="Qual produto você procura?" aria-label="Buscar produtos" autoComplete="off"
           role="combobox" aria-expanded={items.length > 0} aria-controls="search-results" aria-activedescendant={items[active] ? `search-hit-${active}` : undefined}
-          className="h-14 min-w-0 flex-1 bg-transparent text-base text-zinc-100 outline-none placeholder:text-muted" />
-        <button type="button" onClick={() => setOpen(false)} aria-label="Fechar busca" className="grid h-11 w-11 shrink-0 place-items-center text-muted hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"><X className="h-4 w-4" /></button>
+          className="h-14 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted" />
+        <button type="button" onClick={() => setOpen(false)} aria-label="Fechar busca" className="grid h-11 w-11 shrink-0 place-items-center text-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"><X className="h-4 w-4" /></button>
       </div>
       <div role="status" aria-live="polite" className="px-4 pt-3 text-xs text-muted">
         {state === "loading" ? "Buscando ofertas…" : state === "error" ? "A busca não respondeu. Tente novamente." : searching && state === "ready" ? `${hits.length} sugestões com preço coletado nos últimos 7 dias.` : "Digite pelo menos duas letras ou escolha um atalho."}
@@ -106,7 +106,7 @@ export function CommandPalette() {
       <div id="search-results" role="listbox" aria-label="Resultados da busca" aria-busy={state === "loading"} className="max-h-[50vh] overflow-y-auto p-2">
         {items.map((item, index) => <button type="button" id={`search-hit-${index}`} role="option" aria-selected={index === active} key={item.key}
           onMouseEnter={() => setActive(index)} onClick={() => go(item.href)}
-          className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${index === active ? "bg-brand/15 text-white" : "text-zinc-300"}`}>
+          className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${index === active ? "bg-brand/15 text-ink" : "text-ink"}`}>
           {item.node}<ArrowRight className="h-3.5 w-3.5 shrink-0" />
         </button>)}
       </div>

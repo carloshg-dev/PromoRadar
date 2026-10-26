@@ -1,28 +1,19 @@
 import Link from "next/link";
 import { DiscoverySearch } from "@/components/discovery-search";
+import { HomeSpotlight } from "@/components/home-spotlight";
+import { ProductShelf } from "@/components/product-shelf";
+import { CupomCard } from "@/components/cupom-card";
+import { VERTICAIS } from "@/lib/navigation";
+import { temaSazonal } from "@/lib/seasonal";
+import { decodeHtmlEntities } from "@/lib/utils";
 import { SavedRadar } from "@/components/saved-radar";
 import { criarLeituraVitrine, listarOfertas, listarNoticias, ofertasEmDestaque, listarAfiliados, listarAfiliadosRodizio, listarVitrinePorLoja, achadosPorCategorias, achadosBelezaCarrossel } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import type { Comparacao, ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
-import { NewsCarousel } from "@/components/news-carousel";
-import { FeaturedDealRotator } from "@/components/featured-deal-rotator";
-import { ParceirosFeed } from "@/components/parceiros-feed";
-import { CuponsCarrossel } from "@/components/cupons-carrossel";
-import { SeasonalHomeHero } from "@/components/seasonal-home-hero";
 import { cuponsCurados } from "@/lib/cupons-curados";
-import { OfertasVerificadas } from "@/components/ofertas-verificadas";
-import { OfertasMercadoLivre } from "@/components/ofertas-mercadolivre";
-import { VitrineVertical } from "@/components/vitrine-vertical";
-import { DestaquesGrid } from "@/components/destaques-grid";
 import { BarraLojas } from "@/components/vitrine/barra-lojas";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
 import { LOJAS_SOMENTE_COMPARADOR, permitidoNaHome, validarDisponibilidadeHome } from "@/core/home-catalog";
-import {
-  Sparkles, Search, ArrowRight, Dumbbell,
-  Palette, SprayCan, Headphones, Clock3, LineChart,
-} from "lucide-react";
+import { Search, ArrowUpRight, Clock3, Scale, ChartNoAxesCombined } from "lucide-react";
 
 export const revalidate = 7200;
 export const metadata = { alternates: { canonical: "/" } };
@@ -173,114 +164,41 @@ export default async function Home() {
       fitHome,
     ).slice(0, 48);
 
+  const spotlight = itensDestaqueHome.find(item => item.comparacao) ?? itensDestaqueHome[0];
+  const heroProduct = spotlight?.produto ?? gadgetsHome[0] ?? afiliadosHome[0] ?? destaquesVisiveis[0];
+  const tema = temaSazonal();
+
   return (
     <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
-      <DiscoverySearch />
-      <p className="mb-4 flex max-w-prose items-start gap-2 text-xs leading-relaxed text-muted">
-        <Clock3 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>Vitrines selecionadas entre coletas dos últimos 7 dias. Seleção atualizada em <time dateTime={new Date(leitura.agora).toISOString()}>{new Date(leitura.agora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</time>, horário de Brasília. Confira o preço final na loja.</span>
-      </p>
-      <SavedRadar />
-      {/* LOJAS PARCEIRAS — primeiro elemento visível na home.
-          Quem chega pelo Instagram (Shopee, Amazon…) vê a logo de cara
-          e confirma que está no lugar certo. */}
+      <DiscoverySearch><HomeSpotlight produto={heroProduct} comparacao={spotlight?.comparacao} /></DiscoverySearch>
+      <nav aria-label="Explorar categorias" className="flex gap-3 overflow-x-auto border-y border-line py-3 sm:justify-between">
+        {VERTICAIS.map(vertical => {
+          const Icon = vertical.categorias[0]?.Icon ?? Search;
+          return <Link prefetch={false} key={vertical.slug} href={vertical.href} className="route-link flex min-h-14 shrink-0 items-center gap-2.5 rounded-lg px-3 text-sm font-medium"><Icon className={`h-5 w-5 ${vertical.accent.text}`} aria-hidden="true" />{vertical.label}<ArrowUpRight className="h-3.5 w-3.5 text-muted" aria-hidden="true" /></Link>;
+        })}
+      </nav>
+      <div className="flex flex-wrap items-start justify-between gap-3 py-5 text-xs leading-5 text-muted">
+        <p className="flex max-w-[80ch] items-start gap-2"><Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" /><span>Seleção de coletas dos últimos 7 dias. Atualizada em <time dateTime={new Date(leitura.agora).toISOString()}>{new Date(leitura.agora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</time> (Brasília). Confira o preço final na loja.</span></p>
+        {tema && <Link prefetch={false} href={tema.cta.href} className="inline-flex min-h-8 items-center gap-1 text-brand hover:underline">{tema.selo} no radar<ArrowUpRight className="h-3.5 w-3.5" /></Link>}
+      </div>
       <BarraLojas baseHref="/ofertas" excluir={[...LOJAS_SOMENTE_COMPARADOR]} />
 
-      {/* FEED DE PARCEIROS (topo) — produtos de afiliado, esteira automática.
-          Pool 150 → embaralha e exibe 15 por F5 (vitrine viva). */}
-      <ParceirosFeed produtos={afiliadosHome} exibir={15} subtitulo="Seleção de coletas recentes — confira preço e disponibilidade na loja." />
+      <ProductShelf title="Achados para a sua próxima compra" description="Uma seleção do catálogo para explorar. Abra o produto para conferir detalhes, histórico e data da coleta." href="/ofertas" products={produtosUnicos(afiliadosHome, destaquesVisiveis)} limit={8} />
 
-      {/* BELEZA & PERFUMES — 2º carrossel logo ABAIXO, sentido REVERSO (movimento
-          cruzado): perfumes importados/árabes + skincare/cabelos/maquiagem */}
-      <ParceirosFeed produtos={carrosselBelezaHome} exibir={15} direcao="reverso" variante="beleza"
-        titulo="Beleza & Perfumes" verTudoHref="/categoria/perfumes-importados"
-        subtitulo="Perfumes importados, skincare e cuidados do rosto e corpo — rodando sem parar." />
-
-      {/* CUPONS EM DESTAQUE — carrossel enxuto logo abaixo do de produtos */}
-      <CuponsCarrossel cupons={cuponsDestaque} />
-
-      <SeasonalHomeHero produtosRodizio={produtosRodizioHome} />
-
-      {/* HERO — comparador (Oferta em Destaque) na 1ª dobra, logo abaixo do feed */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-72 w-[800px] -translate-x-1/2 rounded-full bg-brand/15 blur-[130px]" />
-        <div className="relative grid items-center gap-10 py-10 lg:grid-cols-[1.05fr_.95fr] lg:py-14">
-          <div className="order-2 min-w-0 animate-fade-up lg:order-1">
-            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-soft/60 px-3 py-1 text-xs text-muted">
-              <Sparkles className="h-3.5 w-3.5 text-brand-2" /> Ofertas, comparação e histórico de preços
-            </span>
-            <h2 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-              <span className="gradient-text">A oportunidade</span><br />antes do mercado.
-            </h2>
-            <p className="mt-5 max-w-md text-base text-muted">
-              Monitoramos preços reais em tecnologia, eletro, ferramentas, suplementos, gadgets, perfumes e beleza,
-              mostramos o histórico disponível e ajudamos você a comparar antes de escolher. Confira o preço final
-              e as condições de cada oferta na loja.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link href="/ofertas"><Button size="lg">Ver melhores ofertas <ArrowRight className="h-4 w-4" /></Button></Link>
-              <Link href="/comparar"><Button variant="outline" size="lg">Comparar entre lojas</Button></Link>
-            </div>
-            <div className="mt-6 flex items-center gap-2 text-xs text-muted">
-              <Search className="h-3.5 w-3.5" /> Busque qualquer produto com <Kbd>Ctrl</Kbd><Kbd>K</Kbd>
-            </div>
-          </div>
-
-          {/* OFERTA EM DESTAQUE (real, em loop) — no mobile vem ANTES do texto */}
-          <div className="order-1 min-w-0 lg:order-2">
-            {itensDestaqueHome.length ? <FeaturedDealRotator itens={itensDestaqueHome} /> : (
-            <EmptyState icon={<LineChart className="h-6 w-6 text-brand-2" />} title="Sem ofertas recentes em destaque"
-              hint="Não temos uma seleção recente para mostrar aqui agora. Explore o catálogo completo e confira a data de cada coleta."
-              action={<Link href="/ofertas" prefetch={false}><Button variant="outline" size="sm">Explorar ofertas</Button></Link>} />
-            )}
-          </div>
-        </div>
+      <section className="my-5 grid gap-7 rounded-2xl bg-lime p-6 sm:p-9 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+        <div><h2 className="max-w-[22ch] font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">Outras lojas.<br />Mais informação. Sua escolha.</h2><p className="mt-4 max-w-[52ch] text-sm leading-6 text-brand">Compare os preços coletados e confira modelo, capacidade e condições de cada oferta antes de escolher.</p></div>
+        <div className="flex flex-col items-start gap-5 lg:items-end"><div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-brand"><span className="inline-flex items-center gap-2"><Scale className="h-4 w-4" />Comparação por classe</span><span className="inline-flex items-center gap-2"><ChartNoAxesCombined className="h-4 w-4" />Histórico disponível</span></div><Link prefetch={false} href="/comparar" className="inline-flex min-h-12 items-center gap-3 rounded-lg bg-brand px-6 text-sm font-semibold text-white hover:bg-brand-2">Encontrar e comparar<ArrowUpRight className="h-4 w-4" /></Link></div>
       </section>
 
-      {/* OFERTAS MONITORADAS — amostra rotativa do catálogo Carrefour coletado. */}
-      <OfertasVerificadas produtos={ofertasMonitoradasVisiveis} />
-
-      {/* MERCADO LIVRE — amostra rotativa do catálogo coletado, com tracking interno. */}
-      <OfertasMercadoLivre produtos={ofertasMercadoLivreVisiveis} />
-
-      {/* VITRINES EM DESTAQUE — Beleza, Perfumes, Gadgets (impacto imediato) */}
-      <VitrineVertical titulo="Beleza & Cosméticos" Icon={Palette} accentText="text-fit" accentGrad="from-fit to-warn"
-        href="/categoria/maquiagem" hrefLabel="ver beleza" produtos={belezaHome} />
-      <VitrineVertical titulo="Perfumes" Icon={SprayCan} accentText="text-parfum-2" accentGrad="from-parfum to-fit"
-        href="/categoria/perfumes-importados" hrefLabel="ver perfumes" produtos={perfumesHome} />
-      <VitrineVertical titulo="Gadgets" Icon={Headphones} accentText="text-gadget-2" accentGrad="from-gadget to-cyan"
-        href="/categoria/fones-bluetooth" hrefLabel="ver gadgets" produtos={gadgetsHome} />
-
-      {/* DESTAQUES — melhores ofertas do momento, mantidas abaixo do feed */}
-      <section className="pb-16">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
-            <Sparkles className="h-4 w-4 text-brand-2" /> Destaques de hoje
-          </h2>
-          <Link href="/ofertas" className="text-xs text-brand-2 hover:underline">ver todas →</Link>
-        </div>
-        {destaquesVisiveis.length ? (
-          <DestaquesGrid pool={destaquesVisiveis} exibir={12} />
-        ) : (
-          <EmptyState icon={<Search className="h-6 w-6 text-brand-2" />} title="Sem ofertas recentes para destacar"
-            hint="Consulte o catálogo completo e confira a data da coleta antes de escolher."
-            action={<Link href="/ofertas"><Button variant="outline" size="sm">Ir para ofertas</Button></Link>} />
-        )}
-      </section>
-
-      {/* MUNDO FIT (vertical suplementos — acento coral) */}
-      {fitHome.length > 0 && (
-        <VitrineVertical titulo="Mundo Fit — suplementos" Icon={Dumbbell} accentText="text-fit" accentGrad="from-fit to-warn"
-          href="/categoria/whey-protein" hrefLabel="ver mais" produtos={fitHome} />
-      )}
-
-      {/* NOTÍCIAS (agora no rodapé, mais discretas) */}
-      {noticias.length > 0 && (
-        <section className="pb-20">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">Notícias de tecnologia</h2>
-          <NewsCarousel items={noticias} />
-        </section>
-      )}
+      <ProductShelf title="Beleza e cuidados, no seu ritmo" description="Maquiagem, skincare e cuidados para a rotina. A escolha começa por informação." href="/categoria/maquiagem" products={produtosUnicos(belezaHome, carrosselBelezaHome)} />
+      <ProductShelf title="Perfumes para descobrir" description="Explore as fragrâncias disponíveis e confira as condições de cada loja." href="/categoria/perfumes-importados" products={perfumesHome} />
+      <section className="home-shelf border-y border-line"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Um cupom também faz diferença.</h2><Link prefetch={false} href="/cupons" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-brand hover:underline">Explorar cupons<ArrowUpRight className="h-4 w-4" /></Link></div><div className="grid gap-4 md:grid-cols-3">{cuponsDestaque.slice(0, 3).map(cupom => <CupomCard key={cupom.id} cupom={cupom} />)}</div></section>
+      <ProductShelf title="Tecnologia para o dia a dia" description="Fones, smartwatches e outros gadgets em uma seleção de ofertas recentes." href="/categoria/fones-bluetooth" products={gadgetsHome} />
+      <ProductShelf title="Para acompanhar a sua rotina" description="Suplementos e achados do Mundo Fit. Veja detalhes e informações na loja." href="/categoria/whey-protein" products={fitHome} />
+      <ProductShelf title="No catálogo do Mercado Livre" description="Ofertas coletadas do parceiro, com acesso aos detalhes e ao histórico disponível." href="/ofertas?loja=mercadolivre" products={ofertasMercadoLivreVisiveis} />
+      <ProductShelf title="Casa e outras descobertas" description="Uma seleção do catálogo Carrefour para continuar explorando." href="/ofertas?loja=carrefour" products={ofertasMonitoradasVisiveis} />
+      <SavedRadar />
+      {noticias.length > 0 && <section className="home-shelf"><div className="mb-5 flex items-center justify-between gap-3"><h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Além das ofertas</h2><Link prefetch={false} href="/noticias" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-brand">Ver notícias<ArrowUpRight className="h-4 w-4" /></Link></div><div className="grid gap-x-8 md:grid-cols-3">{noticias.slice(0, 3).map(noticia => <a key={noticia.id} href={noticia.url} target="_blank" rel="noopener noreferrer" className="group border-t border-line py-5"><p className="text-xs text-muted">{noticia.fonte}</p><h3 className="mt-3 text-base font-medium leading-6 group-hover:text-brand">{decodeHtmlEntities(noticia.titulo)}</h3><span className="mt-4 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-brand">Ler na fonte<ArrowUpRight className="h-3.5 w-3.5" /></span></a>)}</div></section>}
     </main>
   );
 }

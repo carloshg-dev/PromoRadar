@@ -52,7 +52,7 @@ export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }:
           prefetch={false}
           href={href()}
           className={`flex shrink-0 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition ${
-            !ativa ? "border-brand bg-brand/15 text-brand-2" : "border-line text-muted hover:bg-bg-soft hover:text-white"
+            !ativa ? "border-brand bg-brand/15 text-brand-2" : "border-line text-muted hover:bg-bg-soft hover:text-ink"
           }`}
         >
           Todas
@@ -68,16 +68,16 @@ export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }:
               href={href(l.slug)}
               title={l.rede ? `${l.nome} · parceira ${l.rede}` : l.nome}
               className={`flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition ${
-                on ? "text-white" : "border-line text-muted hover:bg-bg-soft hover:text-white"
+                on ? "text-ink" : "border-line text-muted hover:bg-bg-soft hover:text-ink"
               }`}
-              style={on ? { borderColor: cor, backgroundColor: `${cor}26`, boxShadow: `0 0 16px ${cor}2e` } : undefined}
+              style={on ? { borderColor: "#1b6549", backgroundColor: "#edf1e8" } : undefined}
             >
               {logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logo} alt="" loading="lazy"
                   className="h-5 w-5 shrink-0 rounded-full bg-white/95 object-contain p-px" />
               ) : (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-ink"
                   style={{ backgroundColor: cor }}>
                   {l.nome.charAt(0)}
                 </span>
