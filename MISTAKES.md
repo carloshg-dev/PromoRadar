@@ -154,6 +154,13 @@ Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transf
 - Correção: auxiliares movidos para `.impeccable/lab/`, ignorados pelo Git, e build/servidor reiniciados com o guard explícito.
 - Regra preventiva: não guardar scripts de inicialização, recibos ou configuração do laboratório em diretórios gerados pelo build. Ler secrets somente no processo, sem incluí-los nos artefatos.
 
+## 2026-10-26: template de ambiente impediu o gate isolado do Worker
+
+- Fato observado: a cópia feita por `git archive` incluiu `.env.example`; o validador recusou corretamente seus nomes de variáveis privadas, embora fossem um template.
+- Causa: o laboratório exige somente nomes públicos em todos os arquivos `.env*`, e a preparação não retirou o template do diretório executado.
+- Correção: template preservado fora da pasta da aplicação no laboratório próprio; a configuração efetiva contém apenas variáveis públicas. O guard do validador não foi enfraquecido.
+- Regra preventiva: ao criar cópias saneadas, separar também templates e exemplos de ambiente antes do teste de runtime. Nunca usar essa falha como motivo para permitir secrets no laboratório HTTP.
+
 ## 2026-10-25: Ordenação global do sitemap interrompeu publicação
 - Fato observado: dois builds falharam com 57014 ao ordenar produtos por atualização; a consulta isolada também falhou.
 - Causa: o plano SQL não foi perfilado; a forma de consulta é o gargalo observado, sem atribuir a um índice inexistente não verificado.

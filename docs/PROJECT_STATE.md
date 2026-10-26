@@ -1,5 +1,15 @@
 # Estado operacional do PromoDetec
 
+## 26/10/2026: promoção para main autorizada e validada
+
+- Destino desta entrega: `main`, pela [PR #7](https://github.com/carloshg-dev/PromoRadar/pull/7), autorizado explicitamente pelo proprietário após a prévia. A integração inclui a base de produção e a identidade visual; a `main` anterior (`8dd476d`) ainda não continha essa evolução da aplicação.
+- Sincronizar o histórico de `main` produziu o candidato `1da953e` sem mudar a árvore do visual `95217fa`: ambas `794b4c9a7ab177252275f65bfa467a907f08d5e6`. O workflow exclusivo da `main` já tinha conteúdo idêntico; nenhum conflito ou mudança de aplicação foi necessário. Foram preservados os quatro screenshots locais não versionados de outra etapa.
+- CI [40273680113](https://github.com/carloshg-dev/PromoRadar/actions/runs/40273680113) aprovado: tipos da aplicação/runners, testes de crescimento/coleta e ensaio de memória. Build OpenNext Linux com instalação própria aprovado; pacote **1.558,04 KiB gzip**, abaixo de 3.072 KiB. Nenhum deploy foi executado.
+- Worker local com Wrangler 4.151.2 e compatibilidade efetiva `2026-08-23`: primeira rodada 22/23, com timeout de 20 s em ofertas; repetição 23/23, ofertas 200 em 123 ms com cache disponível. A causa inicial não foi perfilada; não interpretar a repetição aquecida como prova de desempenho a frio ou CPU de produção.
+- Conferência das colunas de `scrape_jobs` e `produtos` via GET `limit=0`, ambas 200 e sem linhas. Nenhuma coleta real ou DDL foi disparada para validar a promoção. Varredura dos 259 arquivos do candidato e de 1.355 arquivos do pacote sem valores privados configurados encontrados.
+- Agendamentos existentes passam a encontrar os scripts atualizados quando a integração em `main` é concluída. O workflow de comparações conserva o checkout explícito de `codex/cloudflare-migration`; o Cloudflare também conserva seu ramo de publicação. Merge em `main` e publicação do novo visual no domínio continuam sendo operações separadas.
+- Recibos e limites em `docs/MAIN_PROMOTION_2026-10-26.md`. O status definitivo do merge e seu SHA são os da PR vinculada; os documentos anteriores abaixo são históricos.
+
 ## 26/10/2026: manutenção integrada e identidade em prévia
 
 - PR #5 integrada no ramo de produção `codex/cloudflare-migration`, commit `2878a44c65e7fef3b782587eed89bbdffaed219b`; PR #6 integrada em `main`, commit `8dd476d24bc7fe25dd30103d02103c34521acbb9`. A primeira contém manifestos/retenção; a segunda somente o workflow de simulação. A aplicação completa ainda não foi unificada em `main`.

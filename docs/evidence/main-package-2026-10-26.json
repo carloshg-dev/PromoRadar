@@ -1,0 +1,18 @@
+{
+  "candidate": "1da953eef3b9f9c0b76010e9260b16619780b211",
+  "sourceTree": "794b4c9a7ab177252275f65bfa467a907f08d5e6",
+  "originalVisualCandidate": "95217fa9b2b2f77598a7af63495e6bf9c5e40192",
+  "applicationTreeChangedByMainSync": false,
+  "runtime": "Linux; Node 22.23.3; Wrangler 4.151.2",
+  "totalUploadKiB": 7409.63,
+  "gzipKiB": 1558.04,
+  "freeLimitKiB": 3072,
+  "deploy": false,
+  "ciRun": "40273680113",
+  "ciConclusion": "success",
+  "firstWorkerChecksPassed": 22,
+  "firstWorkerChecksFailed": 1,
+  "repeatedWorkerChecksPassed": 23,
+  "repeatedWorkerChecksFailed": 0,
+  "productionCpuReductionProven": false
+}

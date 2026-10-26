@@ -48,4 +48,4 @@ Produtos/imagens/lojas/datas vêm do catálogo existente. Logo em `public/logo.p
 
 ## Open Decisions
 
-Unificação completa dos ramos de aplicação e coleta em `main` requer avaliação própria. Estratégia comercial e público demográfico específico não foram redefinidos nesta modernização.
+A promoção da base atual para `main` foi autorizada e validada na PR #7. O ramo configurado no Cloudflare e o checkout operacional de comparações continuam explícitos e separados da integração Git. Estratégia comercial e público demográfico específico não foram redefinidos nesta modernização.
