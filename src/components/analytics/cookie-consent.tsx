@@ -65,7 +65,7 @@ export function CookieConsent() {
 
 export function PrivacySettings() {
   return <button type="button" onClick={() => window.dispatchEvent(new Event("pd-consent-open"))}
-    className="min-h-11 px-1 text-muted underline-offset-4 hover:text-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">
+    className="min-h-11 py-2 text-left text-sm leading-6 text-white/75 underline decoration-white/35 underline-offset-4 transition-colors hover:text-white hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime focus-visible:outline-offset-4">
     Preferências de privacidade
   </button>;
 }
