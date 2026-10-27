@@ -103,6 +103,14 @@ components:
   card:
     backgroundColor: "{colors.surface}"
     rounded: "{rounded.2xl}"
+  footer:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.surface}"
+  footer-action:
+    backgroundColor: "{colors.lime}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    padding: "12px 20px"
 ---
 
 # Design System: PromoDetec
@@ -129,7 +137,7 @@ A paleta combina neutros levemente verdes com acentos funcionais contidos. Os va
 ### Primary
 - **Verde de orientação — brand:** ações principais, links, busca e foco.
 - **Verde profundo — brand-deep:** hover de ação principal e links secundários.
-- **Verde claro — lime:** seleção de texto, apoio ao foco da busca e painéis de comparação.
+- **Verde claro — lime:** seleção de texto, apoio ao foco da busca e painéis de comparação; no rodapé, marca, ação e foco.
 
 ### Secondary
 - **Rosa Fit — fit; ocre Casa — eletro; azul Ferramentas — tool; verde Gadgets — gadget; ameixa Beleza — parfum:** pontos, ícones e filtros de categoria. Tech usa a família brand. O rótulo acompanha a cor.
@@ -138,14 +146,16 @@ A paleta combina neutros levemente verdes com acentos funcionais contidos. Os va
 ### Neutral
 - **Papel — paper:** fundo de página.
 - **Branco — surface:** cabeçalho, fotografias e cards.
-- **Papel suave — surface-soft:** campos, ações secundárias, rodapé e agrupamentos.
+- **Papel suave — surface-soft:** campos, ações secundárias e agrupamentos.
 - **Papel de apoio — surface-over:** trilho do histórico no card.
-- **Tinta — ink:** títulos, valores e texto principal.
+- **Tinta — ink:** títulos, valores e texto principal; superfície de encerramento do rodapé compartilhado.
 - **Tinta secundária — muted:** origem, data e explicações legíveis.
 - **Divisória — line:** contornos e separação entre áreas.
 
 ### Named Rules
 **The Orientação Rule.** A cor de categoria acompanha texto ou ícone reconhecível; nunca é o único identificador.
+
+**The Encerramento em Tinta Rule.** O rodapé compartilhado encerra a página em tinta, com branco e lime para leitura e ação. Essa inversão pertence ao rodapé; a base clara continua nas demais superfícies.
 
 ## Typography
 
@@ -174,6 +184,8 @@ O ritmo parte de 4px, com gaps recorrentes de 8/12/16/24/32px. Prateleiras usam 
 As prateleiras mostram uma coluna abaixo de 360px, duas a partir de 360px e quatro em lg. Categorias da home podem rolar horizontalmente; filtros de catálogo quebram em linhas dentro do painel. Abaixo de lg, o painel de filtros começa recolhido e mantém o resumo da seleção visível; o botão anuncia expansão. Em desktop, o painel fica visível. O detalhe reorganiza KPIs de duas para quatro colunas em md e posiciona a compra ao lado do histórico em lg.
 
 Breakpoints observados: 360px (grade e marca compacta), sm 640px, md 768px e lg 1024px. Não reduzir todos os componentes a uma única grade ou largura.
+
+O rodapé usa três áreas em lg: marca/ação, navegação com dois grupos e atendimento/privacidade, cada área ocupando quatro das doze colunas. Entre sm e lg, marca e navegação ficam lado a lado; atendimento e privacidade compartilham uma linha própria. Abaixo de sm, as áreas se empilham e a navegação mantém duas colunas. A faixa legal fica abaixo de uma divisória, alinhada à mesma grade. O respiro vertical principal passa de 32px para 48px em sm e 56px em lg, com gaps de 24px entre colunas e 32/40px entre linhas.
 
 ## Elevation & Depth
 
@@ -211,6 +223,13 @@ Cabeçalho branco com borda inferior, altura mínima 76px e logo existente. Link
 
 ### Resposta e movimento
 Mudanças de cor duram 150–200ms; a imagem de produto cresce apenas para 1.035 em 300ms com curva `cubic-bezier(.16,1,.3,1)`. Foco e expansão são estados visíveis. O stylesheet reduz animações/transições a .01ms quando prefers-reduced-motion está ativo. A descoberta não depende de movimento automático.
+
+### Rodapé compartilhado
+Base plana em tinta, sem sombra ou cards decorativos. Marca em 30px/36px semibold, com terminação lime; lema em body e branco a 70%. A chamada usa 24px/30px medium e cresce para 30px/37.5px em sm. Títulos dos grupos e links usam body; os títulos são semibold e os links usam branco a 75%. O texto legal usa label com entrelinha de 20px, passando a 24px em sm, e branco a 70%. Divisórias usam branco a 15%.
+
+A ação lime tem cantos lg, texto tinta e seta SVG de 16px; hover troca o fundo para branco. Links clareiam para branco e ganham sublinhado no hover. Preferências de privacidade permanece um botão sublinhado e reabre o consentimento existente. Todos os alvos têm altura mínima de 44px; foco usa contorno lime de 2px com offset de 4px. O endereço de atendimento pode quebrar para caber em telas estreitas. Nome, lema, chamada e texto legal preservam o conteúdo existente; links internos mantêm prefetch desativado.
+
+Evidência desta extensão: `src/components/layout/footer.tsx`, `PrivacySettings` em `src/components/analytics/cookie-consent.tsx` e capturas de `/contato` em `.impeccable/review/footer/`, nas larguras 1920/1024/768/390/320. `layout.json` registra alvos mínimos de 44px. Os JPEGs foram reduzidos proporcionalmente pelo capturador; medidas vêm do CSS/recibo, não de pixels do JPEG. A revisão desta extensão não certifica outros componentes nem publicação.
 
 ## Do's and Don'ts
 

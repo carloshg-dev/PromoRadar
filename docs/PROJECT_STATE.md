@@ -1,5 +1,22 @@
 # Estado operacional do PromoDetec
 
+## 26/10/2026: acabamento do rodapé revisado
+
+- Rodapé compartilhado extraído para `src/components/layout/footer.tsx`: base tinta verde, marca/ação, navegação por grupos, atendimento/privacidade e faixa legal. A página mantém a identidade clara. Todos os links, o evento de consentimento e o conteúdo legal existentes foram preservados; nenhuma consulta ou persistência adicional.
+- Typecheck e build Next aprovados. Homologação OpenNext em laboratório Linux próprio: **1.561,28 KiB gzip** de 3.072 KiB e **23/23 contratos HTTP**. Esses números são do pacote/runtime local, não CPU de produção. O recibo UTC é de 27/10, correspondente à noite de 26/10 em Brasília; o buildId foi confrontado com o build executado.
+- QA em 1920/1024/768/390/320 px: sem overflow horizontal observado, alvos de pelo menos 44 px, menor contraste de texto verificado 7,11:1 e foco lime de 2 px. Preferências abriram pelo mouse e teclado; Rejeitar fechou o banner. Console da amostra sem warnings/erros. Capturas JPEG do componente e limitações em `docs/FOOTER_REFINEMENT_2026-10-26.md`.
+- Revisão independente fresca incluiu a captura rejeitada pelo proprietário. Não encontrou correção visual material no lote final; a divergência de DESIGN.md foi corrigida pelo documenter e marcada resolvida no verdict. O ship do verdict cobre esse item documental, não uma certificação de todo o site.
+- Destino da integração: `main`, já configurada como fonte dos Builds do Cloudflare. A confirmação da nova versão pública é etapa separada, registrada na PR de entrega e no recibo local de produção. A publicação visual anterior comprovada está no registro histórico abaixo. Não houve alteração de DNS, WAF, banco, cobrança ou credenciais neste acabamento.
+
+## 26/10/2026: novo visual publicado no domínio
+
+- O usuário encontrou o site antigo após a integração na `main`. Confirmado no painel autenticado: a publicação ainda usava `codex/cloudflare-migration`, versão `51d08bbd`, commit `2878a44`, com 100% do tráfego. A `main` estava em `49ef8bb79a6bb97fc53c7fc4398097db742e1c11`, com a interface já aprovada e homologada.
+- Corrigidas e relidas as duas referências do Cloudflare: branch de produção e branch do acionamento manual existente agora são `main`. Os comandos de build/deploy, secrets, bindings, DNS, WAF e cobrança foram preservados. Novas integrações na `main` passam a ser a fonte das publicações automáticas do Cloudflare.
+- Publicação pelo acionamento existente concluída: build `eae8a468-d4c8-437c-9e26-2bc4e1b28b54`, versão **`12f5eb42-9be8-4c2b-a549-a8800b158c9c`**, **Ready / 100% do tráfego**, fonte `main`. Acionamentos manuais não mostraram SHA no painel; `49ef8bb` foi a ponta remota conferida antes e depois, e a interface pública corresponde ao candidato aprovado.
+- **20 contratos HTTP públicos aprovados**, incluindo apex/www, novo texto e CSS claro, JS, catálogo, busca/leitura de produto, comparador, login/callback anônimo, proteção de admin, saídas técnicas sem clique, dois agentes bloqueados e `workers.dev` 404. QA público em desktop e 390 px: sem overflow observado; menu abriu/fechou, busca enviada retornou 60 produtos, console verificado sem warnings/erros. Medição foi rejeitada no navegador de teste; não foram feitos login/OAuth, compra ou clique afiliado real.
+- O token local foi recusado com 401, assim como o preflight GitHub [40416399728](https://github.com/carloshg-dev/PromoRadar/actions/runs/40416399728). A sessão existente do painel foi retomada com Google e a publicação do Cloudflare funcionou. Nenhuma credencial foi criada, rotacionada ou ampliada. O fluxo de publicação direta pelo GitHub continua sem acesso válido à API.
+- Esta entrega comprova publicação e smoke; não mede redução de CPU, volume humano ou falsos positivos do WAF. A checagem única anterior continua histórica e inconclusiva. Os recibos agregados e capturas locais ficam em `reports/`, com descrição em `docs/THEME_PUBLICATION_2026-10-26.md`. Nenhuma alteração adicional da aplicação foi necessária.
+
 ## 26/10/2026: promoção para main autorizada e validada
 
 - Destino desta entrega: `main`, pela [PR #7](https://github.com/carloshg-dev/PromoRadar/pull/7), autorizado explicitamente pelo proprietário após a prévia. A integração inclui a base de produção e a identidade visual; a `main` anterior (`8dd476d`) ainda não continha essa evolução da aplicação.

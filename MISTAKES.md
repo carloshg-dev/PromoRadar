@@ -133,6 +133,13 @@ Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e preven
 
 Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transforme o procedimento em skill somente se ele for recorrente e verificável.
 
+## 2026-10-26: data local selecionou um recibo UTC anterior
+
+- Fato observado: a homologação do rodapé aprovou 23 contratos, mas o auxiliar copiou o recibo antigo de 26/10; o validador havia gerado o novo em 27/10 UTC, ainda 26/10 em Brasília. A divergência foi detectada antes da integração/publicação.
+- Causa: usar o dia local fixo para localizar um artefato nomeado em UTC.
+- Correção: ler o caminho efetivamente emitido pelo validador e exigir que o buildId do recibo corresponda ao `.next/BUILD_ID` atual. Recibo novo relido, sem repetir os testes já aprovados.
+- Regra preventiva: data de relatório em Brasília e timestamp/nome UTC do produtor são campos distintos. Nunca selecionar evidência somente pelo nome do dia.
+
 ## 2026-10-25: Tipagem da aplicação não incluía scripts de comparação
 
 - Fato observado: o typecheck da aplicação passou, mas a verificação explícita dos scripts detectou parâmetro mutável incompatível com as verticais readonly.

@@ -1,0 +1,116 @@
+{
+  "reportLocalDate": "2026-10-26",
+  "timezone": "America/Sao_Paulo",
+  "validationCheckedAtUtc": "2026-10-27T00:29:30.203Z",
+  "baselineMain": "49ef8bb79a6bb97fc53c7fc4398097db742e1c11",
+  "kind": "Pre-publication validation; not a deployment receipt",
+  "sourceHashes": [
+    {
+      "path": "src/app/layout.tsx",
+      "sha256": "dd6396f6d8e7ebac10e9fd4220e0de13b37963e490618b2e86837ea828a13923"
+    },
+    {
+      "path": "src/components/layout/footer.tsx",
+      "sha256": "4b7a08226e90d3dedbde78a96e1bf3b2e037020135d30e36805e9eadac2678da"
+    },
+    {
+      "path": "src/components/analytics/cookie-consent.tsx",
+      "sha256": "77fabe67fb5a7ed7dd7059e102f146ae2840a329365691b3f481767e8d154b85"
+    }
+  ],
+  "nextBuildPassed": true,
+  "homeFirstLoadJsKB": 122,
+  "worker": {
+    "buildId": "MobLztJZhODNIRLK3efNO",
+    "wranglerVersion": "4.151.2",
+    "compatibilityDate": "2026-08-23",
+    "gzipKiB": 1561.28,
+    "freeLimitKiB": 3072,
+    "passed": 23,
+    "failed": 0,
+    "remoteBindings": false,
+    "runtimeSignals": {
+      "queryTimeout": 0,
+      "analyticsWriteFailure": 0,
+      "cpuExceeded": 0
+    }
+  },
+  "accessibility": {
+    "keyboardConsentOpenedAndClosed": true,
+    "keyboardFocus": {
+      "color": "rgb(217, 239, 185)",
+      "width": "2px"
+    },
+    "minTargetHeight": 44,
+    "minTextContrast": 7.11,
+    "newRasters": 0
+  },
+  "viewports": [
+    {
+      "name": "user-1920",
+      "footerHeight": 465,
+      "footerTop": 615,
+      "height": 1080,
+      "minTargetHeight": 44,
+      "scrollWidth": 1910,
+      "width": 1920
+    },
+    {
+      "name": "tablet",
+      "footerHeight": 634,
+      "footerTop": 390,
+      "height": 1024,
+      "minTargetHeight": 44,
+      "scrollWidth": 758,
+      "width": 768
+    },
+    {
+      "name": "mobile",
+      "footerHeight": 951,
+      "footerTop": 249,
+      "height": 1200,
+      "minTargetHeight": 44,
+      "scrollWidth": 380,
+      "width": 390
+    },
+    {
+      "name": "mobile-bottom",
+      "footerHeight": 951,
+      "footerTop": -107,
+      "height": 844,
+      "minTargetHeight": 44,
+      "scrollWidth": 380,
+      "width": 390
+    },
+    {
+      "name": "narrow-320",
+      "footerHeight": 971,
+      "footerTop": 309,
+      "height": 1280,
+      "minTargetHeight": 44,
+      "scrollWidth": 310,
+      "width": 320
+    },
+    {
+      "footerHeight": 465,
+      "footerTop": 435,
+      "height": 900,
+      "minTargetHeight": 44,
+      "name": "desktop",
+      "scrollWidth": 1014,
+      "width": 1024
+    }
+  ],
+  "review": {
+    "visualMaterialFixes": 0,
+    "documentaryMaterialFixes": 1,
+    "documentaryFixResolved": true,
+    "verdictDisposition": "ship",
+    "verdictScope": "Only the listed documentation fix; not whole-site certification"
+  },
+  "limits": [
+    "No production CPU comparison",
+    "No authenticated OAuth or human affiliate purchase",
+    "Captures are proportionally reduced JPEG; CSS measurements are independent"
+  ]
+}
