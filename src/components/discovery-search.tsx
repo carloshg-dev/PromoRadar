@@ -6,7 +6,7 @@ export function DiscoverySearch({ children }: { children?: React.ReactNode }) {
   return <section aria-labelledby="discovery-title" className="grid items-center gap-9 py-10 sm:py-14 lg:grid-cols-[1.1fr_1fr] lg:gap-12 lg:py-16">
     <div className="min-w-0">
       <h1 id="discovery-title" className="max-w-[11ch] font-display text-[clamp(2.65rem,4.9vw,4.8rem)] font-semibold leading-[1.02] tracking-[-.035em]">Encontre seu próximo <span className="text-brand">bom negócio.</span></h1>
-      <p className="mt-6 max-w-[48ch] text-base leading-7 text-muted">Compare preços, consulte o histórico e guarde seus achados. A decisão é sua. A compra é direto na loja.</p>
+      <p className="mt-6 max-w-[48ch] text-base leading-7 text-muted">Compare preços, consulte o histórico e guarde seus achados. A decisão é sua. Nossa missão é apresentar as ofertas e te direcionar as lojas responsáveis pela venda.</p>
       <form action="/ofertas" role="search" className="home-search mt-7 flex items-center gap-2 rounded-xl border border-line bg-white p-1.5">
         <label htmlFor="home-search" className="sr-only">Qual produto você está procurando?</label>
         <Search className="ml-2.5 h-5 w-5 shrink-0 text-brand" aria-hidden="true" />
