@@ -13,11 +13,27 @@ export default function Contato() {
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Contato" }]} />
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Fale com a gente</h1>
       <p className="mt-3 text-base text-muted">
-        Estamos abertos a parcerias, imprensa, dúvidas de privacidade e correções. Respondemos o mais rápido possível.
+        Tire dúvidas sobre ofertas, relate problemas no site ou fale sobre parcerias, imprensa e privacidade.
       </p>
 
+      <section aria-labelledby="ajuda-com-pedido" className="mt-8 border-y border-line py-6">
+        <h2 id="ajuda-com-pedido" className="font-display text-xl font-semibold tracking-tight text-ink">
+          Precisa de ajuda com um pedido?
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-ink">
+          O PromoDetec compara ofertas e leva você ao site da loja. A compra é feita diretamente nessa loja.
+        </p>
+        <p className="mt-3 text-sm leading-6 text-ink">
+          Para acompanhar pedidos ou pedir ajuda com entrega, troca, devolução ou reembolso,{' '}
+          <strong>fale com o atendimento da loja onde você comprou.</strong>
+        </p>
+      </section>
+
+      <p className="mt-6 text-sm leading-6 text-muted">
+        Encontrou uma informação errada em uma oferta ou algum problema no PromoDetec? Escreva para a gente:
+      </p>
       <a href={`mailto:${SUPPORT_EMAIL}`}
-        className="glass hover-raise mt-6 inline-flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-5 py-4 text-base font-semibold text-ink transition hover:bg-brand/20">
+        className="glass hover-raise mt-3 inline-flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-5 py-4 text-base font-semibold text-ink transition hover:bg-brand/20">
         <Mail className="h-5 w-5 text-brand-2" /> {SUPPORT_EMAIL}
       </a>
 
@@ -29,8 +45,7 @@ export default function Contato() {
       </div>
 
       <p className="mt-8 text-xs text-muted">
-        O PromoDetec é um projeto brasileiro independente. Não vendemos produtos — comparamos preços públicos e
-        direcionamos você à loja oficial.
+        O PromoDetec é um projeto brasileiro independente.
       </p>
     </main>
   );
