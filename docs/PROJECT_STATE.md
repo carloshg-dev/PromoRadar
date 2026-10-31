@@ -1,5 +1,16 @@
 # Estado operacional do PromoDetec
 
+## 31/10/2026: Black em evidência publicado e calendário automático
+
+- O proprietário escolheu **A — Black em evidência** e pré-aprovou continuidade/publicação. [PR #11](https://github.com/carloshg-dev/PromoRadar/pull/11) integrada na `main`, SHA `0ed13376498c034cef119b181fcfee976d4a9e68`. A árvore funcional coincide com o candidato `d7c84eff01d556b0c3c67490367a10cdb426d3e9`.
+- Painel autenticado da conta `0fcbdab34f0d44e0e948a4bb2f051810` confirmou Worker `promodetec`, build automático `7a679339-fdce-4ab2-b85c-b80edbb3345c`, fonte `main`/`0ed1337`, versão **`108b097a`**, **Ready / 100% do tráfego**. Domínio público confirmou `esquenta-black`, missão literal, fotos/preços em grade e 24 ações de salvar. É a verificação deste release, não garantia de versão imutável depois de futuras integrações.
+- Calendário 2026 em `America/Sao_Paulo`: Esquenta Black até 26/11; Black Friday 27–29/11; Cyber Monday 30/11; Esquenta Natal 01–13/12; Natal 14–25/12; neutro a partir de 26/12. Bootstrap antes da pintura e provider sincronizam HTML em cache e abas visíveis, sem chamada remota, computador ligado ou deploy em cada virada. Override de tema ausente nas variáveis de build/runtime consultadas.
+- Tipos, build Next e 74 testes aprovados. CI de crescimento `41171259007` e homologação OpenNext/workerd `41171255955` aprovados no candidato final: **1.573,17 KiB gzip**, **23/23 contratos**, Wrangler 4.151.2, compatibilidade efetiva `2026-08-23`, buildId `xcRLzoBgpQuzbHxtWhZ4X`. Revisão independente Impeccable encerrou os três ajustes apontados, com `disposition: ship`; documentação visual sincronizada.
+- **17/17 testes HTTP públicos** aprovados. QA público da home em 1440/390/320 px sem overflow; 24 produtos únicos, busca com 60 produtos, salvar/remover do próprio teste e comparador com 60 grupos reais no celular. Medição rejeitada e console da amostra sem warnings/erros. Uma imagem externa da Dufrio falhou fora da primeira tela; não afirmar integridade de todas as fotos. Não houve login/OAuth, escrita sintética de eventos nem clique afiliado humano.
+- O preflight API GitHub `41171257797` retornou 401; a sessão existente do navegador permitiu confirmar conta, build, tráfego e nove nomes de bindings sem revelar valores ou alterar credenciais. A publicação ocorreu pelos Builds existentes. Nenhuma alteração de DNS, WAF, banco, cobrança ou credenciais.
+- Índice de comparações relido somente com GET: gerado em 30/10 às 17:00:51 UTC, idade de 12,25 h na consulta, schema/prazo válidos, escopo tech coerente com o índice e 60 grupos atuais. A indisponibilidade vista no laboratório não se repetiu no comparador público. Viradas futuras foram testadas em unidade/VM; não houve navegador com relógio futuro. Este release não comprova redução de CPU/1102.
+- Evidências e limites: `docs/BLACK_EVIDENCIA_2026-10-31.md`. Capturas e recibos agregados locais em `reports/` e `.impeccable/review/black-evidencia/`.
+
 ## 26/10/2026: acabamento do rodapé revisado
 
 - Rodapé compartilhado extraído para `src/components/layout/footer.tsx`: base tinta verde, marca/ação, navegação por grupos, atendimento/privacidade e faixa legal. A página mantém a identidade clara. Todos os links, o evento de consentimento e o conteúdo legal existentes foram preservados; nenhuma consulta ou persistência adicional.
