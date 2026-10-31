@@ -10,6 +10,10 @@ set local idle_in_transaction_session_timeout = '15s';
 
 select 'CATALOG_CONTRACT_JSON=' || jsonb_build_object(
   'transactionReadOnly', current_setting('transaction_read_only'),
+  'databaseBytes', pg_database_size(current_database()),
+  'tableBytes', (select jsonb_agg(jsonb_build_object('table', c.relname, 'totalBytes', pg_total_relation_size(c.oid)))
+    from pg_class c join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public' and c.relname in ('produtos','lojas','categorias','historico_precos')),
   'view', (select jsonb_build_object('options', c.reloptions, 'definition',
     case when pg_get_viewdef(c.oid, true) ~* '(https?://|@|password|secret|token)'
       then '[sensitive-expression-omitted]' else pg_get_viewdef(c.oid, true) end)
