@@ -689,5 +689,25 @@
     "Some image samples are duplicated and the denominator is not a random sample of the full catalogue",
     "Free CPU conclusion comes from authenticated dashboard, not HTTP latency",
     "No Supabase project quota/billing visibility through Management API connector"
-  ]
+  ],
+  "candidate": {
+    "pr": "https://github.com/carloshg-dev/PromoRadar/pull/13",
+    "draft": true,
+    "functionalCommit": "8c70e7b66289f51ab9c21d8af983644251bd9498",
+    "growthRun": 41178271434,
+    "workerRun": 41178276271,
+    "growthTestsPassed": 86,
+    "collectionTestsPassed": 28,
+    "workerContracts": {
+      "passed": 23,
+      "failed": 0,
+      "buildId": "nB-BnJPYoRFjlqSgvqxCw",
+      "wranglerVersion": "4.151.2",
+      "effectiveCompatibilityDate": "2026-08-23",
+      "gzipKiB": 1572.2
+    },
+    "deployed": false,
+    "interactiveBrowserQA": false,
+    "knownLocalQueryIntermittence": true
+  }
 }
