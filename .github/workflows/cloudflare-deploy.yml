@@ -95,7 +95,12 @@ jobs:
       - run: npm run typecheck
 
       - name: Build OpenNext Cloudflare Worker
-        run: npm run cf:build
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.deploy }}" != "true" ]; then
+            export NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3215
+          fi
+          npm run cf:build
 
       - name: Diagnosticar composicao do Worker
         shell: bash
@@ -150,6 +155,42 @@ jobs:
             process.exit(1);
           }
           NODE
+
+      - name: Homologar Worker local sem publicar
+        if: ${{ github.event.inputs.deploy != 'true' }}
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/promodetec-worker-runtime" --no-save --package-lock=false wrangler@4.151.2
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          if (fs.existsSync(".env.example")) fs.renameSync(".env.example", path.join(process.env.RUNNER_TEMP, "promodetec-env.example"));
+          const names = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SITE_URL"];
+          const values = { ...process.env, NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3215" };
+          fs.writeFileSync(".env.local", names.map(name => `${name}=${values[name]}`).join("\n"), { mode: 0o600 });
+          NODE
+          export PROMODETEC_WORKER_WRANGLER="$RUNNER_TEMP/promodetec-worker-runtime/node_modules/wrangler/bin/wrangler.js"
+          npm run test:worker
+          node <<'NODE'
+          const fs = require("node:fs");
+          const assert = require("node:assert/strict");
+          const buildId = fs.readFileSync(".next/BUILD_ID", "utf8").trim();
+          const receipt = fs.readdirSync("docs/evidence").filter(name => /^worker-lab-.*\.json$/.test(name))
+            .map(name => JSON.parse(fs.readFileSync(`docs/evidence/${name}`, "utf8"))).find(report => report.buildId === buildId);
+          assert.ok(receipt, "worker_receipt_must_match_current_build");
+          assert.equal(receipt.failed, 0);
+          assert.equal(receipt.effectiveCompatibilityDate, receipt.requestedCompatibilityDate);
+          fs.mkdirSync("reports", { recursive: true });
+          fs.writeFileSync("reports/worker-ui-receipt.json", JSON.stringify(receipt, null, 2));
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ success() && github.event.inputs.deploy != 'true' }}
+        with:
+          name: worker-ui-receipt-${{ github.run_id }}
+          path: reports/worker-ui-receipt.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Preparar bindings secretos de runtime
         if: ${{ github.event.inputs.deploy == 'true' }}
