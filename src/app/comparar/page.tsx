@@ -29,7 +29,7 @@ export default async function Comparar({ searchParams }: { searchParams: { verti
   } catch { available = false; }
 
   return (
-    <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
+    <main data-public-cache={available ? "ready" : "unavailable"} className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Comparador" }]} />
       <h1 className="mt-4 flex items-center gap-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
         <Scale className="h-7 w-7 text-brand" /> Compare antes de escolher.
