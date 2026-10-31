@@ -7,9 +7,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: { DEFAULT: "#f6f7f3", soft: "#edf1e8", card: "#ffffff", over: "#e5ecdf", input: "#ffffff" },
-        ink: "#20372d", line: "#dbe3d7",
-        brand: { DEFAULT: "#1b6549", 2: "#164b35" }, lime: "#d9efb9",
+        bg: { DEFAULT: "rgb(var(--page-rgb) / <alpha-value>)", soft: "rgb(var(--soft-rgb) / <alpha-value>)", card: "#ffffff", over: "#e5ecdf", input: "#ffffff" },
+        ink: "rgb(var(--ink-rgb) / <alpha-value>)", line: "rgb(var(--line-rgb) / <alpha-value>)",
+        brand: { DEFAULT: "rgb(var(--brand-rgb) / <alpha-value>)", 2: "rgb(var(--brand-deep-rgb) / <alpha-value>)" }, lime: "rgb(var(--accent-rgb) / <alpha-value>)",
         cyan: { DEFAULT: "#216678", 2: "#216678" },
         neon: { DEFAULT: "#1a7045", 2: "#1a7045" },
         fit: { DEFAULT: "#a64350", 2: "#a64350" },
@@ -17,7 +17,7 @@ const config: Config = {
         tool: { DEFAULT: "#285d96", 2: "#285d96" },
         gadget: { DEFAULT: "#28685f", 2: "#28685f" },
         parfum: { DEFAULT: "#7a4a78", 2: "#7a4a78" },
-        ok: "#1a7045", warn: "#865b13", danger: "#b33c3c", muted: "#5b6b61",
+        ok: "#1a7045", warn: "#865b13", danger: "#b33c3c", muted: "rgb(var(--muted-rgb) / <alpha-value>)",
         // "Signal accents" das lojas (DESIGN.md › Retail Integration)
         loja:  { kabum: "#FF6500", terabyte: "#00D35E", pichau: "#E3000F", mercadolivre: "#FFE600", amazon: "#FF9900" },
       },

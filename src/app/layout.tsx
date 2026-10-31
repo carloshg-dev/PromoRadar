@@ -9,6 +9,8 @@ import { CookieConsent } from "@/components/analytics/cookie-consent";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { Journey } from "@/components/analytics/journey";
 import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { CampaignProvider } from "@/components/campaign-provider";
+import { scriptTemaSazonal, temaSazonal } from "@/lib/seasonal";
 
 
 export const metadata: Metadata = {
@@ -41,9 +43,12 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const theme = temaSazonal();
   return (
-    <html lang="pt-BR" className={GeistSans.variable}>
+    <html lang="pt-BR" className={GeistSans.variable} data-campaign={theme?.id ?? "neutro"} suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: scriptTemaSazonal() }} /></head>
       <body className="min-h-screen font-sans antialiased">
+        <CampaignProvider initialTheme={theme}>
         <Clarity />
         <GoogleAnalytics />
         <Journey />
@@ -52,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Footer />
         <CookieConsent />
+        </CampaignProvider>
       </body>
     </html>
   );

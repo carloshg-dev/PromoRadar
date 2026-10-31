@@ -2,7 +2,10 @@ export type TemaSazonalId =
   | "patria-cliente"
   | "primavera-criancas"
   | "primavera"
+  | "esquenta-black"
   | "black-friday"
+  | "cyber-monday"
+  | "esquenta-natal"
   | "natal";
 
 export type TemaVisual = "cliente" | "primavera" | "black-friday" | "natal";
@@ -93,11 +96,30 @@ const BLACK_FRIDAY: TemaSazonal = {
   id: "black-friday",
   visual: "black-friday",
   selo: "Black Friday",
-  frase: "Black Friday de verdade: desconto falso não passa pelo radar.",
-  grad: "from-zinc-700 via-brand to-cyan",
-  corHex: "#a78bfa",
-  corApoioHex: "#22d3ee",
+  frase: "Compare os preços coletados e consulte o histórico antes de escolher.",
+  grad: "from-ink to-brand",
+  corHex: "#183e30",
+  corApoioHex: "#f3dd59",
   cta: { href: "/ofertas", label: "Ver ofertas" },
+};
+
+const ESQUENTA_BLACK: TemaSazonal = {
+  ...BLACK_FRIDAY,
+  id: "esquenta-black",
+  selo: "Esquenta Black Friday",
+  corApoioHex: "#d9efb9",
+  frase: "O esquenta já começou.",
+  cta: { href: "/ofertas", label: "Explorar o esquenta" },
+};
+
+const CYBER_MONDAY: TemaSazonal = {
+  ...BLACK_FRIDAY,
+  id: "cyber-monday",
+  selo: "Cyber Monday",
+  corHex: "#264a82",
+  corApoioHex: "#c6ddff",
+  frase: "Tecnologia, gadgets e outras descobertas: compare antes de comprar.",
+  cta: { href: "/ofertas", label: "Explorar a Cyber Monday" },
 };
 
 const NATAL: TemaSazonal = {
@@ -105,27 +127,51 @@ const NATAL: TemaSazonal = {
   visual: "natal",
   selo: "Natal",
   frase: "Presente bom, preço acompanhado e compra no momento certo.",
-  grad: "from-rose-500 via-amber-300 to-emerald-500",
-  corHex: "#fb7185",
-  corApoioHex: "#fbbf24",
+  grad: "from-ink to-brand",
+  corHex: "#8d252c",
+  corApoioHex: "#f3dca4",
   cta: { href: "/ofertas", label: "Ver presentes" },
 };
+
+const ESQUENTA_NATAL: TemaSazonal = {
+  ...NATAL,
+  id: "esquenta-natal",
+  selo: "Esquenta Natal",
+  corHex: "#1b5b41",
+  corApoioHex: "#f1dea9",
+  frase: "Comece sua lista de presentes e confira os preços com antecedência.",
+  cta: { href: "/ofertas", label: "Encontrar presentes" },
+};
+
+/** Janelas inclusivas em America/Sao_Paulo; fora delas, a campanha é neutra. */
+export const CALENDARIO_SAZONAL_2026 = [
+  { inicio: 20260820, fim: 20260919, tema: CAMPANHA_CLIENTE },
+  { inicio: 20260920, fim: 20261012, tema: CAMPANHA_PRIMAVERA_CRIANCAS },
+  { inicio: 20261013, fim: 20261029, tema: CAMPANHA_PRIMAVERA },
+  { inicio: 20261030, fim: 20261126, tema: ESQUENTA_BLACK },
+  { inicio: 20261127, fim: 20261129, tema: BLACK_FRIDAY },
+  { inicio: 20261130, fim: 20261130, tema: CYBER_MONDAY },
+  { inicio: 20261201, fim: 20261213, tema: ESQUENTA_NATAL },
+  { inicio: 20261214, fim: 20261225, tema: NATAL },
+] as const;
 
 const TEMAS_FORCADOS: Partial<Record<string, TemaSazonal>> = {
   "patria-cliente": CAMPANHA_CLIENTE,
   "primavera-criancas": CAMPANHA_PRIMAVERA_CRIANCAS,
   primavera: CAMPANHA_PRIMAVERA,
+  "esquenta-black": ESQUENTA_BLACK,
   "black-friday": BLACK_FRIDAY,
+  "cyber-monday": CYBER_MONDAY,
+  "esquenta-natal": ESQUENTA_NATAL,
   natal: NATAL,
 };
 
+const DATA_BRASIL = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit",
+});
+
 function dataNoBrasil(data: Date) {
-  const partes = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(data);
+  const partes = DATA_BRASIL.formatToParts(data);
   const valor = (tipo: Intl.DateTimeFormatPartTypes) =>
     Number(partes.find((parte) => parte.type === tipo)?.value ?? 0);
 
@@ -136,22 +182,23 @@ function dataNoBrasil(data: Date) {
 }
 
 /**
- * Fonte única do calendário promocional. As campanhas de setembro/outubro de
- * 2026 já ficam agendadas; o fuso explícito mantém SSR e navegador alinhados.
+ * Fonte única do calendário promocional aprovado para 2026.
+ * O fuso é explícito, inclusive no Worker; 2027 exige calendário próprio.
  */
 export function temaSazonal(hoje: Date = new Date()): TemaSazonal | null {
   const forca = process.env.NEXT_PUBLIC_TEMA_FORCE;
   if (forca && TEMAS_FORCADOS[forca]) return TEMAS_FORCADOS[forca] ?? null;
 
-  const { ano, mes, dia, chave } = dataNoBrasil(hoje);
-  const entre = (inicio: number, fim: number) => chave >= inicio && chave <= fim;
+  const { chave } = dataNoBrasil(hoje);
+  return CALENDARIO_SAZONAL_2026.find(
+    janela => chave >= janela.inicio && chave <= janela.fim,
+  )?.tema ?? null;
+}
 
-  if (ano === 2026 && entre(20260820, 20260919)) return CAMPANHA_CLIENTE;
-  if (ano === 2026 && entre(20260920, 20261012)) return CAMPANHA_PRIMAVERA_CRIANCAS;
-  if (ano === 2026 && entre(20261013, 20261031)) return CAMPANHA_PRIMAVERA;
-
-  if (mes === 11 && dia >= 20) return BLACK_FRIDAY;
-  if (mes === 12) return NATAL;
-
-  return null;
+/** Apenas IDs/datas públicos: atualiza a pele antes da pintura mesmo com HTML em cache. */
+export function scriptTemaSazonal(): string {
+  const janelas = CALENDARIO_SAZONAL_2026.map(({ inicio, fim, tema }) => [inicio, fim, tema.id]);
+  const forca = process.env.NEXT_PUBLIC_TEMA_FORCE;
+  const idForcado = forca ? TEMAS_FORCADOS[forca]?.id ?? null : null;
+  return `(function(){try{var p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),n=function(t){return Number(p.find(function(v){return v.type===t}).value)},d=n('year')*10000+n('month')*100+n('day'),w=${JSON.stringify(janelas)},id=${JSON.stringify(idForcado)};if(!id){var a=w.find(function(v){return d>=v[0]&&d<=v[1]});id=a?a[2]:'neutro'}document.documentElement.dataset.campaign=id}catch(e){}})();`;
 }
