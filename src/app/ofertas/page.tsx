@@ -34,7 +34,7 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
   } catch { available = false; }
 
   return (
-    <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
+    <main data-public-cache={available ? "ready" : "unavailable"} className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
       {busca && <TrackView tipo="busca" termo={busca} origem="ofertas" />}
       {available && busca && produtos.length === 0 && <TrackView tipo="busca_sem_resultado" termo={busca} origem="ofertas" />}
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas" }]} />

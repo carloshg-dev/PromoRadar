@@ -1,0 +1,255 @@
+{
+  "checkedAt": "2026-10-31T08:42:42.729Z",
+  "scope": "Infraestrutura de CPU; sem redesenho ou nova cobrança",
+  "candidate": {
+    "sha": "95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf",
+    "pr": 14,
+    "base": "f4e72f20306aa19bc79591878c0660e6774f7058",
+    "runtimeRun": 41185469428,
+    "contractsRun": 41185478419,
+    "buildId": "GhYTqcZJ2Wtn1mUJZKs3-",
+    "gzipKiB": 1575.51,
+    "published": false
+  },
+  "cache": {
+    "ttlSeconds": 120,
+    "prefixInspectionBytes": 65536,
+    "maxStoredBodyBytes": 1048576,
+    "scope": "por POP, host, URL, variante de roteador e build",
+    "privateRoutesBypass": true,
+    "authCookiesBypass": true,
+    "newPaidBindings": false
+  },
+  "lab": {
+    "runtime": "Local OpenNext preview / Wrangler / workerd",
+    "wranglerVersion": "4.151.2",
+    "effectiveCompatibilityDate": "2026-08-23",
+    "checksPassed": 35,
+    "checksFailed": 0,
+    "queryTimeout": 0,
+    "burstRequests": 512,
+    "burstErrors": 0,
+    "maxConcurrency": 64,
+    "expiryAndRecovery": [
+      {
+        "name": "public-cache-expiry",
+        "passed": true
+      },
+      {
+        "name": "public-cache-recovery",
+        "passed": true
+      }
+    ],
+    "benchmarks": [
+      {
+        "mode": "baseline",
+        "concurrency": 2,
+        "requests": 16,
+        "cacheHits": 0,
+        "errors": 0,
+        "activeSamples": 4907,
+        "requestedSamplingIntervalUs": 100,
+        "jsHeapBytes": 83591520
+      },
+      {
+        "mode": "cache",
+        "concurrency": 1,
+        "requests": 128,
+        "cacheHits": 128,
+        "errors": 0,
+        "activeSamples": 160,
+        "requestedSamplingIntervalUs": 100,
+        "jsHeapBytes": 84875720
+      },
+      {
+        "mode": "cache",
+        "concurrency": 8,
+        "requests": 128,
+        "cacheHits": 128,
+        "errors": 0,
+        "activeSamples": 118,
+        "requestedSamplingIntervalUs": 100,
+        "jsHeapBytes": 86183332
+      },
+      {
+        "mode": "cache",
+        "concurrency": 32,
+        "requests": 128,
+        "cacheHits": 128,
+        "errors": 0,
+        "activeSamples": 179,
+        "requestedSamplingIntervalUs": 100,
+        "jsHeapBytes": 59702276
+      },
+      {
+        "mode": "cache",
+        "concurrency": 64,
+        "requests": 128,
+        "cacheHits": 128,
+        "errors": 0,
+        "activeSamples": 95,
+        "requestedSamplingIntervalUs": 100,
+        "jsHeapBytes": 60994716
+      }
+    ],
+    "profileCaveat": "Amostragem V8 local; nao mede CPU faturada, startup ou pico de memoria em producao"
+  },
+  "database": {
+    "appliedIndex": "idx_produtos_vitrine_ordem",
+    "run": 41184205225,
+    "valid": true,
+    "ready": true,
+    "indexBytes": 2138112,
+    "databaseBytesAfter": 270388371,
+    "pageBeforeMs": 4327.223,
+    "pageAfterDefaultPlanMs": 4361.12,
+    "pageForcedIndexReadOnlyExperimentMs": 71.916,
+    "interpretation": "Sem ganho comprovado no plano padrao; experimento nao altera configuracao da aplicacao"
+  },
+  "productionBefore": {
+    "checkedAt": "2026-10-31T08:32:15.595Z",
+    "readOnly": true,
+    "loadTest": false,
+    "results": [
+      {
+        "route": "/",
+        "method": "GET",
+        "status": 200,
+        "ms": 801,
+        "bytes": 368745,
+        "cpuError": false,
+        "productLinks": 24,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/_next/static/chunks/webpack-8b95e9d75d0634bc.js",
+        "method": "GET",
+        "status": 200,
+        "ms": 26,
+        "bytes": 3827,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/_next/static/css/26e07dffd84b8c54.css",
+        "method": "GET",
+        "status": 200,
+        "ms": 37,
+        "bytes": 67437,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/ofertas?busca=fone",
+        "method": "GET",
+        "status": 200,
+        "ms": 1000,
+        "bytes": 654047,
+        "cpuError": false,
+        "productLinks": 60,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/produto/[id]",
+        "method": "GET",
+        "status": 200,
+        "ms": 1491,
+        "bytes": 206488,
+        "cpuError": false,
+        "productLinks": 8,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/r/[id]",
+        "method": "HEAD",
+        "status": 204,
+        "ms": 45,
+        "bytes": 0,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/categoria/fones-bluetooth",
+        "method": "GET",
+        "status": 200,
+        "ms": 765,
+        "bytes": 631275,
+        "cpuError": false,
+        "productLinks": 60,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/comparar",
+        "method": "GET",
+        "status": 200,
+        "ms": 2816,
+        "bytes": 670300,
+        "cpuError": false,
+        "productLinks": 166,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/api/search?q=fone",
+        "method": "GET",
+        "status": 200,
+        "ms": 664,
+        "bytes": 1875,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/login",
+        "method": "GET",
+        "status": 200,
+        "ms": 216,
+        "bytes": 111697,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/admin",
+        "method": "GET",
+        "status": 307,
+        "ms": 29,
+        "bytes": 0,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      },
+      {
+        "route": "/auth/callback",
+        "method": "GET",
+        "status": 307,
+        "ms": 320,
+        "bytes": 0,
+        "cpuError": false,
+        "productLinks": 0,
+        "cache": null,
+        "build": null
+      }
+    ]
+  },
+  "limits": [
+    "Não houve teste de carga em produção",
+    "Navegador desativado: sem novo QA interativo ou login real",
+    "Painel/API Cloudflare indisponível para nova janela de CPU/1102",
+    "Cache frio, buscas únicas e usuários autenticados continuam no render original",
+    "Cache API ainda conta invocações; não remove o limite diário gratuito"
+  ]
+}
