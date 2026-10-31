@@ -16,6 +16,7 @@ import { ProductActions } from "@/components/product-actions";
 import { productMetadata, productStructuredData, safeJsonLd } from "@/lib/product-seo";
 import { hasRecentPrice } from "@/core/offer-freshness";
 import { verifiedBrlPrice } from "@/core/catalog-policy";
+import { formatShortDate } from "@/core/formatting";
 import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles, ShoppingBag, CheckCircle2, TriangleAlert } from "lucide-react";
 import { TODAS_CATEGORIAS } from "@/lib/navigation";
 
@@ -45,7 +46,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
   let readFailed = false;
   const hist = (await historicoPrecos(params.id).catch(() => { readFailed = true; return []; })) as SeriePonto[];
   const points: ChartPoint[] = hist.map((h) => ({
-    data: new Date(h.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+    data: formatShortDate(h.coletado_em),
     preco: Number(h.preco),
   }));
   const [comp, rel] = await Promise.all([

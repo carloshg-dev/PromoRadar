@@ -4,6 +4,7 @@
  */
 
 import type { Produto } from "@/core/domain/types";
+import { formatBRL as brl } from "@/core/formatting";
 
 export interface PriceTrend {
   /** "queda" | "alta" | "estavel" comparando preço atual vs. média recente */
@@ -71,8 +72,4 @@ export function gerarInsights(p: Produto, serie: SeriePonto[]): Insight[] {
 
   if (!out.length) out.push({ tipo: "neutro", icon: "⏳", texto: "Coletando histórico — insights melhoram a cada atualização." });
   return out;
-}
-
-function brl(v: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 }

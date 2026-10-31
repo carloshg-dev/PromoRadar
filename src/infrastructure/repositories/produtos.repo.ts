@@ -12,6 +12,7 @@ import { limitedFetch } from "@/infrastructure/supabase/limited-fetch";
 import { SELECT_PRODUTO as SELECT, mapProduto as map } from "./produto-row";
 import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
 import { catalogPriceLimit, DEFAULT_CATALOG_PRICE_LIMIT, GENERIC_IMAGE_PATTERNS, UNVERIFIED_BRL_STORES, validProductImage, verifiedBrlPrice } from "@/core/catalog-policy";
+import { formatShortDate } from "@/core/formatting";
 
 export interface LeituraVitrine {
   agora: number;
@@ -463,7 +464,7 @@ export async function ofertasEmDestaque(n = 8, leitura = criarLeituraVitrine()):
     try {
       const pts = await historicoPrecos(refId, 30, leitura);
       historico = pts.map((p) => ({
-        data: new Date(p.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        data: formatShortDate(p.coletado_em),
         preco: Number(p.preco),
       }));
     } catch { /* segue sem gráfico */ }
