@@ -1,5 +1,14 @@
 # Estado operacional do PromoDetec
 
+## 31/10/2026: mitigação gratuita de CPU homologada
+
+- Pedido atual do proprietário: ganhar tempo sem contratar plano e preservar a experiência. Correção de infraestrutura separada na [PR #14](https://github.com/carloshg-dev/PromoRadar/pull/14), candidato funcional `95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf` sobre `main/f4e72f2`. Pré-aprovação de integração/publicação já existente; sem contratação, DNS, WAF, nova credencial ou nova dependência paga.
+- Cache API de respostas públicas íntegras por 120 s, por POP/host/URL/variante/build, antes de renderizar o Next. Sessões, login/admin, APIs, medição e saída afiliada seguem o caminho original. Falhas/fallback/Set-Cookie não são armazenados. Stream limitado e proxy de imagem não utilizado encerrado. Copy, aparência e regras de catálogo da main preservadas; o pacote de catálogo da PR #13 continua separado.
+- CI `41185478419` aprovado. OpenNext/workerd `41185469428`: **35/35 contratos**, **512/512 respostas quentes**, concorrência máxima 64, expiração e recuperação nativas aprovadas; gzip **1.575,51 KiB**, buildId `GhYTqcZJ2Wtn1mUJZKs3-`, Wrangler 4.151.2/compatibilidade `2026-08-23`. O profiler local mostrou economia de trabalho JS, sem medir CPU faturada de produção. Nenhum teste de carga remoto.
+- Índice `idx_produtos_vitrine_ordem` aplicado concorrentemente pelo run `41184205225`, valid/ready, 2,04 MiB; banco aproximadamente 258 MiB. Não alterou preços/estoque/RLS. **Sem ganho comprovado no plano SQL padrão**: consulta restritiva 4,33 s antes/4,36 s depois. Caminho ordenado de 71,9 ms foi somente experimento em transação de leitura; não mudou o planner da aplicação.
+- Antes desta publicação, 12 leituras públicas leves passaram. Painel/API indisponíveis para nova janela de CPU/1102; navegador desativado impede QA interativo novo. Aparência não foi modificada por este patch de infraestrutura. Cache frio/sessões ainda renderizam; HIT continua contando invocações. Não prometer zero 1102 nem converter requisições em pessoas.
+- Integração e comprovação pública serão registradas após a conclusão. Detalhes, limites e contingência em `docs/FREE_PLAN_SURVIVAL_2026-10-31.md`; recibo agregado em `docs/evidence/free-plan-2026-10-31.json`.
+
 ## 31/10/2026: auditoria de saúde e candidato de catálogo
 
 - Painel autenticado confirmou conta do domínio, Worker `promodetec`, `main/f4e72f2`, versão **3a725a85**, 100% do tráfego às 06:10 UTC. Últimas 24 h, todas as versões: aproximadamente 19,48 mil invocações, 5,16 mil erros e 5 mil CPU exceeded; CPU p50 43,96 ms/p90 286 ms. Janelas não equivalentes não permitem atribuição ao layout, contagem de pessoas ou origem geográfica por colo.
