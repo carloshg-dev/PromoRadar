@@ -25,6 +25,6 @@ export function SavedRadar() {
           }} className="grid h-11 w-11 shrink-0 place-items-center text-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"><X className="h-4 w-4" /></button>
         </li>)}
       </ul>
-    </> : <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">Gostou de uma oferta? Abra o produto e toque em “Salvar oferta” para voltar a ele aqui. Sem cadastro.</p>}
+    </> : <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">Gostou de uma oferta? Toque no coração do card ou em “Salvar oferta” no produto para voltar a ela aqui. Sem cadastro.</p>}
   </section>;
 }

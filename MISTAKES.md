@@ -131,6 +131,13 @@ Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e preven
 
 ## Manutenção do registro
 
+## 2026-10-31: build e typecheck concorrentes disputaram os tipos gerados
+
+- Fato observado: `tsc` encontrou arquivos de `.next/types` que o `next build` concorrente havia removido para regenerar.
+- Causa: os dois comandos compartilham a saída mutável `.next`; não são verificações independentes.
+- Correção: concluir o build e só depois repetir o typecheck. O teste funcional do bootstrap usa prazo de VM de um segundo, sem transformar a partida fria do Intl em teste de desempenho.
+- Regra preventiva: não executar build, dev e typecheck simultaneamente no mesmo diretório de saída. Paralelizar somente laboratórios ou operações com saídas independentes.
+
 Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transforme o procedimento em skill somente se ele for recorrente e verificável.
 
 ## 2026-10-26: data local selecionou um recibo UTC anterior

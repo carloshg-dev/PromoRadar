@@ -7,24 +7,24 @@ related_targets: ["src/app/globals.css","tailwind.config.ts","src/components/lay
 
 # Home e identidade pública
 
-Modo: Operate. O visitante encontra, compara e salva ofertas; o primeiro caminho é a busca, seguido de categorias. Produtos, preços, origens e datas são reais. Prévia funcional antes de publicar, conforme escolha do usuário por código direto.
+Modo: Persuade na descoberta, Operate na comparação. Direção A escolhida explicitamente em 31/10/2026; continuidade e publicação pré-aprovadas. Produto, preço, origem e datas continuam reais.
 
 ## Direction contract
 
-THESIS: Uma orientação clara até a boa compra; substituir carrosséis neon por busca, um achado real e categorias legíveis.
+THESIS: Black em evidência: campanha compacta e produtos protagonistas, sem destaque isolado ocupando a primeira tela.
 
-OWN-WORLD: Sinalização de metrô traduzida para catálogo: papel claro, tinta verde profunda, setas consistentes, categorias com cores discretas, Geist e números tabulares.
+OWN-WORLD: Papel claro, tinta verde quase preta, lime, Geist, fotos contidas em branco e preços tabulares. As fases futuras mudam a paleta sazonal, mantendo estrutura e marca.
 
-STORY: Encontrar o produto, conferir origem e preço, comparar ou abrir histórico, decidir na loja.
+STORY: Reconhecer o achado, conferir preço, loja e data, salvar ou consultar histórico e decidir na loja.
 
-FIRST VIEWPORT: Cabeçalho compacto; busca e título amplo à esquerda; produto real à direita; linha de categorias abaixo. No celular, busca primeiro e produto depois, sem cortes.
+FIRST VIEWPORT: Cabeçalho compacto; campanha à esquerda, missão literal à direita; busca e categorias; quatro produtos no desktop e dois em 390px. Primeira vitrine intercala lojas; nenhum produto isolado precede a grade.
 
-FORM: Sistema de orientação de metrô, candidato 6 de 7; seed d01731c2. Interação assinatura: caminhos por categoria e foco claro, sem movimento automático.
+FORM: Composição 3/7, seed 4412e623, opção A escolhida pelo proprietário. Interação assinatura: salvar na vitrine; calendário sincroniza faixa, hero e cores sem animação automática.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Escolha e critérios
 
-Direção assumida a partir do pedido de modernização e da opção explícita por implementar e mostrar a prévia; não há comp aprovado. `buildPath=code`.
+Aprovada a prévia A de `reports/seasonal-preview-2026-10-30/a.html`. Screenshot `a-desktop.jpg` é referência crítica da escolha; `buildPath=code`, não reprodução métrica de comp. Frase da missão e conteúdo legal preservados literalmente; rodapé existente mantido.
 
-Os dados e contratos financeiros/afiliados são preservados. As leituras usam a fronteira existente; nenhuma consulta adicional é necessária para a nova composição. A política sazonal continua disponível, com presença discreta em vez de dominar a página.
+Reaproveitar pools limitados para variar lojas e evitar repetição, sem novas consultas. Campanhas em Brasília: Esquenta até 26/11; Black 27–29/11; Cyber 30/11; Esquenta Natal 01–13/12; Natal 14–25/12; neutro em 26/12. A troca deve funcionar com ISR e abas abertas.
