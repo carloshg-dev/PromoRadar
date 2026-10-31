@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { hasRecentPrice } from "@/core/offer-freshness";
+import { verifiedBrlPrice } from "@/core/catalog-policy";
 import { agruparComparacoes, type Comparacao } from "./comparison";
 
 export const SNAPSHOT_BUCKET = "catalog-comparisons";
@@ -48,7 +49,7 @@ export function validateSnapshotIndex(value: unknown, now = Date.now()): Snapsho
 /** Uma oferta que envelheceu depois da geração nunca reaparece como preço atual. */
 export function currentComparisons(comparisons: Comparacao[], now = Date.now()): Comparacao[] {
   return comparisons.flatMap(c => {
-    const offers = c.ofertas.filter(p => hasRecentPrice(p.atualizadoEm, now));
+    const offers = c.ofertas.filter(p => hasRecentPrice(p.atualizadoEm, now) && verifiedBrlPrice(p.lojaSlug));
     return offers.length === c.ofertas.length ? [c] : agruparComparacoes(offers, 1);
   });
 }

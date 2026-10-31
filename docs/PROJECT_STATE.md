@@ -1,5 +1,15 @@
 # Estado operacional do PromoDetec
 
+## 31/10/2026: auditoria de saúde e candidato de catálogo
+
+- Painel autenticado confirmou conta do domínio, Worker `promodetec`, `main/f4e72f2`, versão **3a725a85**, 100% do tráfego às 06:10 UTC. Últimas 24 h, todas as versões: aproximadamente 19,48 mil invocações, 5,16 mil erros e 5 mil CPU exceeded; CPU p50 43,96 ms/p90 286 ms. Janelas não equivalentes não permitem atribuição ao layout, contagem de pessoas ou origem geográfica por colo.
+- Recomendado **Workers Paid, a partir de US$ 5/mês**, pelo orçamento de CPU; domínio Pro não o substitui. Nenhuma contratação. Limites/uso faturável do Supabase e segmentação recente de WAF/bots/países continuam sem prova completa.
+- Auditoria por cursor de 42.567 produtos em estoque, 20.326 recentes. Awin confirmou 14 programas ativos; Acer/Doce Beleza/Trocafy sem catálogo, Panasonic/Diesel inativos, Carrefour desatualizado. 10.530 registros AliExpress usam imagem genérica; amostra de feed AliExpress CNY/USD exige comprovação de BRL. Não foram alterados dados nem reativadas lojas.
+- Candidato em `codex/health-affiliate-audit`: preço Awin atual sem mínimo de preços antigos/câmbio fixo; quarentena AliExpress; filtros até R$ 1.000 e primeira prateleira até R$ 300; rejeição de fotos genéricas; paginação com 60 linhas; registro de afiliações atualizado; retirada da desativação de estoque por volume pequeno; proteção da curadoria e atribuição Mercado Livre corrigidas. Histórico/preços preservados. **Sem integração/publicação nesta etapa.**
+- Typecheck/build Next e 86 + 28 testes locais aprovados. Build teve aviso parcial SQL 57014 e primeira leitura local de `/ofertas` ficou indisponível, recuperando na repetição. QA interativo desktop/mobile bloqueado: navegador continua desativado para a ferramenta após tentativa de reativação pelo usuário. Build/HTTP não provam cliques, console ou estabilidade; candidato ainda exige homologação.
+- Metadados SQL somente leitura confirmaram proteções de usuários/eventos/cliques/jobs; campanhas não publicadas continuam acessíveis anonimamente. Proposta restritiva preparada em `db/proposals/2026-10-31-campanhas-private.sql`, não aplicada/homologada. `npm audit --omit=dev` apontou seis pacotes (Next crítico); não houve upgrade major. Conteúdo automático falhou por timeout SQL, comparações têm schedule real aprovado e backup tem execução aprovada sem restore testado.
+- Evidências, lojas, custo e próximos passos: `docs/HEALTH_AUDIT_2026-10-31.md` e `docs/evidence/health-audit-2026-10-31.json`. Nenhum deploy, DDL remota, alteração WAF/DNS, cobrança ou envio de post nesta auditoria. O registro de publicação abaixo é histórico, não estado do candidato novo.
+
 ## 31/10/2026: Black em evidência publicado e calendário automático
 
 - O proprietário escolheu **A — Black em evidência** e pré-aprovou continuidade/publicação. [PR #11](https://github.com/carloshg-dev/PromoRadar/pull/11) integrada na `main`, SHA `0ed13376498c034cef119b181fcfee976d4a9e68`. A árvore funcional coincide com o candidato `d7c84eff01d556b0c3c67490367a10cdb426d3e9`.

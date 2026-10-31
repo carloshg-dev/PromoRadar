@@ -1,0 +1,693 @@
+{
+  "checkedAt": "2026-10-31T06:38:54.175Z",
+  "productionMutation": false,
+  "catalog": {
+    "scanned": 42567,
+    "complete": true,
+    "recentProducts": 20326,
+    "stores": [
+      {
+        "name": "AliExpress",
+        "slug": "aliexpress",
+        "adapter": "awin",
+        "active": true,
+        "stock": 14846,
+        "recent7d": 3940,
+        "lastObservation": "2026-10-30T15:44:55.459+00:00",
+        "genericImages": 10530
+      },
+      {
+        "name": "Amazon",
+        "slug": "amazon",
+        "adapter": "amazon",
+        "active": true,
+        "stock": 2863,
+        "recent7d": 972,
+        "lastObservation": "2026-10-30T15:34:20.911+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Americanas",
+        "slug": "americanas",
+        "adapter": "americanas",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Bio Bran",
+        "slug": "biobran",
+        "adapter": "lomadee",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Carrefour",
+        "slug": "carrefour",
+        "adapter": "carrefour",
+        "active": true,
+        "stock": 635,
+        "recent7d": 0,
+        "lastObservation": "2026-10-04T14:49:25.533+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Casa do Fitness",
+        "slug": "casadofitness",
+        "adapter": "lomadee",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Dark Lab",
+        "slug": "darklab",
+        "adapter": "darklab",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Diesel",
+        "slug": "diesel",
+        "adapter": "diesel",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Dufrio",
+        "slug": "dufrio",
+        "adapter": "awin",
+        "active": true,
+        "stock": 876,
+        "recent7d": 876,
+        "lastObservation": "2026-10-30T16:25:57.466+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Época Cosméticos",
+        "slug": "epocacosmeticos",
+        "adapter": "epocacosmeticos",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Eudora",
+        "slug": "eudora",
+        "adapter": "awin",
+        "active": true,
+        "stock": 897,
+        "recent7d": 897,
+        "lastObservation": "2026-10-30T16:15:24.684+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Extra",
+        "slug": "extra",
+        "adapter": "awin",
+        "active": true,
+        "stock": 899,
+        "recent7d": 0,
+        "lastObservation": "2026-08-17T09:56:14.619+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Ferramentas Gerais",
+        "slug": "ferramentasgerais",
+        "adapter": "ferramentasgerais",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Growth Supplements",
+        "slug": "growth",
+        "adapter": "growth",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Havan",
+        "slug": "havan",
+        "adapter": "havan",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Integralmédica",
+        "slug": "integralmedica",
+        "adapter": "integralmedica",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Kabum",
+        "slug": "kabum",
+        "adapter": "kabum",
+        "active": true,
+        "stock": 6063,
+        "recent7d": 3080,
+        "lastObservation": "2026-10-30T16:36:08.95+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "L'Occitane",
+        "slug": "loccitane",
+        "adapter": "awin",
+        "active": true,
+        "stock": 726,
+        "recent7d": 362,
+        "lastObservation": "2026-10-30T15:48:37.094+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Loja do Mecânico",
+        "slug": "lojadomecanico",
+        "adapter": "lojadomecanico",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Lomadee",
+        "slug": "lomadee",
+        "adapter": "lomadee",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Max Titanium",
+        "slug": "maxtitanium",
+        "adapter": "maxtitanium",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Mercado Livre",
+        "slug": "mercadolivre",
+        "adapter": "mercadolivre",
+        "active": true,
+        "stock": 409,
+        "recent7d": 0,
+        "lastObservation": "2026-06-25T11:42:57.874+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "NutriBullet",
+        "slug": "nutribullet",
+        "adapter": "lomadee",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Olympikus",
+        "slug": "olympikus",
+        "adapter": "awin",
+        "active": true,
+        "stock": 3693,
+        "recent7d": 1190,
+        "lastObservation": "2026-10-30T16:05:00.249+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Panasonic",
+        "slug": "panasonic",
+        "adapter": "awin",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Pichau",
+        "slug": "pichau",
+        "adapter": "pichau",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Polishop",
+        "slug": "polishop",
+        "adapter": "polishop",
+        "active": true,
+        "stock": 755,
+        "recent7d": 596,
+        "lastObservation": "2026-10-30T15:55:39.733+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Ponto Frio",
+        "slug": "pontofrio",
+        "adapter": "awin",
+        "active": true,
+        "stock": 898,
+        "recent7d": 0,
+        "lastObservation": "2026-08-17T10:10:29.27+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Shopee",
+        "slug": "shopee",
+        "adapter": "shopee",
+        "active": true,
+        "stock": 7805,
+        "recent7d": 7805,
+        "lastObservation": "2026-10-30T06:24:57.207+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Sieno Perfumes",
+        "slug": "sieno",
+        "adapter": "lomadee",
+        "active": true,
+        "stock": 457,
+        "recent7d": 248,
+        "lastObservation": "2026-10-30T15:37:18.534+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "Soldiers Nutrition",
+        "slug": "soldiers",
+        "adapter": "soldiers",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      },
+      {
+        "name": "Spicy",
+        "slug": "spicy",
+        "adapter": "awin",
+        "active": true,
+        "stock": 745,
+        "recent7d": 360,
+        "lastObservation": "2026-10-30T15:52:44.322+00:00",
+        "genericImages": 0
+      },
+      {
+        "name": "TerabyteShop",
+        "slug": "terabyteshop",
+        "adapter": "terabyte",
+        "active": false,
+        "stock": 0,
+        "recent7d": 0,
+        "lastObservation": null,
+        "genericImages": 0
+      }
+    ],
+    "budgetBins": [
+      {
+        "limit": 50,
+        "count": 3530
+      },
+      {
+        "limit": 100,
+        "count": 7044
+      },
+      {
+        "limit": 200,
+        "count": 10660
+      },
+      {
+        "limit": 300,
+        "count": 12710
+      },
+      {
+        "limit": 500,
+        "count": 14521
+      },
+      {
+        "limit": 750,
+        "count": 15827
+      },
+      {
+        "limit": 1000,
+        "count": 16698
+      },
+      {
+        "limit": 1500,
+        "count": 17583
+      },
+      {
+        "limit": 2000,
+        "count": 18162
+      },
+      {
+        "limit": 3000,
+        "count": 18828
+      },
+      {
+        "limit": 5000,
+        "count": 19497
+      },
+      {
+        "limit": 10000,
+        "count": 19982
+      }
+    ]
+  },
+  "awin": {
+    "activeProgrammes": [
+      {
+        "id": 17665,
+        "name": "Carrefour BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 17698,
+        "name": "Olympikus BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 17729,
+        "name": "Kabum BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 17837,
+        "name": "Eudora BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 17846,
+        "name": "Diesel BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 17891,
+        "name": "Loccitane en Provence BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 18878,
+        "name": "Acer BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 18879,
+        "name": "Aliexpress BR & LATAM",
+        "currency": "USD"
+      },
+      {
+        "id": 23524,
+        "name": "Dufrio BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 26113,
+        "name": "Polishop BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 30615,
+        "name": "Spicy BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 51277,
+        "name": "Trocafy BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 76888,
+        "name": "Doce Beleza BR",
+        "currency": "BRL"
+      },
+      {
+        "id": 78382,
+        "name": "Panasonic BR",
+        "currency": "BRL"
+      }
+    ],
+    "feeds": [
+      {
+        "id": 17665,
+        "name": "Carrefour BR",
+        "currency": "BRL",
+        "feeds": 0
+      },
+      {
+        "id": 17698,
+        "name": "Olympikus BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 17729,
+        "name": "Kabum BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 17837,
+        "name": "Eudora BR",
+        "currency": "BRL",
+        "feeds": 2
+      },
+      {
+        "id": 17846,
+        "name": "Diesel BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 17891,
+        "name": "Loccitane en Provence BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 18878,
+        "name": "Acer BR",
+        "currency": "BRL",
+        "feeds": 0
+      },
+      {
+        "id": 18879,
+        "name": "Aliexpress BR & LATAM",
+        "currency": "USD",
+        "feeds": 20
+      },
+      {
+        "id": 23524,
+        "name": "Dufrio BR",
+        "currency": "BRL",
+        "feeds": 2
+      },
+      {
+        "id": 26113,
+        "name": "Polishop BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 30615,
+        "name": "Spicy BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 51277,
+        "name": "Trocafy BR",
+        "currency": "BRL",
+        "feeds": 1
+      },
+      {
+        "id": 76888,
+        "name": "Doce Beleza BR",
+        "currency": "BRL",
+        "feeds": 0
+      },
+      {
+        "id": 78382,
+        "name": "Panasonic BR",
+        "currency": "BRL",
+        "feeds": 1
+      }
+    ]
+  },
+  "images": {
+    "checked": 38,
+    "httpImages": 34,
+    "placeholderResponses": 8,
+    "http404": 3,
+    "unreviewed": 1,
+    "httpImagesIncludesPlaceholders": true
+  },
+  "analytics": {
+    "days": 30,
+    "events": 408,
+    "searchActions": 25,
+    "topSearches": [
+      [
+        "5060",
+        7
+      ],
+      [
+        "cama",
+        3
+      ],
+      [
+        "celular",
+        2
+      ],
+      [
+        "controle xbox",
+        2
+      ],
+      [
+        "fone",
+        2
+      ],
+      [
+        "rtx 5050",
+        1
+      ],
+      [
+        "monitor",
+        1
+      ],
+      [
+        "ryzen 5",
+        1
+      ],
+      [
+        "xbox",
+        1
+      ],
+      [
+        "creatina",
+        1
+      ],
+      [
+        "blusa",
+        1
+      ],
+      [
+        "blusa mas",
+        1
+      ]
+    ],
+    "redirectRequests": 1847,
+    "interpretation": "Consented actions and redirect requests, not unique people, real buyers or causal conversion proof"
+  },
+  "cloudflare": {
+    "checkedAt": "2026-10-31T06:10:00Z",
+    "source": "Authenticated Cloudflare dashboard, expected domain account",
+    "worker": "promodetec",
+    "accountConfirmed": true,
+    "activeVersion": "3a725a85",
+    "commit": "f4e72f20306aa19bc79591878c0660e6774f7058",
+    "trafficPercent": 100,
+    "window": "Last 24 hours, all deployed versions",
+    "invocationsApprox": 19480,
+    "errorsApprox": 5160,
+    "cpuExceededApprox": 5000,
+    "cpuMs": {
+      "p50": 43.96,
+      "p90": 286,
+      "p99": 632,
+      "p999": 761
+    },
+    "memoryMb": {
+      "p50": 34.99,
+      "p90": 44.2,
+      "p99": 50.72,
+      "p999": 52.27
+    },
+    "activeVersionSnapshot": {
+      "invocations": 889,
+      "errors": 96,
+      "displayedErrorPercent": 9.9,
+      "medianCpuMs": 66.35
+    },
+    "subrequests": {
+      "totalApprox": 23190,
+      "supabase2xxApprox": 21000,
+      "supabase4xxApprox": 1000,
+      "supabase5xx": 121
+    },
+    "domainPlan": "Free",
+    "limits": [
+      "Rounded panel totals and different metric windows are not exact accounting",
+      "Active deployment snapshot and per-version charts may not have identical sampling",
+      "Cloudflare colo location is not visitor country",
+      "No 1102 route breakdown obtained before browser control was disabled",
+      "No before-after attribution from unequal windows"
+    ],
+    "mutation": false
+  },
+  "security": {
+    "privateAnonymousTablesDenied": [
+      "usuarios",
+      "eventos",
+      "cliques"
+    ],
+    "campaigns": {
+      "status": 200,
+      "rows": 3,
+      "unpublishedVisible": true,
+      "internalErrorsVisible": false,
+      "localPathsVisible": true
+    },
+    "dependencyAlerts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 5,
+      "critical": 1,
+      "total": 6
+    },
+    "productionExploitTestPerformed": false
+  },
+  "limits": [
+    "GET/HEAD catalog, telemetry and external APIs; one existing DB metadata workflow ran in read-only transaction",
+    "No database data/DDL change, charge, WAF change or live affiliate click",
+    "Current browser control disabled in Work despite user attempting to re-enable; interactive QA remains pending",
+    "Some image samples are duplicated and the denominator is not a random sample of the full catalogue",
+    "Free CPU conclusion comes from authenticated dashboard, not HTTP latency",
+    "No Supabase project quota/billing visibility through Management API connector"
+  ]
+}

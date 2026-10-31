@@ -25,6 +25,17 @@ const req = (body: unknown, headers: Record<string, string> = {}) => new NextReq
   method: "POST", headers: { origin: "https://site.test", "user-agent": ua, "content-type": "application/json", ...headers }, body: JSON.stringify(body),
 });
 
+test("saída de preço com moeda pendente não grava clique nem visita a loja", async context => {
+  let reads = 0;
+  context.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) => {
+    assert.equal(init?.method ?? "GET", "GET"); reads++;
+    return Response.json({ id, url: "https://www.awin1.com/cread.php?awinmid=18879&awinaffid=2936727", loja_slug: "aliexpress" });
+  });
+  const response = await outbound(new NextRequest(`https://site.test/r/${id}`, { headers: { "user-agent": ua } }), { params: { id } });
+  assert.equal(response.headers.get("location"), `https://site.test/produto/${id}`);
+  assert.equal(reads, 1);
+});
+
 test("analytics rejeita origem externa, ausência de consentimento, robôs e corpo excessivo sem tocar no banco", async (context) => {
   let calls = 0;
   context.mock.method(globalThis, "fetch", async () => { calls++; throw new Error("external_access_forbidden"); });
