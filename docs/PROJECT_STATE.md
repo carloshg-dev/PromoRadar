@@ -1,5 +1,12 @@
 # Estado operacional do PromoDetec
 
+## 31/10/2026: acesso ao painel restabelecido e CPU ainda pendente
+
+- Consulta autenticada somente leitura confirmou a conta do domínio, Worker `promodetec`, release `main/5ea0ec4d`, versão **364a748a**, **Pronto/100%**, build `3c5f692e-fb1b-4b26-8d3b-04117bcbea39`. A indisponibilidade do navegador descrita nos registros anteriores foi superada nesta consulta.
+- Filtro de métricas de 24 h restrito à versão atual, com aproximadamente uma hora de vida: **757 invocações, 92 CPU exceeded, 12,2% de erros**, CPU p50 **58,46 ms**, p90 **268 ms**. Não são janelas equivalentes antes/depois e não provam o efeito causal do release. A mitigação está publicada, mas os estouros não foram eliminados.
+- Logs filtrados por `exceededCpu`, última hora, amostra renderizada de 50 eventos: 22 em produto, 12 na home, 15 em categorias e um em ofertas. Não é censo das 92 ocorrências. Não foram segmentados bots/pessoas nem verificado o status HTTP final de cada falha; tarefas de fundo podem falhar após a resposta.
+- Próxima prioridade: localizar o custo de respostas sem cache e tarefas de fundo em produto/home/categorias; reduzir o trabalho preservando preços e navegação. O QA interativo da PR #13 pode ser retomado com o acesso restabelecido. Nenhuma mudança remota foi feita nesta leitura. Recibo agregado local: `reports/free-runtime-2026-10-31/next-step-check.json`.
+
 ## 31/10/2026: mitigação gratuita de CPU publicada
 
 - Pedido atual do proprietário: ganhar tempo sem contratar plano e preservar a experiência. Correção de infraestrutura separada na [PR #14](https://github.com/carloshg-dev/PromoRadar/pull/14), candidato funcional `95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf` sobre `main/f4e72f2`. Pré-aprovação de integração/publicação já existente; sem contratação, DNS, WAF, nova credencial ou nova dependência paga.
