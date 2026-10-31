@@ -1,5 +1,11 @@
 # Auditoria de saúde, afiliação e catálogo — 31/10/2026
 
+## Continuação de 31/10, após a publicação da correção de formatação
+
+O proprietário definiu orçamento de **nenhuma contratação nova** nesta fase. A recomendação de Paid abaixo é histórica e não foi executada. A PR #15 publicou `main/9d1d511`, versão `335c0c74`, com cache gratuito preservado e formatação otimizada; a amostra de poucos minutos ainda não prova estabilidade ou eliminação de 1102. Ver `docs/CPU_FORMATTING_2026-10-31.md` para versão, CI, smoke e limites atuais.
+
+O controle do navegador voltou a funcionar. A PR #13 recebeu a nova main no candidato `1ec1080`: tipos, 100 testes, CI `41233540747` e OpenNext/workerd `41233577087` aprovados, 35/35, gzip 1.576,29 KiB. Teto R$ 1.000 e seleção R$ 100/categoria foram exercitados no navegador; amostra móvel sem overflow e console limpo. Um ensaio HTTP adicional ficou em 8/9 por indisponibilidade em `/ofertas?ate=300`; as consultas diretas posteriores não reproduziram o erro. A PR #13 permanece em rascunho e **não está publicada**. Não tratar os bloqueios anteriores de navegador como atuais, nem os itens históricos de segurança/lojas/SQL como resolvidos.
+
 ## Resultado e estado
 
 Há evidência atual para recomendar **Workers Paid imediatamente**, a partir de **US$ 5/mês**: o painel autenticado registrou aproximadamente 5 mil estouros de CPU em 24 horas. Essa contratação aumenta o limite por execução; imagens, preços de origem, consultas SQL e automações exigem correções próprias. Não foi feita contratação nem alteração de cobrança.

@@ -1,5 +1,13 @@
 # Estado operacional do PromoDetec
 
+## 31/10/2026, continuação: formatação de CPU publicada
+
+- [PR #15](https://github.com/carloshg-dev/PromoRadar/pull/15) integrada na `main`, **9d1d5119614cd536307507d7f36436a69e07bb1e**, às 16:15:23 BRT. Painel da conta do domínio confirmou build `f27a0f4e-d508-4f3a-a7cd-8b850b8e8b29`, versão **335c0c74**, **Pronto / 100%**. Domínio confirmou buildId `NvQNmZRlmaST2Vcn94Upg`. Nomes dos nove bindings de configuração esperados e R2/autorreferência relidos, sem expor valores.
+- Formatadores imutáveis de moeda/data reutilizados por preços e pontos do histórico; saída anterior preservada por testes. Tipos, 88 testes, CI `41214257418`, OpenNext/workerd `41214209351` **35/35**, 512 respostas quentes e gzip **1.575,08 KiB**. QA interativo na prévia restabelecido, desktop/tablet/mobile sem overflow na amostra; radar, busca, histórico, menu e cupom exercitados. **19 verificações HTTP públicas** aprovadas; sem contratação, DDL, WAF, DNS ou credenciais nesta entrega.
+- A amostra inicial exclusiva da versão nova mostrou **36 invocações, indicador CPU exceeded 0, CPU p50 169 ms/p90 531 ms**. O painel de erros também dizia “Nenhum dado”; janela curta, possível atraso e tráfego de QA. **Não comprova estabilização nem redução de CPU**. A versão anterior já tinha 92 CPU exceeded em 757 invocações. Não comparar janelas diferentes como experimento causal.
+- PR #13 sincronizada no candidato `1ec1080`, tipos/100 testes e CI `41233540747` aprovados; OpenNext/workerd `41233577087` **35/35**, gzip **1.576,29 KiB**, sem publicação. Navegação móvel por orçamento/categoria funcionou, mas ensaio HTTP adicional teve **8/9**: indisponibilidade em `/ofertas?ate=300`. Quatro consultas diretas posteriores responderam com dados e não explicaram a causa. A publicação ampla permanece separada até tratar a falha intermitente.
+- Detalhes e limites, inclusive divergência WSL 32/35 do patch de CPU, em `docs/CPU_FORMATTING_2026-10-31.md`. Este registro atualiza os estados históricos de navegador/publicação abaixo; não declara concluídos todos os itens da auditoria de segurança, fontes e catálogo.
+
 ## 31/10/2026: acesso ao painel restabelecido e CPU ainda pendente
 
 - Consulta autenticada somente leitura confirmou a conta do domínio, Worker `promodetec`, release `main/5ea0ec4d`, versão **364a748a**, **Pronto/100%**, build `3c5f692e-fb1b-4b26-8d3b-04117bcbea39`. A indisponibilidade do navegador descrita nos registros anteriores foi superada nesta consulta.
