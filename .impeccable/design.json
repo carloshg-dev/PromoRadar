@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-27T00:32:09.709214Z",
+  "generatedAt": "2026-10-31T05:05:22.994002Z",
   "title": "Design System: PromoDetec",
   "extensions": {
     "colorMeta": {
@@ -64,14 +64,14 @@
         "role": "neutral",
         "displayName": "Branco",
         "tonalRamp": [
-          "oklch(15% 0.0000 89.88)",
-          "oklch(26% 0.0000 89.88)",
-          "oklch(38% 0.0000 89.88)",
-          "oklch(49% 0.0000 89.88)",
-          "oklch(61% 0.0000 89.88)",
-          "oklch(72% 0.0000 89.88)",
-          "oklch(84% 0.0000 89.88)",
-          "oklch(95% 0.0000 89.88)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(49% 0.0000 0.00)",
+          "oklch(61% 0.0000 0.00)",
+          "oklch(72% 0.0000 0.00)",
+          "oklch(84% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "surface-soft": {
@@ -120,14 +120,14 @@
         "role": "neutral",
         "displayName": "Tinta secundária",
         "tonalRamp": [
-          "oklch(15% 0.0249 157.98)",
-          "oklch(26% 0.0249 157.98)",
-          "oklch(38% 0.0249 157.98)",
-          "oklch(49% 0.0249 157.98)",
-          "oklch(61% 0.0249 157.98)",
-          "oklch(72% 0.0249 157.98)",
-          "oklch(84% 0.0249 157.98)",
-          "oklch(95% 0.0249 157.98)"
+          "oklch(15% 0.0280 162.24)",
+          "oklch(26% 0.0280 162.24)",
+          "oklch(38% 0.0280 162.24)",
+          "oklch(49% 0.0280 162.24)",
+          "oklch(61% 0.0280 162.24)",
+          "oklch(72% 0.0280 162.24)",
+          "oklch(84% 0.0280 162.24)",
+          "oklch(95% 0.0280 162.24)"
         ]
       },
       "line": {
@@ -255,6 +255,426 @@
           "oklch(84% 0.0923 328.36)",
           "oklch(95% 0.0923 328.36)"
         ]
+      },
+      "campaign": {
+        "role": "primary",
+        "displayName": "campaign",
+        "tonalRamp": [
+          "oklch(15% 0.0183 165.26)",
+          "oklch(26% 0.0183 165.26)",
+          "oklch(38% 0.0183 165.26)",
+          "oklch(49% 0.0183 165.26)",
+          "oklch(61% 0.0183 165.26)",
+          "oklch(72% 0.0183 165.26)",
+          "oklch(84% 0.0183 165.26)",
+          "oklch(95% 0.0183 165.26)"
+        ]
+      },
+      "black-friday-paper": {
+        "role": "neutral",
+        "displayName": "black-friday-paper",
+        "tonalRamp": [
+          "oklch(15% 0.0054 117.92)",
+          "oklch(26% 0.0054 117.92)",
+          "oklch(38% 0.0054 117.92)",
+          "oklch(49% 0.0054 117.92)",
+          "oklch(61% 0.0054 117.92)",
+          "oklch(72% 0.0054 117.92)",
+          "oklch(84% 0.0054 117.92)",
+          "oklch(95% 0.0054 117.92)"
+        ]
+      },
+      "black-friday-ink": {
+        "role": "neutral",
+        "displayName": "black-friday-ink",
+        "tonalRamp": [
+          "oklch(15% 0.0150 166.23)",
+          "oklch(26% 0.0150 166.23)",
+          "oklch(38% 0.0150 166.23)",
+          "oklch(49% 0.0150 166.23)",
+          "oklch(61% 0.0150 166.23)",
+          "oklch(72% 0.0150 166.23)",
+          "oklch(84% 0.0150 166.23)",
+          "oklch(95% 0.0150 166.23)"
+        ]
+      },
+      "black-friday-lime": {
+        "role": "primary",
+        "displayName": "black-friday-lime",
+        "tonalRamp": [
+          "oklch(15% 0.1509 99.82)",
+          "oklch(26% 0.1509 99.82)",
+          "oklch(38% 0.1509 99.82)",
+          "oklch(49% 0.1509 99.82)",
+          "oklch(61% 0.1509 99.82)",
+          "oklch(72% 0.1509 99.82)",
+          "oklch(84% 0.1509 99.82)",
+          "oklch(95% 0.1509 99.82)"
+        ]
+      },
+      "black-friday-campaign": {
+        "role": "primary",
+        "displayName": "black-friday-campaign",
+        "tonalRamp": [
+          "oklch(15% 0.0074 164.05)",
+          "oklch(26% 0.0074 164.05)",
+          "oklch(38% 0.0074 164.05)",
+          "oklch(49% 0.0074 164.05)",
+          "oklch(61% 0.0074 164.05)",
+          "oklch(72% 0.0074 164.05)",
+          "oklch(84% 0.0074 164.05)",
+          "oklch(95% 0.0074 164.05)"
+        ]
+      },
+      "cyber-monday-paper": {
+        "role": "neutral",
+        "displayName": "cyber-monday-paper",
+        "tonalRamp": [
+          "oklch(15% 0.0074 260.73)",
+          "oklch(26% 0.0074 260.73)",
+          "oklch(38% 0.0074 260.73)",
+          "oklch(49% 0.0074 260.73)",
+          "oklch(61% 0.0074 260.73)",
+          "oklch(72% 0.0074 260.73)",
+          "oklch(84% 0.0074 260.73)",
+          "oklch(95% 0.0074 260.73)"
+        ]
+      },
+      "cyber-monday-surface-soft": {
+        "role": "neutral",
+        "displayName": "cyber-monday-surface-soft",
+        "tonalRamp": [
+          "oklch(15% 0.0154 257.20)",
+          "oklch(26% 0.0154 257.20)",
+          "oklch(38% 0.0154 257.20)",
+          "oklch(49% 0.0154 257.20)",
+          "oklch(61% 0.0154 257.20)",
+          "oklch(72% 0.0154 257.20)",
+          "oklch(84% 0.0154 257.20)",
+          "oklch(95% 0.0154 257.20)"
+        ]
+      },
+      "cyber-monday-ink": {
+        "role": "neutral",
+        "displayName": "cyber-monday-ink",
+        "tonalRamp": [
+          "oklch(15% 0.0473 254.18)",
+          "oklch(26% 0.0473 254.18)",
+          "oklch(38% 0.0473 254.18)",
+          "oklch(49% 0.0473 254.18)",
+          "oklch(61% 0.0473 254.18)",
+          "oklch(72% 0.0473 254.18)",
+          "oklch(84% 0.0473 254.18)",
+          "oklch(95% 0.0473 254.18)"
+        ]
+      },
+      "cyber-monday-line": {
+        "role": "neutral",
+        "displayName": "cyber-monday-line",
+        "tonalRamp": [
+          "oklch(15% 0.0238 256.11)",
+          "oklch(26% 0.0238 256.11)",
+          "oklch(38% 0.0238 256.11)",
+          "oklch(49% 0.0238 256.11)",
+          "oklch(61% 0.0238 256.11)",
+          "oklch(72% 0.0238 256.11)",
+          "oklch(84% 0.0238 256.11)",
+          "oklch(95% 0.0238 256.11)"
+        ]
+      },
+      "cyber-monday-muted": {
+        "role": "neutral",
+        "displayName": "cyber-monday-muted",
+        "tonalRamp": [
+          "oklch(15% 0.0470 255.45)",
+          "oklch(26% 0.0470 255.45)",
+          "oklch(38% 0.0470 255.45)",
+          "oklch(49% 0.0470 255.45)",
+          "oklch(61% 0.0470 255.45)",
+          "oklch(72% 0.0470 255.45)",
+          "oklch(84% 0.0470 255.45)",
+          "oklch(95% 0.0470 255.45)"
+        ]
+      },
+      "cyber-monday-brand": {
+        "role": "primary",
+        "displayName": "cyber-monday-brand",
+        "tonalRamp": [
+          "oklch(15% 0.1028 258.97)",
+          "oklch(26% 0.1028 258.97)",
+          "oklch(38% 0.1028 258.97)",
+          "oklch(49% 0.1028 258.97)",
+          "oklch(61% 0.1028 258.97)",
+          "oklch(72% 0.1028 258.97)",
+          "oklch(84% 0.1028 258.97)",
+          "oklch(95% 0.1028 258.97)"
+        ]
+      },
+      "cyber-monday-brand-deep": {
+        "role": "primary",
+        "displayName": "cyber-monday-brand-deep",
+        "tonalRamp": [
+          "oklch(15% 0.0813 259.55)",
+          "oklch(26% 0.0813 259.55)",
+          "oklch(38% 0.0813 259.55)",
+          "oklch(49% 0.0813 259.55)",
+          "oklch(61% 0.0813 259.55)",
+          "oklch(72% 0.0813 259.55)",
+          "oklch(84% 0.0813 259.55)",
+          "oklch(95% 0.0813 259.55)"
+        ]
+      },
+      "cyber-monday-lime": {
+        "role": "primary",
+        "displayName": "cyber-monday-lime",
+        "tonalRamp": [
+          "oklch(15% 0.0531 258.04)",
+          "oklch(26% 0.0531 258.04)",
+          "oklch(38% 0.0531 258.04)",
+          "oklch(49% 0.0531 258.04)",
+          "oklch(61% 0.0531 258.04)",
+          "oklch(72% 0.0531 258.04)",
+          "oklch(84% 0.0531 258.04)",
+          "oklch(95% 0.0531 258.04)"
+        ]
+      },
+      "cyber-monday-campaign": {
+        "role": "primary",
+        "displayName": "cyber-monday-campaign",
+        "tonalRamp": [
+          "oklch(15% 0.0494 256.37)",
+          "oklch(26% 0.0494 256.37)",
+          "oklch(38% 0.0494 256.37)",
+          "oklch(49% 0.0494 256.37)",
+          "oklch(61% 0.0494 256.37)",
+          "oklch(72% 0.0494 256.37)",
+          "oklch(84% 0.0494 256.37)",
+          "oklch(95% 0.0494 256.37)"
+        ]
+      },
+      "esquenta-natal-paper": {
+        "role": "neutral",
+        "displayName": "esquenta-natal-paper",
+        "tonalRamp": [
+          "oklch(15% 0.0080 98.88)",
+          "oklch(26% 0.0080 98.88)",
+          "oklch(38% 0.0080 98.88)",
+          "oklch(49% 0.0080 98.88)",
+          "oklch(61% 0.0080 98.88)",
+          "oklch(72% 0.0080 98.88)",
+          "oklch(84% 0.0080 98.88)",
+          "oklch(95% 0.0080 98.88)"
+        ]
+      },
+      "esquenta-natal-surface-soft": {
+        "role": "neutral",
+        "displayName": "esquenta-natal-surface-soft",
+        "tonalRamp": [
+          "oklch(15% 0.0147 115.04)",
+          "oklch(26% 0.0147 115.04)",
+          "oklch(38% 0.0147 115.04)",
+          "oklch(49% 0.0147 115.04)",
+          "oklch(61% 0.0147 115.04)",
+          "oklch(72% 0.0147 115.04)",
+          "oklch(84% 0.0147 115.04)",
+          "oklch(95% 0.0147 115.04)"
+        ]
+      },
+      "esquenta-natal-ink": {
+        "role": "neutral",
+        "displayName": "esquenta-natal-ink",
+        "tonalRamp": [
+          "oklch(15% 0.0366 160.38)",
+          "oklch(26% 0.0366 160.38)",
+          "oklch(38% 0.0366 160.38)",
+          "oklch(49% 0.0366 160.38)",
+          "oklch(61% 0.0366 160.38)",
+          "oklch(72% 0.0366 160.38)",
+          "oklch(84% 0.0366 160.38)",
+          "oklch(95% 0.0366 160.38)"
+        ]
+      },
+      "esquenta-natal-line": {
+        "role": "neutral",
+        "displayName": "esquenta-natal-line",
+        "tonalRamp": [
+          "oklch(15% 0.0230 114.98)",
+          "oklch(26% 0.0230 114.98)",
+          "oklch(38% 0.0230 114.98)",
+          "oklch(49% 0.0230 114.98)",
+          "oklch(61% 0.0230 114.98)",
+          "oklch(72% 0.0230 114.98)",
+          "oklch(84% 0.0230 114.98)",
+          "oklch(95% 0.0230 114.98)"
+        ]
+      },
+      "esquenta-natal-brand": {
+        "role": "primary",
+        "displayName": "esquenta-natal-brand",
+        "tonalRamp": [
+          "oklch(15% 0.0781 162.52)",
+          "oklch(26% 0.0781 162.52)",
+          "oklch(38% 0.0781 162.52)",
+          "oklch(49% 0.0781 162.52)",
+          "oklch(61% 0.0781 162.52)",
+          "oklch(72% 0.0781 162.52)",
+          "oklch(84% 0.0781 162.52)",
+          "oklch(95% 0.0781 162.52)"
+        ]
+      },
+      "esquenta-natal-lime": {
+        "role": "primary",
+        "displayName": "esquenta-natal-lime",
+        "tonalRamp": [
+          "oklch(15% 0.0716 90.66)",
+          "oklch(26% 0.0716 90.66)",
+          "oklch(38% 0.0716 90.66)",
+          "oklch(49% 0.0716 90.66)",
+          "oklch(61% 0.0716 90.66)",
+          "oklch(72% 0.0716 90.66)",
+          "oklch(84% 0.0716 90.66)",
+          "oklch(95% 0.0716 90.66)"
+        ]
+      },
+      "esquenta-natal-campaign": {
+        "role": "primary",
+        "displayName": "esquenta-natal-campaign",
+        "tonalRamp": [
+          "oklch(15% 0.0471 159.80)",
+          "oklch(26% 0.0471 159.80)",
+          "oklch(38% 0.0471 159.80)",
+          "oklch(49% 0.0471 159.80)",
+          "oklch(61% 0.0471 159.80)",
+          "oklch(72% 0.0471 159.80)",
+          "oklch(84% 0.0471 159.80)",
+          "oklch(95% 0.0471 159.80)"
+        ]
+      },
+      "natal-paper": {
+        "role": "neutral",
+        "displayName": "natal-paper",
+        "tonalRamp": [
+          "oklch(15% 0.0062 75.41)",
+          "oklch(26% 0.0062 75.41)",
+          "oklch(38% 0.0062 75.41)",
+          "oklch(49% 0.0062 75.41)",
+          "oklch(61% 0.0062 75.41)",
+          "oklch(72% 0.0062 75.41)",
+          "oklch(84% 0.0062 75.41)",
+          "oklch(95% 0.0062 75.41)"
+        ]
+      },
+      "natal-surface-soft": {
+        "role": "neutral",
+        "displayName": "natal-surface-soft",
+        "tonalRamp": [
+          "oklch(15% 0.0121 43.28)",
+          "oklch(26% 0.0121 43.28)",
+          "oklch(38% 0.0121 43.28)",
+          "oklch(49% 0.0121 43.28)",
+          "oklch(61% 0.0121 43.28)",
+          "oklch(72% 0.0121 43.28)",
+          "oklch(84% 0.0121 43.28)",
+          "oklch(95% 0.0121 43.28)"
+        ]
+      },
+      "natal-ink": {
+        "role": "neutral",
+        "displayName": "natal-ink",
+        "tonalRamp": [
+          "oklch(15% 0.0506 18.66)",
+          "oklch(26% 0.0506 18.66)",
+          "oklch(38% 0.0506 18.66)",
+          "oklch(49% 0.0506 18.66)",
+          "oklch(61% 0.0506 18.66)",
+          "oklch(72% 0.0506 18.66)",
+          "oklch(84% 0.0506 18.66)",
+          "oklch(95% 0.0506 18.66)"
+        ]
+      },
+      "natal-line": {
+        "role": "neutral",
+        "displayName": "natal-line",
+        "tonalRamp": [
+          "oklch(15% 0.0190 51.95)",
+          "oklch(26% 0.0190 51.95)",
+          "oklch(38% 0.0190 51.95)",
+          "oklch(49% 0.0190 51.95)",
+          "oklch(61% 0.0190 51.95)",
+          "oklch(72% 0.0190 51.95)",
+          "oklch(84% 0.0190 51.95)",
+          "oklch(95% 0.0190 51.95)"
+        ]
+      },
+      "natal-muted": {
+        "role": "neutral",
+        "displayName": "natal-muted",
+        "tonalRamp": [
+          "oklch(15% 0.0346 31.38)",
+          "oklch(26% 0.0346 31.38)",
+          "oklch(38% 0.0346 31.38)",
+          "oklch(49% 0.0346 31.38)",
+          "oklch(61% 0.0346 31.38)",
+          "oklch(72% 0.0346 31.38)",
+          "oklch(84% 0.0346 31.38)",
+          "oklch(95% 0.0346 31.38)"
+        ]
+      },
+      "natal-brand": {
+        "role": "primary",
+        "displayName": "natal-brand",
+        "tonalRamp": [
+          "oklch(15% 0.1389 21.67)",
+          "oklch(26% 0.1389 21.67)",
+          "oklch(38% 0.1389 21.67)",
+          "oklch(49% 0.1389 21.67)",
+          "oklch(61% 0.1389 21.67)",
+          "oklch(72% 0.1389 21.67)",
+          "oklch(84% 0.1389 21.67)",
+          "oklch(95% 0.1389 21.67)"
+        ]
+      },
+      "natal-brand-deep": {
+        "role": "primary",
+        "displayName": "natal-brand-deep",
+        "tonalRamp": [
+          "oklch(15% 0.1102 20.73)",
+          "oklch(26% 0.1102 20.73)",
+          "oklch(38% 0.1102 20.73)",
+          "oklch(49% 0.1102 20.73)",
+          "oklch(61% 0.1102 20.73)",
+          "oklch(72% 0.1102 20.73)",
+          "oklch(84% 0.1102 20.73)",
+          "oklch(95% 0.1102 20.73)"
+        ]
+      },
+      "natal-lime": {
+        "role": "primary",
+        "displayName": "natal-lime",
+        "tonalRamp": [
+          "oklch(15% 0.0763 88.27)",
+          "oklch(26% 0.0763 88.27)",
+          "oklch(38% 0.0763 88.27)",
+          "oklch(49% 0.0763 88.27)",
+          "oklch(61% 0.0763 88.27)",
+          "oklch(72% 0.0763 88.27)",
+          "oklch(84% 0.0763 88.27)",
+          "oklch(95% 0.0763 88.27)"
+        ]
+      },
+      "natal-campaign": {
+        "role": "primary",
+        "displayName": "natal-campaign",
+        "tonalRamp": [
+          "oklch(15% 0.0777 16.80)",
+          "oklch(26% 0.0777 16.80)",
+          "oklch(38% 0.0777 16.80)",
+          "oklch(49% 0.0777 16.80)",
+          "oklch(61% 0.0777 16.80)",
+          "oklch(72% 0.0777 16.80)",
+          "oklch(84% 0.0777 16.80)",
+          "oklch(95% 0.0777 16.80)"
+        ]
       }
     },
     "typographyMeta": {
@@ -273,17 +693,29 @@
       "label": {
         "displayName": "Label",
         "purpose": "Origem, data e ações compactas."
+      },
+      "campaign-display": {
+        "displayName": "campaign-display",
+        "purpose": "Título comercial do hero a partir de 768px."
+      },
+      "campaign-display-mobile": {
+        "displayName": "campaign-display-mobile",
+        "purpose": "Título comercial abaixo de 768px."
+      },
+      "price": {
+        "displayName": "price",
+        "purpose": "Preço primário dos cards, com números tabulares."
       }
     },
     "shadows": [
       {
         "name": "search-focus",
-        "value": "0 0 0 3px #d9efb9",
+        "value": "0 0 0 3px rgb(var(--accent-rgb))",
         "purpose": "Foco no conjunto da busca da home."
       },
       {
         "name": "input-focus",
-        "value": "0 0 0 2px rgb(27 101 73 / .2)",
+        "value": "0 0 0 2px rgb(var(--brand-rgb) / .2)",
         "purpose": "Anel do Input compartilhado."
       },
       {
@@ -340,7 +772,7 @@
       "refersTo": "button-primary",
       "description": "Variante do Button compartilhado, tamanho padrão.",
       "html": "<button class=\"ds-button-primary\">Buscar</button>",
-      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:#1b6549;color:#fff;border:0;}.ds-button-primary:hover{background:#164b35;}.ds-button-primary:focus-visible{outline:2px solid #1b6549;outline-offset:2px;}.ds-button-primary:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition-duration:.01ms!important}}"
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:rgb(var(--brand-rgb, 27 101 73));color:#fff;border:0;}.ds-button-primary:hover{background:rgb(var(--brand-deep-rgb, 22 75 53));}.ds-button-primary:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px;}.ds-button-primary:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition-duration:.01ms!important}}"
     },
     {
       "name": "Botão Contorno",
@@ -348,7 +780,7 @@
       "refersTo": "button-outline",
       "description": "Variante do Button compartilhado, tamanho padrão.",
       "html": "<button class=\"ds-button-outline\">Continuar</button>",
-      "css": ".ds-button-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:#fff;color:#20372d;border:1px solid #dbe3d7;}.ds-button-outline:hover{background:#edf1e8;border-color:rgb(27 101 73 / .4);}.ds-button-outline:focus-visible{outline:2px solid #1b6549;outline-offset:2px;}.ds-button-outline:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-outline{transition-duration:.01ms!important}}"
+      "css": ".ds-button-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:#fff;color:rgb(var(--ink-rgb, 32 55 45));border:1px solid rgb(var(--line-rgb, 219 227 215));}.ds-button-outline:hover{background:rgb(var(--soft-rgb, 237 241 232));border-color:rgb(var(--brand-rgb, 27 101 73) / .4);}.ds-button-outline:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px;}.ds-button-outline:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-outline{transition-duration:.01ms!important}}"
     },
     {
       "name": "Botão Ghost",
@@ -356,7 +788,7 @@
       "refersTo": "button-ghost",
       "description": "Variante do Button compartilhado, tamanho padrão.",
       "html": "<button class=\"ds-button-ghost\">Continuar</button>",
-      "css": ".ds-button-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:transparent;color:#20372d;border:0;}.ds-button-ghost:hover{background:#edf1e8;}.ds-button-ghost:focus-visible{outline:2px solid #1b6549;outline-offset:2px;}.ds-button-ghost:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition-duration:.01ms!important}}"
+      "css": ".ds-button-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:transparent;color:rgb(var(--ink-rgb, 32 55 45));border:0;}.ds-button-ghost:hover{background:rgb(var(--soft-rgb, 237 241 232));}.ds-button-ghost:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px;}.ds-button-ghost:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition-duration:.01ms!important}}"
     },
     {
       "name": "Botão Suave",
@@ -364,7 +796,7 @@
       "refersTo": "button-subtle",
       "description": "Variante do Button compartilhado, tamanho padrão.",
       "html": "<button class=\"ds-button-subtle\">Continuar</button>",
-      "css": ".ds-button-subtle{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:#edf1e8;color:#20372d;border:0;}.ds-button-subtle:hover{background:#dbe3d7;}.ds-button-subtle:focus-visible{outline:2px solid #1b6549;outline-offset:2px;}.ds-button-subtle:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-subtle{transition-duration:.01ms!important}}"
+      "css": ".ds-button-subtle{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:rgb(var(--soft-rgb, 237 241 232));color:rgb(var(--ink-rgb, 32 55 45));border:0;}.ds-button-subtle:hover{background:rgb(var(--line-rgb, 219 227 215));}.ds-button-subtle:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px;}.ds-button-subtle:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-subtle{transition-duration:.01ms!important}}"
     },
     {
       "name": "Botão Perigo",
@@ -372,7 +804,7 @@
       "refersTo": "button-danger",
       "description": "Variante do Button compartilhado, tamanho padrão.",
       "html": "<button class=\"ds-button-danger\">Excluir</button>",
-      "css": ".ds-button-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:rgb(179 60 60 / .9);color:#fff;border:0;}.ds-button-danger:hover{background:#b33c3c;}.ds-button-danger:focus-visible{outline:2px solid #1b6549;outline-offset:2px;}.ds-button-danger:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-danger{transition-duration:.01ms!important}}"
+      "css": ".ds-button-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;font-family:var(--font-sans,sans-serif);font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s;background:rgb(179 60 60 / .9);color:#fff;border:0;}.ds-button-danger:hover{background:#b33c3c;}.ds-button-danger:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px;}.ds-button-danger:disabled{opacity:.5;pointer-events:none;}@media(prefers-reduced-motion:reduce){.ds-button-danger{transition-duration:.01ms!important}}"
     },
     {
       "name": "Campo com rótulo",
@@ -380,7 +812,7 @@
       "refersTo": "input",
       "description": "Input compartilhado com rótulo persistente de autenticação.",
       "html": "<label class=\"ds-label\" for=\"ds-email\">E-mail</label><input class=\"ds-input\" id=\"ds-email\" type=\"email\" placeholder=\"seu@email.com\" />",
-      "css": ".ds-label{display:block;margin-bottom:6px;color:#20372d;font:500 14px/20px var(--font-sans,sans-serif)}.ds-input{height:40px;width:calc(100% - 30px);padding:0 14px;background:#edf1e8;color:#20372d;border:1px solid #dbe3d7;border-radius:14px;font:400 14px/20px var(--font-sans,sans-serif);caret-color:#1b6549;outline:none;transition:all .15s}.ds-input::placeholder{color:#5b6b61;opacity:1}.ds-input:focus{border-color:rgb(27 101 73 / .6);box-shadow:0 0 0 2px rgb(27 101 73 / .2)}.ds-input:focus-visible{outline:none}@media(prefers-reduced-motion:reduce){.ds-label,.ds-input{transition-duration:.01ms!important}}"
+      "css": ".ds-label{display:block;margin-bottom:6px;color:rgb(var(--ink-rgb, 32 55 45));font:500 14px/20px var(--font-sans,sans-serif)}.ds-input{height:40px;width:calc(100% - 30px);padding:0 14px;background:rgb(var(--soft-rgb, 237 241 232));color:rgb(var(--ink-rgb, 32 55 45));border:1px solid rgb(var(--line-rgb, 219 227 215));border-radius:14px;font:400 14px/20px var(--font-sans,sans-serif);caret-color:rgb(var(--brand-rgb, 27 101 73));outline:none;transition:all .15s}.ds-input::placeholder{color:rgb(var(--muted-rgb, 82 101 91));opacity:1}.ds-input:focus{border-color:rgb(var(--brand-rgb, 27 101 73) / .6);box-shadow:0 0 0 2px rgb(var(--brand-rgb, 27 101 73) / .2)}.ds-input:focus-visible{outline:none}@media(prefers-reduced-motion:reduce){.ds-label,.ds-input{transition-duration:.01ms!important}}"
     },
     {
       "name": "Navegação",
@@ -388,7 +820,7 @@
       "refersTo": "navigation-link",
       "description": "Links diretos da navegação desktop.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Navegação principal\"><a class=\"ds-route\" href=\"#ofertas\">Ofertas</a><a class=\"ds-route\" href=\"#comparar\">Comparar preços</a></nav>",
-      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:4px}.ds-route{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;text-decoration:none;color:#20372d;font:500 14px/20px var(--font-sans,sans-serif);transition:color .15s ease,background-color .15s ease}.ds-route:hover{color:#164b35;background:#e8eee2}.ds-route:focus-visible{outline:2px solid #1b6549;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-nav,.ds-route{transition-duration:.01ms!important}}"
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:4px}.ds-route{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;text-decoration:none;color:rgb(var(--ink-rgb, 32 55 45));font:500 14px/20px var(--font-sans,sans-serif);transition:color .15s ease,background-color .15s ease}.ds-route:hover{color:rgb(var(--brand-deep-rgb, 22 75 53));background:rgb(var(--soft-rgb, 237 241 232))}.ds-route:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-nav,.ds-route{transition-duration:.01ms!important}}"
     },
     {
       "name": "Filtro de categoria",
@@ -396,22 +828,22 @@
       "refersTo": "category-chip",
       "description": "Seleção explícita com aria-current; exemplo usa Tech.",
       "html": "<div class=\"ds-chips\"><a class=\"ds-chip\" href=\"#todas\" aria-current=\"page\">Todas</a><a class=\"ds-chip\" href=\"#fone\">Fones Bluetooth</a></div>",
-      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:8px}.ds-chip{display:inline-block;border:1px solid #dbe3d7;border-radius:9999px;padding:4px 12px;color:#5b6b61;text-decoration:none;font:400 12px/16px var(--font-sans,sans-serif);transition:all .15s}.ds-chip:hover{background:#edf1e8;color:#20372d}.ds-chip[aria-current=\"page\"]{border-color:#1b6549;background:rgb(27 101 73 / .15);color:#164b35}.ds-chip:focus-visible{outline:2px solid #1b6549;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-chips,.ds-chip{transition-duration:.01ms!important}}"
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:8px}.ds-chip{display:inline-block;border:1px solid rgb(var(--line-rgb, 219 227 215));border-radius:9999px;padding:4px 12px;color:rgb(var(--muted-rgb, 82 101 91));text-decoration:none;font:400 12px/16px var(--font-sans,sans-serif);transition:all .15s}.ds-chip:hover{background:rgb(var(--soft-rgb, 237 241 232));color:rgb(var(--ink-rgb, 32 55 45))}.ds-chip[aria-current=\"page\"]{border-color:rgb(var(--brand-rgb, 27 101 73));background:rgb(var(--brand-rgb, 27 101 73) / .15);color:rgb(var(--brand-deep-rgb, 22 75 53))}.ds-chip:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-chips,.ds-chip{transition-duration:.01ms!important}}"
     },
     {
       "name": "Card de catálogo",
       "kind": "card",
       "refersTo": "card",
-      "description": "Invólucro plano de produto, sem dados comerciais fabricados no exemplo.",
-      "html": "<article class=\"ds-card\"><div class=\"ds-card-content\"><span class=\"ds-card-meta\">Loja · data da coleta</span><h3 class=\"ds-card-title\">Título do produto</h3><p class=\"ds-card-price\">Preço coletado</p><a class=\"ds-card-link\" href=\"#produto\">Comparar preço <svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></a></div></article>",
-      "css": ".ds-card{background:#fff;border:1px solid #dbe3d7;border-radius:16px;overflow:hidden;color:#20372d;font-family:var(--font-sans,sans-serif)}.ds-card:focus-within{border-color:#1b6549}.ds-card-content{padding:16px}.ds-card-meta{color:#5b6b61;font-size:12px;line-height:16px}.ds-card-title{margin:12px 0 16px;font-size:14px;line-height:19.25px;font-weight:500}.ds-card:hover .ds-card-title{color:#1b6549}.ds-card-price{font-size:clamp(1.2rem,2vw,1.65rem);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.025em}.ds-card-link{display:flex;align-items:center;justify-content:space-between;min-height:44px;border:1px solid #dbe3d7;border-radius:12px;padding:0 12px;color:#1b6549;text-decoration:none;font-size:12px;font-weight:600}.ds-card-link:hover{background:#edf1e8}.ds-card-link:focus-visible{outline:2px solid #1b6549;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-card,.ds-card-content,.ds-card-meta,.ds-card-title,.ds-card-price,.ds-card-link{transition-duration:.01ms!important}}"
+      "description": "Card atual: preço primário, metadados compactos e saída para loja. Exemplo sem dados comerciais inventados; o link de cobertura e o salvar exigem o runtime da aplicação.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-photo\"><svg aria-hidden=\"true\" width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"m3 16 5-5 5 5 3-3 5 5\"/></svg></div><div class=\"ds-card-content\"><div class=\"ds-card-meta\">Loja do catálogo</div><h3 class=\"ds-card-title\">Título do produto</h3><p class=\"ds-card-meta\">Preço coletado</p><p class=\"ds-card-price\">Valor do catálogo</p><p class=\"ds-card-condition\">Confira as condições na loja</p><p class=\"ds-card-meta\">Data da coleta</p><a class=\"ds-card-link\" href=\"#loja\">Ver oferta na loja <svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></a></div></article>",
+      "css": ".ds-card{background:#fff;border:1px solid rgb(var(--line-rgb,219 227 215));border-radius:16px;overflow:hidden;color:rgb(var(--ink-rgb,32 55 45));font-family:var(--font-sans,sans-serif)}.ds-card:focus-within{border-color:rgb(var(--brand-rgb,27 101 73))}.ds-card-photo{height:144px;display:grid;place-items:center;background:#fff;color:rgb(var(--muted-rgb,82 101 91))}.ds-card-content{padding:4px 12px 12px}.ds-card-meta{font-size:11px;line-height:16px;color:rgb(var(--muted-rgb,82 101 91));margin:8px 0 4px}.ds-card-title{min-height:40px;font-size:13px;line-height:20px;font-weight:500;margin:6px 0 12px}.ds-card:hover .ds-card-title{color:rgb(var(--brand-rgb,27 101 73))}.ds-card-price{font-size:clamp(1.35rem,2.2vw,1.85rem);font-weight:700;line-height:1;letter-spacing:-.025em;font-variant-numeric:tabular-nums;margin:0}.ds-card-condition{font-size:11px;line-height:16px;color:rgb(var(--brand-rgb,27 101 73));margin:12px 0 0}.ds-card-link{box-sizing:border-box;display:flex;min-height:44px;align-items:center;justify-content:space-between;gap:4px;margin-top:12px;padding:8px 12px;border-radius:12px;background:rgb(var(--brand-rgb,27 101 73));color:#fff;text-decoration:none;font-size:11px;font-weight:600;transition:background-color .15s}.ds-card-link:hover{background:rgb(var(--brand-deep-rgb,22 75 53))}.ds-card-link:focus-visible{outline:2px solid rgb(var(--brand-rgb,27 101 73));outline-offset:4px}@media(min-width:640px){.ds-card-photo{height:176px}.ds-card-content{padding:4px 16px 16px}.ds-card-title{font-size:14px}.ds-card-link{font-size:12px}}@media(min-width:1024px){.ds-card-photo{height:192px}}@media(prefers-reduced-motion:reduce){.ds-card-link{transition-duration:.01ms!important}}"
     },
     {
       "name": "Busca de descoberta",
       "kind": "custom",
       "description": "Casca branca da busca, campo flexível e foco no conjunto.",
       "html": "<form class=\"ds-search\" action=\"#ofertas\" role=\"search\"><svg aria-hidden=\"true\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><label class=\"ds-search-label\" for=\"ds-search\">Buscar produto</label><input id=\"ds-search\" class=\"ds-search-input\" type=\"search\" placeholder=\"O que você quer encontrar?\"/><button class=\"ds-search-button\">Buscar</button></form>",
-      "css": ".ds-search{display:flex;align-items:center;gap:8px;padding:6px;border:1px solid #dbe3d7;border-radius:14px;background:#fff;color:#1b6549;font-family:var(--font-sans,sans-serif);transition:border-color .2s ease,box-shadow .2s ease}.ds-search>svg{margin-left:10px;flex-shrink:0}.ds-search-label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.ds-search:focus-within{border-color:#1b6549;box-shadow:0 0 0 3px #d9efb9}.ds-search-input{height:44px;min-width:0;flex:1;background:transparent;border:0;padding:0 4px;color:#20372d;font:400 14px/20px var(--font-sans,sans-serif);outline:none}.ds-search-input::placeholder{color:#5b6b61}.ds-search-input:focus-visible{outline:none}.ds-search-button{height:44px;border:0;border-radius:12px;padding:0 16px;background:#1b6549;color:white;font:600 14px/20px var(--font-sans,sans-serif);transition:background-color .15s}.ds-search-button:hover{background:#164b35}.ds-search-button:focus-visible{outline:2px solid #1b6549;outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-search,.ds-search-label,.ds-search-input,.ds-search-button{transition-duration:.01ms!important}}"
+      "css": ".ds-search{display:flex;align-items:center;gap:8px;padding:6px;border:1px solid rgb(var(--line-rgb, 219 227 215));border-radius:14px;background:#fff;color:rgb(var(--brand-rgb, 27 101 73));font-family:var(--font-sans,sans-serif);transition:border-color .2s ease,box-shadow .2s ease}.ds-search>svg{margin-left:10px;flex-shrink:0}.ds-search-label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.ds-search:focus-within{border-color:rgb(var(--brand-rgb, 27 101 73));box-shadow:0 0 0 3px rgb(var(--accent-rgb, 217 239 185))}.ds-search-input{height:44px;min-width:0;flex:1;background:transparent;border:0;padding:0 4px;color:rgb(var(--ink-rgb, 32 55 45));font:400 14px/20px var(--font-sans,sans-serif);outline:none}.ds-search-input::placeholder{color:rgb(var(--muted-rgb, 82 101 91))}.ds-search-input:focus-visible{outline:none}.ds-search-button{height:44px;border:0;border-radius:12px;padding:0 16px;background:rgb(var(--brand-rgb, 27 101 73));color:white;font:600 14px/20px var(--font-sans,sans-serif);transition:background-color .15s}.ds-search-button:hover{background:rgb(var(--brand-deep-rgb, 22 75 53))}.ds-search-button:focus-visible{outline:2px solid rgb(var(--brand-rgb, 27 101 73));outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-search,.ds-search-label,.ds-search-input,.ds-search-button{transition-duration:.01ms!important}}"
     },
     {
       "name": "Rodapé compartilhado",
@@ -419,15 +851,31 @@
       "refersTo": "footer",
       "description": "Encerramento em tinta na página clara: marca/ação, navegação e atendimento/privacidade. Amostra visual autônoma; o evento de consentimento depende da aplicação e o ano é um retrato de 2026.",
       "html": "<footer class=\"ds-footer\" aria-label=\"Rodapé do PromoDetec\"><div class=\"ds-footer-container\"><div class=\"ds-footer-main\"><div class=\"ds-footer-brand\"><a class=\"ds-footer-wordmark\" href=\"/\" aria-label=\"PromoDetec — início\">Promo<span>Detec.</span></a><p class=\"ds-footer-tagline\">Detecte. Compare. Escolha.</p><h2 class=\"ds-footer-call\">Encontre seu próximo bom negócio.</h2><a class=\"ds-footer-action\" href=\"/comparar\">Comparar preços<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></a></div><div class=\"ds-footer-navs\"><nav aria-label=\"Explore\"><h2 class=\"ds-footer-nav-title\">Explore</h2><ul class=\"ds-footer-list\"><li><a class=\"ds-footer-link\" href=\"/ofertas\">Ofertas</a></li><li><a class=\"ds-footer-link\" href=\"/comparar\">Comparador</a></li><li><a class=\"ds-footer-link\" href=\"/cupons\">Cupons</a></li><li><a class=\"ds-footer-link\" href=\"/noticias\">Notícias</a></li></ul></nav><nav aria-label=\"Institucional\"><h2 class=\"ds-footer-nav-title\">Institucional</h2><ul class=\"ds-footer-list\"><li><a class=\"ds-footer-link\" href=\"/sobre\">Sobre</a></li><li><a class=\"ds-footer-link\" href=\"/contato\">Contato</a></li><li><a class=\"ds-footer-link\" href=\"/privacidade\">Privacidade</a></li><li><a class=\"ds-footer-link\" href=\"/termos\">Termos</a></li></ul></nav></div><div class=\"ds-footer-support\"><div><h2 class=\"ds-footer-support-title\">Atendimento</h2><a class=\"ds-footer-mail ds-footer-link\" href=\"mailto:suporte@promodetec.com.br\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\"/><path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\"/></svg><span>suporte@promodetec.com.br</span></a></div><div class=\"ds-footer-privacy\"><button class=\"ds-footer-privacy-button\" type=\"button\">Preferências de privacidade</button></div></div></div><div class=\"ds-footer-legal\"><p class=\"ds-footer-copyright\">© 2026 PromoDetec</p><p class=\"ds-footer-disclosure\">O PromoDetec não vende produtos: comparamos preços públicos e direcionamos você à loja oficial. Preços e disponibilidade são da loja e podem mudar — ofertas válidas enquanto durarem os estoques. Podemos ganhar comissão de afiliado quando você compra pelos nossos links, sem custo extra pra você.</p></div></div></footer>",
-      "css": ".ds-footer{margin-top:48px;background:#20372d;color:#fff;font-family:var(--font-sans,\"Geist\",sans-serif)}.ds-footer-container{box-sizing:border-box;max-width:1400px;margin:0 auto;padding:0 16px}.ds-footer-main{display:grid;column-gap:24px;row-gap:32px;padding:32px 0}.ds-footer-wordmark{display:inline-flex;min-height:44px;align-items:center;font-family:var(--font-display,var(--font-sans,\"Geist\",sans-serif));font-size:30px;line-height:36px;font-weight:600;letter-spacing:-.025em;color:#fff;text-decoration:none}.ds-footer-wordmark span{color:#d9efb9}.ds-footer-tagline{margin:4px 0 0;font-size:14px;line-height:24px;color:rgb(255 255 255 / .7)}.ds-footer-call{margin:24px 0 0;max-width:19ch;font-family:var(--font-display,var(--font-sans,\"Geist\",sans-serif));font-size:24px;line-height:1.25;font-weight:500;letter-spacing:-.025em;text-wrap:balance}.ds-footer-action{margin-top:20px;display:inline-flex;min-height:44px;box-sizing:border-box;align-items:center;justify-content:center;gap:20px;border-radius:12px;background:#d9efb9;padding:12px 20px;font-size:14px;line-height:20px;font-weight:600;color:#20372d;text-decoration:none;transition:background-color .15s}.ds-footer-action:hover{background:#fff}.ds-footer-action svg,.ds-footer-mail svg{flex-shrink:0}.ds-footer-navs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.ds-footer-nav-title{margin:0 0 12px;font-size:14px;line-height:24px;font-weight:600}.ds-footer-list{list-style:none;margin:0;padding:0}.ds-footer-link{display:inline-flex;min-height:44px;box-sizing:border-box;align-items:center;padding:8px 0;font-size:14px;line-height:24px;color:rgb(255 255 255 / .75);text-decoration:none;text-underline-offset:4px;transition:color .15s}.ds-footer-link:hover{color:#fff;text-decoration:underline}.ds-footer-support{border-top:1px solid rgb(255 255 255 / .15);padding-top:24px}.ds-footer-support-title{margin:0;font-size:14px;line-height:24px;font-weight:600}.ds-footer-mail{margin-top:12px;display:flex;width:fit-content;max-width:100%;gap:12px}.ds-footer-mail span{word-break:break-all}.ds-footer-privacy{margin-top:20px;border-top:1px solid rgb(255 255 255 / .15);padding-top:16px}.ds-footer-privacy-button{min-height:44px;box-sizing:border-box;padding:8px 0;border:0;background:transparent;text-align:left;font:400 14px/24px var(--font-sans,\"Geist\",sans-serif);color:rgb(255 255 255 / .75);text-decoration:underline;text-decoration-color:rgb(255 255 255 / .35);text-underline-offset:4px;cursor:pointer;transition:color .15s,text-decoration-color .15s}.ds-footer-privacy-button:hover{color:#fff;text-decoration-color:#fff}.ds-footer-wordmark:focus-visible,.ds-footer-action:focus-visible,.ds-footer-link:focus-visible,.ds-footer-privacy-button:focus-visible{outline:2px solid #d9efb9;outline-offset:4px}.ds-footer-legal{display:grid;gap:16px;border-top:1px solid rgb(255 255 255 / .15);padding:24px 0;font-size:12px;line-height:20px;color:rgb(255 255 255 / .7)}.ds-footer-copyright,.ds-footer-disclosure{margin:0;text-wrap:pretty}.ds-footer-disclosure{max-width:90ch}@media(min-width:640px){.ds-footer-container{padding:0 24px}.ds-footer-main{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:40px;padding:48px 0}.ds-footer-call{font-size:30px}.ds-footer-support{grid-column:span 2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.ds-footer-privacy{margin-top:0;border-top:0;padding-top:0}.ds-footer-legal{line-height:24px}}@media(min-width:1024px){.ds-footer-container{padding:0 40px}.ds-footer-main{grid-template-columns:repeat(12,minmax(0,1fr));padding:56px 0}.ds-footer-brand,.ds-footer-navs,.ds-footer-support{grid-column:span 4}.ds-footer-support{display:block;border-top:0;padding-top:0;padding-left:24px}.ds-footer-privacy{margin-top:20px;border-top:1px solid rgb(255 255 255 / .15);padding-top:16px}.ds-footer-legal{grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}.ds-footer-copyright{grid-column:span 4}.ds-footer-disclosure{grid-column:span 8}}@media(prefers-reduced-motion:reduce){.ds-footer-action,.ds-footer-link,.ds-footer-privacy-button{transition-duration:.01ms!important}}"
+      "css": ".ds-footer{margin-top:48px;background:rgb(var(--ink-rgb, 32 55 45));color:#fff;font-family:var(--font-sans,\"Geist\",sans-serif)}.ds-footer-container{box-sizing:border-box;max-width:1400px;margin:0 auto;padding:0 16px}.ds-footer-main{display:grid;column-gap:24px;row-gap:32px;padding:32px 0}.ds-footer-wordmark{display:inline-flex;min-height:44px;align-items:center;font-family:var(--font-display,var(--font-sans,\"Geist\",sans-serif));font-size:30px;line-height:36px;font-weight:600;letter-spacing:-.025em;color:#fff;text-decoration:none}.ds-footer-wordmark span{color:rgb(var(--accent-rgb, 217 239 185))}.ds-footer-tagline{margin:4px 0 0;font-size:14px;line-height:24px;color:rgb(255 255 255 / .7)}.ds-footer-call{margin:24px 0 0;max-width:19ch;font-family:var(--font-display,var(--font-sans,\"Geist\",sans-serif));font-size:24px;line-height:1.25;font-weight:500;letter-spacing:-.025em;text-wrap:balance}.ds-footer-action{margin-top:20px;display:inline-flex;min-height:44px;box-sizing:border-box;align-items:center;justify-content:center;gap:20px;border-radius:12px;background:rgb(var(--accent-rgb, 217 239 185));padding:12px 20px;font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--ink-rgb, 32 55 45));text-decoration:none;transition:background-color .15s}.ds-footer-action:hover{background:#fff}.ds-footer-action svg,.ds-footer-mail svg{flex-shrink:0}.ds-footer-navs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.ds-footer-nav-title{margin:0 0 12px;font-size:14px;line-height:24px;font-weight:600}.ds-footer-list{list-style:none;margin:0;padding:0}.ds-footer-link{display:inline-flex;min-height:44px;box-sizing:border-box;align-items:center;padding:8px 0;font-size:14px;line-height:24px;color:rgb(255 255 255 / .75);text-decoration:none;text-underline-offset:4px;transition:color .15s}.ds-footer-link:hover{color:#fff;text-decoration:underline}.ds-footer-support{border-top:1px solid rgb(255 255 255 / .15);padding-top:24px}.ds-footer-support-title{margin:0;font-size:14px;line-height:24px;font-weight:600}.ds-footer-mail{margin-top:12px;display:flex;width:fit-content;max-width:100%;gap:12px}.ds-footer-mail span{word-break:break-all}.ds-footer-privacy{margin-top:20px;border-top:1px solid rgb(255 255 255 / .15);padding-top:16px}.ds-footer-privacy-button{min-height:44px;box-sizing:border-box;padding:8px 0;border:0;background:transparent;text-align:left;font:400 14px/24px var(--font-sans,\"Geist\",sans-serif);color:rgb(255 255 255 / .75);text-decoration:underline;text-decoration-color:rgb(255 255 255 / .35);text-underline-offset:4px;cursor:pointer;transition:color .15s,text-decoration-color .15s}.ds-footer-privacy-button:hover{color:#fff;text-decoration-color:#fff}.ds-footer-wordmark:focus-visible,.ds-footer-action:focus-visible,.ds-footer-link:focus-visible,.ds-footer-privacy-button:focus-visible{outline:2px solid rgb(var(--accent-rgb, 217 239 185));outline-offset:4px}.ds-footer-legal{display:grid;gap:16px;border-top:1px solid rgb(255 255 255 / .15);padding:24px 0;font-size:12px;line-height:20px;color:rgb(255 255 255 / .7)}.ds-footer-copyright,.ds-footer-disclosure{margin:0;text-wrap:pretty}.ds-footer-disclosure{max-width:90ch}@media(min-width:640px){.ds-footer-container{padding:0 24px}.ds-footer-main{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:40px;padding:48px 0}.ds-footer-call{font-size:30px}.ds-footer-support{grid-column:span 2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.ds-footer-privacy{margin-top:0;border-top:0;padding-top:0}.ds-footer-legal{line-height:24px}}@media(min-width:1024px){.ds-footer-container{padding:0 40px}.ds-footer-main{grid-template-columns:repeat(12,minmax(0,1fr));padding:56px 0}.ds-footer-brand,.ds-footer-navs,.ds-footer-support{grid-column:span 4}.ds-footer-support{display:block;border-top:0;padding-top:0;padding-left:24px}.ds-footer-privacy{margin-top:20px;border-top:1px solid rgb(255 255 255 / .15);padding-top:16px}.ds-footer-legal{grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}.ds-footer-copyright{grid-column:span 4}.ds-footer-disclosure{grid-column:span 8}}@media(prefers-reduced-motion:reduce){.ds-footer-action,.ds-footer-link,.ds-footer-privacy-button{transition-duration:.01ms!important}}"
+    },
+    {
+      "name": "Hero sazonal",
+      "kind": "custom",
+      "refersTo": "campaign-hero",
+      "description": "Esquenta Black como exemplo; copy da missão preservada e cores herdadas da fase ativa. A troca de fase depende do provider.",
+      "html": "<section class=\"ds-campaign\"><div><h1 class=\"ds-campaign-heading\">Esquenta<br class=\"ds-campaign-break\"/> <span>Black Friday.</span></h1><p class=\"ds-campaign-phrase\">O esquenta já começou.</p></div><div><h2 class=\"ds-campaign-mission\">Encontre seu próximo bom negócio.</h2><p class=\"ds-campaign-copy\">Compare preços, consulte o histórico e guarde seus achados. A decisão é sua. Nossa missão é apresentar as ofertas e te direcionar as lojas responsáveis pela venda.</p><a class=\"ds-campaign-action\" href=\"#achados\">Explorar o esquenta <svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></a></div></section>",
+      "css": ".ds-campaign{display:grid;grid-template-columns:1fr 1.05fr;align-items:center;gap:48px;padding:24px 32px;border-radius:16px;background:rgb(var(--campaign-rgb,23 34 29));color:#fff;font-family:var(--font-sans,sans-serif)}.ds-campaign-heading{margin:0;font-size:clamp(2.75rem,4.1vw,3.625rem);font-weight:750;line-height:.99;letter-spacing:-.035em}.ds-campaign-heading span{color:rgb(var(--accent-rgb,217 239 185))}.ds-campaign-phrase{max-width:44ch;margin:16px 0 0;font-size:14px;line-height:24px;color:rgb(255 255 255/.8)}.ds-campaign-mission{margin:0;font-size:24px;font-weight:650;line-height:1.15;letter-spacing:-.025em}.ds-campaign-copy{margin:12px 0 0;max-width:64ch;font-size:14px;line-height:1.65;color:#e1e8e2}.ds-campaign-action{box-sizing:border-box;display:inline-flex;min-height:44px;align-items:center;gap:20px;margin-top:16px;border-radius:12px;padding:10px 16px;background:rgb(var(--accent-rgb,217 239 185));color:rgb(var(--ink-rgb,32 55 45));font-size:14px;font-weight:600;text-decoration:none}.ds-campaign-action:hover{background:#fff}.ds-campaign-action:focus-visible{outline:2px solid rgb(var(--accent-rgb,217 239 185));outline-offset:4px}@media(max-width:767px){.ds-campaign{grid-template-columns:1fr;gap:14px;padding:20px}.ds-campaign-heading{font-size:clamp(1.875rem,7.5vw,2.5rem);line-height:1.04}.ds-campaign-mission{font-size:17px;line-height:1.25}.ds-campaign-copy{margin-top:8px;font-size:13px;line-height:1.5}}@media(max-width:639px){.ds-campaign-break,.ds-campaign-phrase,.ds-campaign-action{display:none}}"
+    },
+    {
+      "name": "Salvar no radar",
+      "kind": "button",
+      "refersTo": "card-save",
+      "description": "Estado visual; persistência local, limite de 30 e status dependem do runtime.",
+      "html": "<button class=\"ds-save\" type=\"button\" aria-label=\"Salvar produto no radar\" aria-pressed=\"false\"><svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z\"/></svg></button>",
+      "css": ".ds-save{box-sizing:border-box;display:grid;place-items:center;width:44px;height:44px;border-radius:9999px;border:1px solid rgb(var(--line-rgb,219 227 215));background:#fff;color:rgb(var(--brand-rgb,27 101 73));cursor:pointer;transition:background-color .15s}.ds-save:hover{background:rgb(var(--accent-rgb,217 239 185))}.ds-save:focus-visible{outline:2px solid rgb(var(--brand-rgb,27 101 73));outline-offset:4px}.ds-save[aria-pressed=\"true\"]{border-color:rgb(var(--brand-rgb,27 101 73))}.ds-save[aria-pressed=\"true\"] svg{fill:currentColor}.ds-save:disabled{opacity:.5}@media(prefers-reduced-motion:reduce){.ds-save{transition-duration:.01ms!important}}"
     }
   ],
   "narrative": {
     "northStar": "Sinalização de metrô traduzida para catálogo",
-    "overview": "Papel claro, tinta verde profunda e sinais pequenos orientam a leitura. Geist mantém títulos, navegação e dados na mesma família. A identidade aparece no contraste, nas setas e nas categorias; imagens reais dos produtos ocupam áreas brancas, com espaço para reconhecer o objeto.\n\nA composição combina áreas abertas com módulos de dados compactos. A hierarquia dá prioridade a produto, preço, loja e atualização. Nome, logo existente e português brasileiro permanecem os compromissos de marca. Este registro descreve o código e as capturas da prévia local de 26/10/2026; não atesta publicação visual.",
+    "overview": "Papel claro, tinta verde profunda e sinais pequenos orientam a leitura. Geist mantém títulos, navegação e dados na mesma família. A identidade aparece no contraste, nas setas e nas categorias; imagens reais dos produtos ocupam áreas brancas, com espaço para reconhecer o objeto.\n\nA composição combina áreas abertas com módulos de dados compactos. A hierarquia dá prioridade a produto, preço, loja e atualização. Nome, logo existente e português brasileiro permanecem os compromissos de marca. Este registro mescla o sistema confirmado com a implementação e as capturas locais de 31/10/2026. A campanha “Black em evidência” aplica uma variação comercial à identidade existente; não redefine a marca. Não atesta publicação ou melhoria de CPU em produção.",
     "keyCharacteristics": [
       "Base clara com superfícies brancas e divisórias suaves.",
-      "Verde para ações, foco e comparação; cores discretas para categorias.",
+      "Verde para ações, foco e comparação, com substituições sazonais nomeadas e cores discretas para categorias.",
       "Uma família tipográfica, hierarquia por escala e peso.",
       "Fotografias de catálogo contidas, preço destacado e origem próxima.",
       "Estados e expansão explícitos; movimento curto de resposta."
@@ -440,7 +888,12 @@
       },
       {
         "name": "The Encerramento em Tinta Rule",
-        "body": "O rodapé compartilhado encerra a página em tinta, com branco e lime para leitura e ação. Essa inversão pertence ao rodapé; a base clara continua nas demais superfícies.",
+        "body": "O rodapé compartilhado encerra a página em tinta, com branco e lime para leitura e ação. O hero sazonal também usa inversão escura; ambas as áreas preservam a base clara do catálogo e acompanham os tokens da fase ativa.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fase Coerente Rule",
+        "body": "Faixa, hero e controles compartilham a mesma fase; o catálogo continua branco e as cores de categoria mantêm seus rótulos.",
         "section": "colors"
       },
       {

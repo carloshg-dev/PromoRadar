@@ -3,7 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 export interface ChartPoint { data: string; preco: number }
 
-/** Gráfico de histórico de preço. Verde neon (acento de "preço/oferta") + área preenchida. */
+/** Histórico estável durante a montagem e mudanças de largura. */
 export function PriceChart({ points, color = "#1b6549", height = 224 }:
   { points: ChartPoint[]; color?: string; height?: number }) {
   if (points.length < 2) {
@@ -30,7 +30,7 @@ export function PriceChart({ points, color = "#1b6549", height = 224 }:
         <Tooltip
           contentStyle={{ background: "#ffffff", border: "1px solid #dbe3d7", borderRadius: 12, color: "#20372d" }}
           formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "Preço"]} />
-        <Area type="monotone" dataKey="preco" stroke={color} strokeWidth={2.5} fill={`url(#${gid})`} dot={false}
+        <Area type="monotone" dataKey="preco" stroke={color} strokeWidth={2.5} fill={`url(#${gid})`} dot={false} isAnimationActive={false}
           activeDot={{ r: 4, fill: color }} />
       </AreaChart>
     </ResponsiveContainer>

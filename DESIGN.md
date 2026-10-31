@@ -2,16 +2,16 @@
 name: PromoDetec
 description: Orientação clara para encontrar produtos, comparar preços e escolher a loja.
 colors:
-  brand: "#1b6549"
-  brand-deep: "#164b35"
-  lime: "#d9efb9"
-  paper: "#f6f7f3"
+  brand: "rgb(27 101 73)"
+  brand-deep: "rgb(22 75 53)"
+  lime: "rgb(217 239 185)"
+  paper: "rgb(246 247 243)"
   surface: "#ffffff"
-  surface-soft: "#edf1e8"
+  surface-soft: "rgb(237 241 232)"
   surface-over: "#e5ecdf"
-  ink: "#20372d"
-  muted: "#5b6b61"
-  line: "#dbe3d7"
+  ink: "rgb(32 55 45)"
+  muted: "rgb(82 101 91)"
+  line: "rgb(219 227 215)"
   positive: "#1a7045"
   warning: "#865b13"
   danger: "#b33c3c"
@@ -20,7 +20,55 @@ colors:
   tool: "#285d96"
   gadget: "#28685f"
   parfum: "#7a4a78"
+  campaign: "rgb(23 34 29)"
+  black-friday-paper: "rgb(247 248 244)"
+  black-friday-ink: "rgb(24 33 29)"
+  black-friday-lime: "rgb(243 221 89)"
+  black-friday-campaign: "rgb(16 20 18)"
+  cyber-monday-paper: "rgb(243 246 251)"
+  cyber-monday-surface-soft: "rgb(231 238 248)"
+  cyber-monday-ink: "rgb(24 42 64)"
+  cyber-monday-line: "rgb(211 222 237)"
+  cyber-monday-muted: "rgb(73 92 117)"
+  cyber-monday-brand: "rgb(38 74 130)"
+  cyber-monday-brand-deep: "rgb(26 52 94)"
+  cyber-monday-lime: "rgb(198 221 255)"
+  cyber-monday-campaign: "rgb(18 35 58)"
+  esquenta-natal-paper: "rgb(248 247 241)"
+  esquenta-natal-surface-soft: "rgb(239 241 230)"
+  esquenta-natal-ink: "rgb(29 52 40)"
+  esquenta-natal-line: "rgb(222 225 208)"
+  esquenta-natal-brand: "rgb(27 91 65)"
+  esquenta-natal-lime: "rgb(241 222 169)"
+  esquenta-natal-campaign: "rgb(30 61 45)"
+  natal-paper: "rgb(249 246 242)"
+  natal-surface-soft: "rgb(245 235 231)"
+  natal-ink: "rgb(67 34 35)"
+  natal-line: "rgb(230 216 208)"
+  natal-muted: "rgb(108 83 78)"
+  natal-brand: "rgb(141 37 44)"
+  natal-brand-deep: "rgb(105 27 33)"
+  natal-lime: "rgb(243 220 164)"
+  natal-campaign: "rgb(83 31 36)"
 typography:
+  campaign-display:
+    fontFamily: "var(--font-display), var(--font-sans), sans-serif"
+    fontSize: "clamp(2.75rem, 4.1vw, 3.625rem)"
+    fontWeight: 750
+    lineHeight: 0.99
+    letterSpacing: "-0.035em"
+  campaign-display-mobile:
+    fontFamily: "var(--font-display), var(--font-sans), sans-serif"
+    fontSize: "clamp(1.875rem, 7.5vw, 2.5rem)"
+    fontWeight: 750
+    lineHeight: 1.04
+    letterSpacing: "-0.035em"
+  price:
+    fontFamily: "var(--font-sans), system-ui, sans-serif"
+    fontSize: "clamp(1.35rem, 2.2vw, 1.85rem)"
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: "-0.025em"
   headline:
     fontFamily: "var(--font-display), var(--font-sans), sans-serif"
     fontSize: "1.875rem"
@@ -103,6 +151,27 @@ components:
   card:
     backgroundColor: "{colors.surface}"
     rounded: "{rounded.2xl}"
+  campaign-hero:
+    backgroundColor: "{colors.campaign}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.2xl}"
+    padding: "24px 32px"
+  campaign-action:
+    backgroundColor: "{colors.lime}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    padding: "10px 16px"
+  card-store-action:
+    backgroundColor: "{colors.brand}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.lg}"
+    padding: "8px 12px"
+  card-save:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.brand}"
+    rounded: "{rounded.full}"
+    height: "44px"
+    width: "44px"
   footer:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.surface}"
@@ -121,11 +190,11 @@ components:
 
 Papel claro, tinta verde profunda e sinais pequenos orientam a leitura. Geist mantém títulos, navegação e dados na mesma família. A identidade aparece no contraste, nas setas e nas categorias; imagens reais dos produtos ocupam áreas brancas, com espaço para reconhecer o objeto.
 
-A composição combina áreas abertas com módulos de dados compactos. A hierarquia dá prioridade a produto, preço, loja e atualização. Nome, logo existente e português brasileiro permanecem os compromissos de marca. Este registro descreve o código e as capturas da prévia local de 26/10/2026; não atesta publicação visual.
+A composição combina áreas abertas com módulos de dados compactos. A hierarquia dá prioridade a produto, preço, loja e atualização. Nome, logo existente e português brasileiro permanecem os compromissos de marca. Este registro mescla o sistema confirmado com a implementação e as capturas locais de 31/10/2026. A campanha “Black em evidência” aplica uma variação comercial à identidade existente; não redefine a marca. Não atesta publicação ou melhoria de CPU em produção.
 
 **Key Characteristics:**
 - Base clara com superfícies brancas e divisórias suaves.
-- Verde para ações, foco e comparação; cores discretas para categorias.
+- Verde para ações, foco e comparação, com substituições sazonais nomeadas e cores discretas para categorias.
 - Uma família tipográfica, hierarquia por escala e peso.
 - Fotografias de catálogo contidas, preço destacado e origem próxima.
 - Estados e expansão explícitos; movimento curto de resposta.
@@ -155,7 +224,23 @@ A paleta combina neutros levemente verdes com acentos funcionais contidos. Os va
 ### Named Rules
 **The Orientação Rule.** A cor de categoria acompanha texto ou ícone reconhecível; nunca é o único identificador.
 
-**The Encerramento em Tinta Rule.** O rodapé compartilhado encerra a página em tinta, com branco e lime para leitura e ação. Essa inversão pertence ao rodapé; a base clara continua nas demais superfícies.
+**The Encerramento em Tinta Rule.** O rodapé compartilhado encerra a página em tinta, com branco e lime para leitura e ação. O hero sazonal também usa inversão escura; ambas as áreas preservam a base clara do catálogo e acompanham os tokens da fase ativa.
+
+### Variações sazonais
+
+As variáveis RGB de `src/app/globals.css` são normativas. `paper`, `surface-soft`, `ink`, `line`, `muted`, `brand`, `brand-deep`, `lime` e `campaign` correspondem a `--page-rgb`, `--soft-rgb`, `--ink-rgb`, `--line-rgb`, `--muted-rgb`, `--brand-rgb`, `--brand-deep-rgb`, `--accent-rgb` e `--campaign-rgb`. As cores fixas de categoria, status, branco e surface-over não mudam com o calendário.
+
+| Fase | Tokens substituídos pelo prefixo da fase |
+| --- | --- |
+| Esquenta Black / neutro | Base; campaign é o fundo do hero ativo |
+| black-friday | paper, ink, lime, campaign |
+| cyber-monday | paper, surface-soft, ink, line, muted, brand, brand-deep, lime, campaign |
+| esquenta-natal | paper, surface-soft, ink, line, brand, lime, campaign |
+| natal | paper, surface-soft, ink, line, muted, brand, brand-deep, lime, campaign |
+
+Cada nome da tabela resolve ao token `fase-nome` no frontmatter; propriedades omitidas herdam a base. As substituições alcançam também foco, ações e o rodapé compartilhado, sem mudar sua estrutura. Não há nova família de cores por componente.
+
+**The Fase Coerente Rule.** Faixa, hero e controles compartilham a mesma fase; o catálogo continua branco e as cores de categoria mantêm seus rótulos.
 
 ## Typography
 
@@ -169,8 +254,9 @@ A paleta combina neutros levemente verdes com acentos funcionais contidos. Os va
 - **Title:** títulos de prateleira e áreas de navegação, com peso semibold; autenticação e detalhe também usam 24px, em bold.
 - **Body:** descrições e controles em 14px; a introdução da busca usa 16px/28px. Descrições de prateleira têm largura máxima de prosa.
 - **Label:** origem, data e ações compactas em 12px; valores auxiliares do histórico usam 11px. Metadados herdados de detalhe chegam a 10px e não estabelecem o tamanho de novos textos essenciais.
-- **Preço:** em cards, `clamp(1.2rem, 2vw, 1.65rem)` semibold, entrelinha 1 e tracking negativo; o destaque usa 30px/36px, crescendo para 36px/40px. A classe price ativa números tabulares e tracking de -0.025em. Nem todo preço do detalhe usa essa classe: não pressupor cobertura global.
-- **Título da descoberta:** expressão específica da home, com `clamp(2.65rem, 4.9vw, 4.8rem)`, peso 600, entrelinha 1.02 e tracking -0.035em; não é tamanho padrão de outras páginas.
+- **Preço:** cards usam o token price, bold e números tabulares; referência riscada, loja e data são subordinadas. O detalhe conserva sua própria hierarquia, sem pressupor cobertura global da classe price.
+- **Campanha:** campaign-display no desktop; campaign-display-mobile abaixo de 768px. A missão usa 24px/1.15 e peso 650, passando a 17px/1.25 no celular. Sua copy usa 14px/1.65, máximo 64ch, e 13px/1.5 no celular. São papéis da abertura sazonal, não tamanhos globais de títulos.
+- **Card compacto:** título de 13px/20px em mobile e 14px/20px em sm, peso 500, limitado a duas linhas; metadados em 11px/16px e mínimo/máximo em 10px/16px. Essa densidade descreve os cards existentes e não estabelece tamanho para novos textos essenciais.
 
 ### Named Rules
 **The Números Comparáveis Rule.** Nas vitrines, preços usam números tabulares; loja e data permanecem próximos ao valor que qualificam.
@@ -179,7 +265,7 @@ A paleta combina neutros levemente verdes com acentos funcionais contidos. Os va
 
 Home, cabeçalho, rodapé e ofertas compartilham contêiner central de até 1400px. Recuos laterais passam de 16px para 24px em sm e 40px em lg. O detalhe usa contêiner mais estreito, até 1152px, com recuos 16/24/32px. Esses dois contextos coexistem.
 
-O ritmo parte de 4px, com gaps recorrentes de 8/12/16/24/32px. Prateleiras usam 44px de respiro vertical, reduzido a 32px abaixo de 640px. Divisórias horizontais marcam a progressão do catálogo. A home abre em duas colunas somente em lg; em telas menores a busca precede o destaque.
+O ritmo parte de 4px, com gaps recorrentes de 8/12/16/24/32px. Prateleiras usam 44px de respiro vertical, reduzido a 32px abaixo de 640px. Divisórias horizontais marcam a progressão do catálogo. A home abre com hero sazonal: campanha e missão lado a lado a partir de 768px, em proporção 1:1.05 e gap de 48px. Abaixo disso, empilham com gap de 14px. Padding de 24px/32px passa a 20px no celular. Busca e categorias precedem a grade; nenhum produto isolado antecede a primeira vitrine. A primeira prateleira usa respiro de 24px/44px, reduzido a 20px/32px abaixo de 768px.
 
 As prateleiras mostram uma coluna abaixo de 360px, duas a partir de 360px e quatro em lg. Categorias da home podem rolar horizontalmente; filtros de catálogo quebram em linhas dentro do painel. Abaixo de lg, o painel de filtros começa recolhido e mantém o resumo da seleção visível; o botão anuncia expansão. Em desktop, o painel fica visível. O detalhe reorganiza KPIs de duas para quatro colunas em md e posiciona a compra ao lado do histórico em lg.
 
@@ -196,22 +282,24 @@ Cards e painéis são planos em repouso: branco, tonalidade de papel e borda de 
 
 ## Shapes
 
-Retângulos suavemente arredondados predominam. A configuração redefine lg para 12px, xl para 14px e 2xl/3xl para 16px: não aplicar os valores padrão do Tailwind por memória. Botões usam lg, campos xl, cards 2xl; chips e pequenos pontos usam full. Badges de desconto usam md. O círculo com seta do destaque é um dispositivo de ação específico, não a forma de todo botão.
+Retângulos suavemente arredondados predominam. A configuração redefine lg para 12px, xl para 14px e 2xl/3xl para 16px: não aplicar os valores padrão do Tailwind por memória. Botões usam lg, campos xl, cards 2xl; chips e pequenos pontos usam full. Badges de desconto usam md. O botão circular de salvar tem 44px e pertence ao card; não é a forma de todo botão.
 
 ## Components
 
 ### Buttons
 Firmes e compactos. Primary tem verde e texto branco; outline combina branco e borda suave; ghost deixa a superfície visível; subtle usa papel suave; danger usa vermelho. Alturas do componente: sm 40px, padrão/ícone 44px, lg 48px. Peso 600, cantos lg e ícones com texto quando há espaço.
 
-Hover troca cores, sem deslocamento. Foco do Button usa contorno verde de 2px com offset de 2px; o foco global tem offset de 4px. Disabled reduz opacidade à metade e bloqueia interação. CTAs de card usam papel suave com texto verde; o detalhe usa uma ação sólida de saída para a loja.
+Hover troca cores, sem deslocamento. Foco do Button usa contorno verde de 2px com offset de 2px; o foco global tem offset de 4px. Disabled reduz opacidade à metade e bloqueia interação. Cards monetizados usam ação sólida de saída “Ver oferta na loja”; os demais usam “Comparar preço” com contorno. O detalhe conserva sua ação de saída para a loja.
 
 ### Chips
 Filtros têm contorno, formato pill, padding 4px/12px e texto de 12px. Inativos usam tinta secundária; selecionados combinam borda da categoria, fundo a 15% e texto correspondente, além de aria-current. Não confundir chip de filtro com botão primário.
 
 ### Cards / Containers
-Cards de produto usam branco, borda suave e raio 16px. Imagem 4:3 contida em branco, sem recortar o produto; conteúdo com 16px de padding e preço alinhado após o título. Título limitado a duas linhas; a área de preço e condições se alinha na parte inferior. Origem, desconto quando calculável e atualização acompanham o produto. Histórico só aparece quando há dados suficientes.
+Cards de produto usam branco, borda suave e raio 16px. A fotografia é contida em branco, com altura de 144px, 176px em sm e 192px em lg; não há proporção 4:3 fixa no contêiner. Conteúdo usa 12px laterais/inferiores no celular e 16px em sm, com 4px no topo. Título tem mínimo de 40px e duas linhas; histórico, atualização e ação se alinham abaixo do preço. Desconto somente quando calculável; “Menor preço histórico” depende dos valores disponíveis. Sem histórico suficiente, o card informa condições da loja.
 
-O destaque da home usa painel tonal e fotografia branca; seu tom específico não vira uma nova família de tokens. Fotografias vêm de Produto.imagemUrl e CDNs das lojas; não são ilustrações produzidas para a identidade. Os rasters locais ativos preservam origem preexistente; assets históricos não referenciados não representam o sistema atual.
+O link do card abre o detalhe; coração e CTA de loja têm camadas próprias. Salvar usa coração SVG em círculo branco com borda, 44px, no canto superior direito; selecionado preenche o coração e colore a borda. Hover usa lime; disabled reduz opacidade. `aria-pressed`, nome acessível e status anunciam resultado. O radar salva neste navegador, com limite de 30 ofertas, e informa erro de armazenamento; não exige login para essa ação.
+
+Fotografias vêm de Produto.imagemUrl e CDNs das lojas; a campanha não introduz novos rasters. Logo e ícones raster preexistentes conservam sua origem; assets históricos não referenciados não representam o sistema atual.
 
 ### Inputs / Fields
 O Input compartilhado tem fundo de papel suave, altura 40px, padding horizontal 14px e raio xl. Foco combina borda verde a 60% e anel de 2px a 20%. A busca da home é outra composição: casca branca, campo transparente e ação sólida; focus-within aplica borda verde e anel lime de 3px.
@@ -219,10 +307,17 @@ O Input compartilhado tem fundo de papel suave, altura 40px, padding horizontal 
 Formulários de autenticação têm rótulos persistentes acima dos campos e largura máxima 384px. Placeholders exemplificam conteúdo; não substituem rótulo. Feedback usa texto e região status para sucesso ou alert para erro, além de cor e contorno. A busca possui rótulo acessível e nome explícito no botão compacto.
 
 ### Navigation
-Cabeçalho branco com borda inferior, altura mínima 76px e logo existente. Links de desktop são de 14px e aparecem em lg; hover usa fundo suave e tinta verde profunda. Categorias abrem painel por hover ou foco interno. No celular, botão de 44px abre navegação abaixo do cabeçalho; categorias se expandem com chevron e estado anunciado. Setas e símbolos da composição usam Lucide/SVG, sem emojis decorativos.
+Cabeçalho branco com borda inferior, altura mínima 68px no celular e 76px em sm, além da faixa de campanha de no mínimo 44px, e logo existente. Links de desktop são de 14px e aparecem em lg; hover usa fundo suave e tinta verde profunda. Categorias abrem painel por hover ou foco interno. No celular, botão de 44px abre navegação abaixo do cabeçalho; categorias se expandem com chevron e estado anunciado. Setas e símbolos da composição usam Lucide/SVG, sem emojis decorativos.
 
 ### Resposta e movimento
-Mudanças de cor duram 150–200ms; a imagem de produto cresce apenas para 1.035 em 300ms com curva `cubic-bezier(.16,1,.3,1)`. Foco e expansão são estados visíveis. O stylesheet reduz animações/transições a .01ms quando prefers-reduced-motion está ativo. A descoberta não depende de movimento automático.
+Mudanças de cor duram 150–200ms; a imagem de produto cresce apenas para 1.035 em 300ms com curva `cubic-bezier(.16,1,.3,1)`. Foco e expansão são estados visíveis. O stylesheet reduz animações/transições a .01ms quando prefers-reduced-motion está ativo. A descoberta não depende de movimento automático. A área do gráfico de histórico tem animação desativada (`isAnimationActive={false}`); a curva não percorre preços intermediários durante a captura ou abertura.
+
+### Campanha sincronizada
+Hero escuro, título pesado com acento e missão literal; faixa usa acento com texto tinta. A partir de sm, o hero inclui frase da campanha e ação para #achados; no celular ficam a missão e a busca, enquanto a faixa mantém a ação “Ver ofertas”. Em estado neutro, não há faixa nem título comercial; o painel passa a surface-soft e a missão é h1.
+
+O calendário em `src/lib/seasonal.ts` usa America/Sao_Paulo e janelas inclusivas de 2026: Esquenta Black de 30/10 a 26/11; Black Friday de 27 a 29/11; Cyber Monday em 30/11; Esquenta Natal de 01 a 13/12; Natal de 14 a 25/12; neutro em 26/12 e sem repetição automática em 2027. Override de preview é explícito. Bootstrap aplica a pele antes da pintura mesmo com HTML em cache; o provider sincroniza copy, faixa, cores e theme-color na montagem, a cada minuto em aba visível, no retorno à aba e em pageshow. Somente IDs e datas públicos entram no bootstrap. São comportamentos verificados no código; fases futuras não foram capturadas no navegador.
+
+Evidência da extensão sazonal: fontes CSS, layout, componentes de campanha/card/prateleira e calendário; capturas em `.impeccable/review/black-evidencia/`. `layout.json` mede home em 1440/768/390/320 CSS, 24 cards únicos, sem overflow horizontal e sem imagens visíveis quebradas. Os JPEGs podem estar reduzidos proporcionalmente; medidas vêm do recibo/CSS. Capturas de ofertas, produto, comparação e login complementam o conjunto; comparação cobre indisponibilidade, não resultado carregado. As recapturas do produto acompanham o gráfico sem animação. A referência crítica é a opção A aprovada em `reports/seasonal-preview-2026-10-30/`, não uma comp métrica nem um QUALITY BAR externo.
 
 ### Rodapé compartilhado
 Base plana em tinta, sem sombra ou cards decorativos. Marca em 30px/36px semibold, com terminação lime; lema em body e branco a 70%. A chamada usa 24px/30px medium e cresce para 30px/37.5px em sm. Títulos dos grupos e links usam body; os títulos são semibold e os links usam branco a 75%. O texto legal usa label com entrelinha de 20px, passando a 24px em sm, e branco a 70%. Divisórias usam branco a 15%.
@@ -246,4 +341,4 @@ Evidência desta extensão: `src/components/layout/footer.tsx`, `PrivacySettings
 - **Don't** usar cor sozinha para indicar categoria, erro ou tendência.
 - **Don't** inventar fotografias, avaliações, descontos ou selos para preencher a interface.
 
-Não canonizado: glow RGBA e gradientes herdados ainda consumidos por SubcategoriaNav; rótulos uppercase de detalhe/subcategoria como linguagem de títulos; marca Google branca em botão outline branco como solução de ícone. São resíduos/defeitos locais, não regras para novas superfícies. A revisão final fornecida cobre quatro correções específicas, não uma certificação de todos os estados do repositório.
+Não canonizado: glow RGBA e gradientes herdados ainda consumidos por SubcategoriaNav; rótulos uppercase de detalhe/subcategoria como linguagem de títulos; marca Google branca em botão outline branco como solução de ícone. São resíduos/defeitos locais, não regras para novas superfícies. Metadados de 10–11px descrevem a densidade comercial existente, sem legitimar sua adoção como corpo de texto ou instrução. Este registro não certifica todos os estados do repositório, datas futuras no navegador ou publicação.
