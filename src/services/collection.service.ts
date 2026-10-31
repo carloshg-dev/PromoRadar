@@ -15,6 +15,7 @@ import { notificarColeta } from "@/infrastructure/notify/owner";
 import { degolada, PISO_GUILHOTINA } from "@/core/guilhotina";
 import { traduzirTitulo } from "@/core/traducao-titulos";
 import { avisarPromocoesNovas, type DealNovo } from "@/infrastructure/notify/promo-feed";
+import { validProductImage } from "@/core/catalog-policy";
 import type { AdapterKey, RawProduct } from "@/core/domain/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -92,7 +93,7 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
         // FILTRO DE QUALIDADE (regra do dono 03/07): vitrine cega não vende —
         // produto SEM IMAGEM é descartado central (vale p/ TODOS os adapters).
         // (O "muito barato" é a guilhotina abaixo, piso R$20 via PISO_PRECO_BRL.)
-        if (!item.imagemUrl || !/^https?:\/\//i.test(item.imagemUrl)) {
+        if (!validProductImage(item.imagemUrl)) {
           stats.descartados++;
           continue;
         }
@@ -148,37 +149,8 @@ export async function executarColeta(keys?: AdapterKey[]): Promise<CollectionRes
   await notificarColeta(result); // avisa o DONO (Discord + Telegram): saúde da coleta
   await avisarPromocoesNovas(novosDeals); // feed PÚBLICO de ofertas (chaves próprias; no-op se não configurado)
 
-  // "Lista real de afiliação": por loja, quanto MONETIZA (afiliado) vs ainda não.
-  // SÓ lojas ativas (a guilhotina desativa loja + oculta produto; sem o filtro,
-  // as 13 lojas desligadas em 02-03/07 continuavam aparecendo como "potencial"
-  // toda coleta) e SÓ produtos em_estoque (senão a contagem é o total histórico
-  // acumulado — nunca cai mesmo com stale-sweep, já que a linha não é deletada).
-  // GUILHOTINA DE VOLUME (regra do dono 04/07): só catálogo de ALTO VOLUME roda.
-  // Loja com 1..(MIN-1) produtos válidos = coletada mas fraca → BLOQUEADA (ativo=
-  // false + produtos ocultados). Loja em 0 = ainda não coletada (marca nova como
-  // Acer/Eudora/Dufrio) → POUPADA, será avaliada quando o feed dela chegar.
-  // GUILHOTINA_MIN_PRODUTOS=0 desliga a regra.
-  const MIN_VOLUME = Number(process.env.GUILHOTINA_MIN_PRODUTOS) || 200;
-  const guilhotinadas: string[] = [];
-  try {
-    if (result.erros > 0) return result; // rodada parcial não autoriza manutenção destrutiva
-    const { data: ls } = await sb.from("lojas").select("id, adapter_key, nome").eq("ativo", true);
-    for (const l of ls ?? []) {
-      const { count } = await sb.from("produtos").select("id", { count: "exact", head: true })
-        .eq("loja_id", l.id as string).eq("em_estoque", true);
-      const n = count ?? 0;
-      if (MIN_VOLUME > 0 && n >= 1 && n < MIN_VOLUME) {
-        await sb.from("lojas").update({ ativo: false }).eq("id", l.id as string);
-        await sb.from("produtos").update({ em_estoque: false }).eq("loja_id", l.id as string).eq("em_estoque", true);
-        guilhotinadas.push(`${(l.nome as string) || (l.adapter_key as string)} (${n})`);
-      }
-    }
-    if (guilhotinadas.length) console.log(`⚔️ Guilhotina de volume (<${MIN_VOLUME}): ${guilhotinadas.join(", ")} DESATIVADAS`);
-    // A "💰 Lista real de afiliação" agora é enviada UMA vez pelo digest (roda por
-    // último, via `needs`), não por job — evita os retratos parciais/conflitantes
-    // (o job da Amazon enviava a lista sem a Kabum, que ainda estava coletando).
-  } catch { /* a guilhotina nunca derruba a coleta */ }
-
+  // Poucos produtos não provam falta de estoque nem afiliação inativa.
+  // A elegibilidade pública usa recência; não falsificar estoque pelo volume do feed.
   return result;
 }
 

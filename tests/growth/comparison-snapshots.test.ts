@@ -32,6 +32,12 @@ test("matching preserva uma oferta mais barata por loja e descarta outliers", ()
   assert.equal(c.lojas, 2); assert.equal(c.economia, 50);
 });
 
+test("comparação não transforma preço sem moeda confirmada em oferta brasileira", () => {
+  const group = agruparComparacoes([product("aliexpress", 100), product("amazon", 150)], 1);
+  assert.equal(group.length, 1);
+  assert.equal(currentComparisons(group, now).length, 0);
+});
+
 test("geração por lotes encontra loja tardia, publica o índice por último e não duplica vertical unitária", async () => {
   const output = new Map<string, unknown>();
   const receipt = await buildComparisonSnapshots({ categories: ["placas-de-video"], verticals: [{ categorias: [{ slug: "placas-de-video" }] }], now,

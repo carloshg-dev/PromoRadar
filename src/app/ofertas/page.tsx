@@ -14,23 +14,27 @@ import { pageNumber, searchTerm } from "@/core/search";
 import { MAX_PRICE_AGE_DAYS } from "@/core/offer-freshness";
 import { Search } from "lucide-react";
 import { TODAS_CATEGORIAS } from "@/lib/navigation";
+import { catalogPriceLimit } from "@/core/catalog-policy";
+import { CatalogPriceFilter } from "@/components/catalog-price-filter";
 
 const POR_PAGINA = 60;
 
 export const metadata = { title: "Melhores ofertas", alternates: { canonical: "/ofertas" }, description: "Encontre ofertas por produto, categoria e loja. Consulte o histórico disponível antes de comprar." };
 export const revalidate = 3600;
 
-export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string } }) {
+export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string; ate?: string } }) {
   const categoria = searchParams.categoria ?? "all";
   const busca = searchTerm(searchParams.busca);
   const loja = searchParams.loja ?? "";
   const pagina = pageNumber(searchParams.pagina);
+  const maxPreco = catalogPriceLimit(searchParams.ate);
+  const ate = maxPreco === null ? "todos" : String(maxPreco);
   const selection = `${TODAS_CATEGORIAS.find(item => item.slug === categoria)?.nome ?? "Todas as categorias"} · ${loja ? loja.replace(/-/g, " ").slice(0, 60) : "Todas as lojas"}`;
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
   let total = 0;
   let available = true;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria, busca, loja: loja || undefined, limit: POR_PAGINA, pagina }));
+    ({ produtos, total } = await listarOfertasPaginado({ categoria, busca, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco }));
   } catch { available = false; }
 
   return (
@@ -49,20 +53,21 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
         <Input id="offers-search" name="busca" type="search" maxLength={80} defaultValue={busca} placeholder="Buscar produto…" className="min-w-0 flex-1" />
         <input type="hidden" name="categoria" value={categoria} />
         {loja && <input type="hidden" name="loja" value={loja} />}
+        <CatalogPriceFilter value={maxPreco} id="offers-price-limit" />
         <Button>Buscar</Button>
       </form>
 
       <CatalogFilters selection={selection}>
-        <CategoriaFiltro baseHref="/ofertas" ativo={categoria} params={{ busca: busca || undefined, loja: loja || undefined }} />
+        <CategoriaFiltro baseHref="/ofertas" ativo={categoria} params={{ busca: busca || undefined, loja: loja || undefined, ate }} />
         <BarraLojas baseHref="/ofertas" ativa={loja}
-          params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined }} />
+          params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, ate }} />
       </CatalogFilters>
 
       {produtos.length ? (
         <>
           <GridProdutos produtos={produtos} />
           <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref="/ofertas"
-            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined }} />
+            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined, ate }} />
         </>
       ) : (
         <EmptyState className="mt-8" icon={<Search className="h-6 w-6 text-brand" />} title={available ? "Nenhuma oferta neste filtro" : "Não foi possível carregar as ofertas"}

@@ -11,6 +11,7 @@ import { permitidoNaHome } from "@/core/home-catalog";
 import { limitedFetch } from "@/infrastructure/supabase/limited-fetch";
 import { SELECT_PRODUTO as SELECT, mapProduto as map } from "./produto-row";
 import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
+import { catalogPriceLimit, DEFAULT_CATALOG_PRICE_LIMIT, GENERIC_IMAGE_PATTERNS, UNVERIFIED_BRL_STORES, validProductImage, verifiedBrlPrice } from "@/core/catalog-policy";
 
 export interface LeituraVitrine {
   agora: number;
@@ -42,20 +43,14 @@ export interface AchadoDoDia extends Produto {
  * NUNCA carrega os milhares — a query retorna ~120 linhas no pior caso.
  */
 export async function top5DoDia(n = 5, minDesconto = 15): Promise<AchadoDoDia[]> {
-  const sb = createPublicClient();
-  // Só ORDER BY promo_score + LIMIT (usa índice, rápido — igual listarOfertas).
-  // Filtros de desconto/imagem/estoque vão em MEMÓRIA sobre as ~300 linhas: pôr
-  // as WHERE de coluna computada na view estourava o statement timeout.
-  const { data, error } = await sb.from("vw_ofertas").select(SELECT)
-    .order("promo_score", { ascending: false, nullsFirst: false })
-    .limit(400);
-  if (error) throw error;
+  const now = Date.now();
+  // Mesma elegibilidade das vitrines; predicados permitem o índice parcial de leitura.
   // FILTRO DE CONTEÚDO (em memória): monetizado (post tem que pagar), com imagem,
   // preço de conteúdo (≥R$20, sem cacareco) e desconto na BANDA CRÍVEL 20-78% —
   // corta a âncora falsa da Shopee (90% off) que envenena a seleção.
-  const pool = (data ?? []).map(map).filter((p) =>
-    p.emEstoque && p.imagemUrl && ehLinkMonetizado(p.url) &&
-    (p.precoAtual ?? 0) >= 20 &&
+  const pool = (await listarOfertas({ limit: 400 })).filter((p) =>
+    p.emEstoque && validProductImage(p.imagemUrl) && verifiedBrlPrice(p.lojaSlug) && ehLinkMonetizado(p.url) &&
+    hasRecentPrice(p.atualizadoEm, now) && (p.precoAtual ?? 0) >= 20 && (p.precoAtual ?? Infinity) <= DEFAULT_CATALOG_PRICE_LIMIT &&
     (p.descontoPct ?? 0) >= minDesconto && (p.descontoPct ?? 0) <= 78);
   const ranqueado = pool
     .map((o) => ({ o, sc: scoreConteudo(o) }))
@@ -89,6 +84,7 @@ function mapVitrine(rows: Record<string, unknown>[], leitura?: LeituraVitrine): 
 }
 
 export interface OfertaFiltro {
+  maxPreco?: number | null;
   categoria?: string;
   /** filtro por várias categorias (ex: todas as de uma vertical). Tem prioridade sobre `categoria`. */
   categorias?: string[];
@@ -115,6 +111,15 @@ export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitri
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  // A home valida o pool limitado em permitidoNaHome; duplicar estes predicados
+  // na view já causou 57014. Listagens completas precisam filtrar antes do limit.
+  if (!leitura) {
+    const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
+    if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
+    q = q.not("imagem_url", "is", null);
+    q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
+    for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
+  }
   q = q.limit(pool);
   const { data, error } = await q;
   if (error) throw error;
@@ -369,9 +374,6 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
 /** Página de ofertas com total — para paginação real nas listas (/ofertas, /categoria). */
 export interface PaginaOfertas { produtos: Produto[]; total: number }
 
-/** Teto do pool p/ reordenar "monetizado primeiro" — cobre as páginas rasas (99% do tráfego). */
-const POOL_ORDENACAO = 1000;
-
 export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number } = {}): Promise<PaginaOfertas> {
   const sb = createCachedPublicClient();
   // Janela de cinco minutos evita uma chave de cache nova a cada milissegundo.
@@ -391,27 +393,18 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
+  if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
+  q = q.not("imagem_url", "is", null);
+  q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
+  for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
 
-  // Páginas rasas: puxa o pool (top por nota) e reordena MONETIZADO PRIMEIRO — a loja que
-  // te paga comissão vira destaque, mesmo com nota menor (a nota vira só desempate interno).
-  // Assim o gamer que entra na Tech vê Amazon/Shopee/AliExpress no topo, não quem nos rejeitou.
-  //
-  // EXCEÇÃO — filtro de LOJA ÚNICA (f.loja): todos os produtos são da mesma loja, então o
-  // re-sort "monetizado primeiro" é INÓCUO. Puxar o pool de 1000 linhas nesse caso fazia a
-  // query estourar em loja gigante (Kabum: 2919 produtos → statement timeout no ambiente
-  // publicado → página "Nenhuma oferta"). Vai ranged puro (60 linhas), rápido. Idem página funda.
-  const usarPool = de < POOL_ORDENACAO && !f.loja;
-  const { data, error, count } = await q.range(usarPool ? 0 : de, usarPool ? POOL_ORDENACAO - 1 : de + porPagina - 1);
+  // Ordenação e paginação no banco: ler 1000 para exibir 60 gastava CPU/rede
+  // e promovia comissão sobre a nota. O preço e o CTA afiliado ficam intactos.
+  const { data, error, count } = await q.range(de, de + porPagina - 1);
   if (error) throw error;
   const total = count ?? 0;
-  if (!usarPool) return { produtos: (data ?? []).map(map), total };
-
-  const pool = (data ?? []).map(map);
-  pool.sort((a, b) => {
-    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
-    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
-  });
-  return { produtos: pool.slice(de, de + porPagina), total };
+  return { produtos: (data ?? []).map(map), total };
 }
 
 /** Comparações já calculadas no runner; a visita nunca varre o catálogo. */

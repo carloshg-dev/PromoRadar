@@ -9,7 +9,7 @@
     "contractsRun": 41185478419,
     "buildId": "GhYTqcZJ2Wtn1mUJZKs3-",
     "gzipKiB": 1575.51,
-    "published": false
+    "published": true
   },
   "cache": {
     "ttlSeconds": 120,
@@ -250,6 +250,246 @@
     "Navegador desativado: sem novo QA interativo ou login real",
     "Painel/API Cloudflare indisponível para nova janela de CPU/1102",
     "Cache frio, buscas únicas e usuários autenticados continuam no render original",
-    "Cache API ainda conta invocações; não remove o limite diário gratuito"
-  ]
+    "Cache API ainda conta invocações; não remove o limite diário gratuito",
+    "UUID interno da versão Cloudflare não foi consultado; prova externa liga check do commit, build e respostas públicas"
+  ],
+  "release": {
+    "sha": "5ea0ec4d7287f0de2e5cf5b6af32d7e7cf9bbdb1",
+    "cloudflareBuild": "3c5f692e-fb1b-4b26-8d3b-04117bcbea39",
+    "appBuildId": "ASiBOyGyT3SDp14c5VT1e",
+    "cloudflareVersionId": null,
+    "cloudflareCheck": "success",
+    "publicVerifiedAt": "2026-10-31T12:39:31.858Z",
+    "contractHeadRun": 41201506341
+  },
+  "productionAfter": {
+    "checkedAt": "2026-10-31T12:39:31.858Z",
+    "commit": "5ea0ec4d7287f0de2e5cf5b6af32d7e7cf9bbdb1",
+    "cloudflareBuild": "3c5f692e-fb1b-4b26-8d3b-04117bcbea39",
+    "readOnly": true,
+    "loadTest": false,
+    "passed": true,
+    "results": [
+      {
+        "name": "home-first",
+        "status": 200,
+        "bytes": 372650,
+        "ms": 1459,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "67b5c4e31cd9958501f04fab97b73fc792b2b6215ad286060a7fa45aa011faf9",
+        "cpuError": false
+      },
+      {
+        "name": "home-repeat",
+        "status": 200,
+        "bytes": 372650,
+        "ms": 47,
+        "cache": "HIT",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "67b5c4e31cd9958501f04fab97b73fc792b2b6215ad286060a7fa45aa011faf9",
+        "cpuError": false
+      },
+      {
+        "name": "offers-first",
+        "status": 200,
+        "bytes": 654105,
+        "ms": 4353,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "eedfd22053735d584f6933c70c936b7903b702f9622ef64ef5db952cfecfb5d4",
+        "cpuError": false
+      },
+      {
+        "name": "offers-repeat",
+        "status": 200,
+        "bytes": 654105,
+        "ms": 63,
+        "cache": "HIT",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "eedfd22053735d584f6933c70c936b7903b702f9622ef64ef5db952cfecfb5d4",
+        "cpuError": false
+      },
+      {
+        "name": "rsc-first",
+        "status": 200,
+        "bytes": 320501,
+        "ms": 110,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/x-component",
+        "sha256": "28d3a56a3d3fb781f9e3517fd8470d6e238ac29b7acd23fbbd74e2cdac1c4da2",
+        "cpuError": false
+      },
+      {
+        "name": "rsc-repeat",
+        "status": 200,
+        "bytes": 320501,
+        "ms": 57,
+        "cache": "HIT",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/x-component",
+        "sha256": "28d3a56a3d3fb781f9e3517fd8470d6e238ac29b7acd23fbbd74e2cdac1c4da2",
+        "cpuError": false
+      },
+      {
+        "name": "rsc-second-nonce",
+        "status": 200,
+        "bytes": 320501,
+        "ms": 29,
+        "cache": "HIT",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/x-component",
+        "sha256": "28d3a56a3d3fb781f9e3517fd8470d6e238ac29b7acd23fbbd74e2cdac1c4da2",
+        "cpuError": false
+      },
+      {
+        "name": "cookie-bypass",
+        "status": 200,
+        "bytes": 654105,
+        "ms": 211,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "eedfd22053735d584f6933c70c936b7903b702f9622ef64ef5db952cfecfb5d4",
+        "cpuError": false
+      },
+      {
+        "name": "product",
+        "status": 200,
+        "bytes": 205527,
+        "ms": 2856,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "587969e2f14731e70e6710884cb63ddc6a3d767f7a601ed68677bbc0178d0eb4",
+        "cpuError": false
+      },
+      {
+        "name": "outbound-head",
+        "status": 204,
+        "bytes": 0,
+        "ms": 78,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": null,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "cpuError": false
+      },
+      {
+        "name": "login",
+        "status": 200,
+        "bytes": 111698,
+        "ms": 609,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "16fc6b4320bdb592aa8c07f05ce21a9100677a1e279ed1e705a1db9484fde74f",
+        "cpuError": false
+      },
+      {
+        "name": "admin",
+        "status": 307,
+        "bytes": 0,
+        "ms": 359,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": null,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "cpuError": false
+      },
+      {
+        "name": "search",
+        "status": 200,
+        "bytes": 1875,
+        "ms": 1365,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "application/json",
+        "sha256": "0d8e5029f82e0f5e5eb9b0dc6f4103b33ea0a17511370260b79e4970522f6133",
+        "cpuError": false
+      },
+      {
+        "name": "image-proxy",
+        "status": 403,
+        "bytes": 7,
+        "ms": 31,
+        "cache": null,
+        "build": null,
+        "type": "text/plain;charset=UTF-8",
+        "sha256": "18f2a0947f9d6523991b29b450307f22773f57d65f7efb98d48a167df04d6b1d",
+        "cpuError": false
+      },
+      {
+        "name": "home-assets-reference",
+        "status": 200,
+        "bytes": 372650,
+        "ms": 397,
+        "cache": "HIT",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "67b5c4e31cd9958501f04fab97b73fc792b2b6215ad286060a7fa45aa011faf9",
+        "cpuError": false
+      },
+      {
+        "name": "js",
+        "status": 200,
+        "bytes": 3827,
+        "ms": 40,
+        "cache": null,
+        "build": null,
+        "type": "text/javascript",
+        "sha256": "ecd3cb36a03aff62cfd34127da6ba2a37737be39eba6a6da580621d66a0f73c2",
+        "cpuError": false
+      },
+      {
+        "name": "css",
+        "status": 200,
+        "bytes": 67437,
+        "ms": 43,
+        "cache": null,
+        "build": null,
+        "type": "text/css",
+        "sha256": "8813da262cfd44ad0062c873ec281c0b89fb5922762e43c85326accf0da2ce5f",
+        "cpuError": false
+      },
+      {
+        "name": "coupons",
+        "status": 200,
+        "bytes": 142368,
+        "ms": 554,
+        "cache": "BYPASS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "6415be32f045eef29f5514b7720467f3fb72f14df56ad00bf48c6561eb17f5a6",
+        "cpuError": false
+      },
+      {
+        "name": "comparison",
+        "status": 200,
+        "bytes": 670358,
+        "ms": 2501,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "26b40af70563e95693fc1f581f579da26d1d25a697e3d96bd45f6d30d9e9eb19",
+        "cpuError": false
+      },
+      {
+        "name": "category",
+        "status": 200,
+        "bytes": 631333,
+        "ms": 580,
+        "cache": "MISS",
+        "build": "ASiBOyGyT3SDp14c5VT1e",
+        "type": "text/html; charset=utf-8",
+        "sha256": "64b884aa57ea7712cc203a885f7b9e71ef718fb7055267f920f6f622540f9fa8",
+        "cpuError": false
+      }
+    ]
+  }
 }

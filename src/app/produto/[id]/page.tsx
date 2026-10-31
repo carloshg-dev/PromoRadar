@@ -15,6 +15,7 @@ import { TrackView } from "@/components/analytics/track-view";
 import { ProductActions } from "@/components/product-actions";
 import { productMetadata, productStructuredData, safeJsonLd } from "@/lib/product-seo";
 import { hasRecentPrice } from "@/core/offer-freshness";
+import { verifiedBrlPrice } from "@/core/catalog-policy";
 import { ExternalLink, TrendingDown, TrendingUp, Minus, Info, ImageOff, Scale, LineChart as LineChartIcon, Sparkles, ShoppingBag, CheckCircle2, TriangleAlert } from "lucide-react";
 import { TODAS_CATEGORIAS } from "@/lib/navigation";
 
@@ -31,6 +32,15 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 export default async function ProdutoPage({ params }: { params: { id: string } }) {
   const p = await cachedProduct(params.id).catch(() => null);
   if (!p) notFound();
+  if (!verifiedBrlPrice(p.lojaSlug)) return <main data-public-cache="ready" className="mx-auto max-w-page px-4 py-8 sm:px-6 lg:px-10">
+    <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas", href: "/ofertas" }]} />
+    <h1 className="mt-5 text-2xl font-semibold text-ink">{p.titulo}</h1>
+    <div role="note" className="mt-5 max-w-prose rounded-xl border border-line bg-white p-5">
+      <h2 className="text-lg font-semibold text-ink">Preço em verificação</h2>
+      <p className="mt-2 text-sm leading-6 text-muted">Estamos conferindo a moeda e o preço desta oferta. Ela ficará fora das vitrines até termos um valor em reais confirmado pela fonte.</p>
+      <Link prefetch={false} href="/ofertas" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-white">Explorar outras ofertas</Link>
+    </div>
+  </main>;
 
   let readFailed = false;
   const hist = (await historicoPrecos(params.id).catch(() => { readFailed = true; return []; })) as SeriePonto[];

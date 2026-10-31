@@ -10,6 +10,7 @@ import type { Produto } from "@/core/domain/types";
 import { cuponsCurados } from "@/lib/cupons-curados";
 import { BarraLojas } from "@/components/vitrine/barra-lojas";
 import { LOJAS_SOMENTE_COMPARADOR, permitidoNaHome, validarDisponibilidadeHome, selecionarAchadosHome, perfumePessoalNaHome } from "@/core/home-catalog";
+import { HOME_HIGHLIGHT_PRICE_LIMIT } from "@/core/catalog-policy";
 import { Search, ArrowUpRight, Clock3, Scale, ChartNoAxesCombined } from "lucide-react";
 
 export const revalidate = 7200;
@@ -122,7 +123,7 @@ export default async function Home() {
   const achados = selecionarAchadosHome(produtosUnicos(
     afiliadosHome, destaquesVisiveis, gadgetsHome, fitHome, belezaHome, perfumesHome,
     ofertasMonitoradasVisiveis, ofertasMercadoLivreVisiveis, carrosselBelezaHome,
-  ), 8, leitura.agora);
+  ).filter(produto => (produto.precoAtual ?? Infinity) <= HOME_HIGHLIGHT_PRICE_LIMIT), 8, leitura.agora);
   const exibidos = new Set(achados.map(produto => produto.id));
   const prateleira = (produtos: Produto[]) => {
     const selecionados = selecionarAchadosHome(produtos.filter(produto => !exibidos.has(produto.id)), 4, leitura.agora);
@@ -145,7 +146,7 @@ export default async function Home() {
           return <Link prefetch={false} key={vertical.slug} href={vertical.href} className="route-link flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-2.5 text-xs font-medium sm:text-sm"><Icon className={`h-4 w-4 ${vertical.accent.text}`} aria-hidden="true" />{vertical.label}<ArrowUpRight className="h-3 w-3 text-muted" aria-hidden="true" /></Link>;
         })}
       </nav>
-      <ProductShelf featured title="Achados para entrar no seu radar" description="Produtos de diferentes lojas para explorar. Confira os detalhes e o histórico de cada oferta." href="/ofertas" products={achados} limit={8} />
+      <ProductShelf featured title="Achados de até R$300 para o seu radar" description="Produtos de diferentes lojas para explorar. Confira os detalhes e o histórico de cada oferta." href="/ofertas?ate=300" products={achados} limit={8} />
       <div className="flex flex-wrap items-start justify-between gap-3 py-5 text-xs leading-5 text-muted">
         <p className="flex max-w-[80ch] items-start gap-2"><Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" /><span>Preços coletados nos últimos 7 dias. Seleção gerada em <time dateTime={new Date(leitura.agora).toISOString()}>{new Date(leitura.agora).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</time> (Brasília). Confira o preço final na loja.</span></p>
       </div>
