@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowUpRight, BadgePercent, ImageOff } from "lucide-react";
 import type { ProdutoRodizio } from "@/infrastructure/repositories/produtos.repo";
 import { formatBRL, timeAgo } from "@/lib/utils";
+import { formatShortDate } from "@/core/formatting";
 import { PriceHistoryChart, buildPriceVariationPoints, type PriceVariationPoint } from "@/components/price-history-chart";
 
 const CARD_ACCENTS = ["#22e06b", "#facc15", "#38bdf8", "#a78bfa", "#2dd4bf", "#fb7185"];
@@ -16,7 +17,7 @@ function accentForProduct(product: ProdutoRodizio) {
 function pricePointsForProduct(product: ProdutoRodizio): PriceVariationPoint[] {
   if (product.historicoPrecos.length >= 2) {
     return product.historicoPrecos.map((point) => ({
-      label: new Date(point.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+      label: formatShortDate(point.coletado_em),
       value: Number(point.preco),
     }));
   }

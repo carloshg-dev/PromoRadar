@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check, ExternalLink, Ticket } from "lucide-react";
 import { corLoja } from "@/lib/utils";
+import { formatShortDate } from "@/core/formatting";
 import type { CupomLomadee } from "@/lib/lomadee-cupons";
 import { track } from "./analytics/track";
 
@@ -22,7 +23,7 @@ export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
   }
 
   const validade = cupom.terminaEm
-    ? new Date(cupom.terminaEm).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+    ? formatShortDate(cupom.terminaEm)
     : null;
 
   return (
