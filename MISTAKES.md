@@ -131,6 +131,13 @@ Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e preven
 
 ## Manutenção do registro
 
+## 2026-10-31: revalidação local tentou TLS na porta HTTP
+
+- Fato observado: após o vencimento do ISR, `/cupons` retornou 500 no laboratório, com falha de TLS; o gate anterior com cache ainda válido havia passado.
+- Causa confirmada: o adapter de fila `direct` instalado escolhe HTTP somente quando o host contém `localhost`. O runner usava `127.0.0.1` e provocava uma chamada HTTPS à porta HTTP local.
+- Correção: requisições do runner usam `localhost`, mantendo bind/inspector em loopback. A URL do redirecionamento aceita forma relativa, mas continua validando a origem. Nova homologação CI passou nos 35 contratos, incluindo expiração/recuperação do cache.
+- Regra preventiva: exercitar cache vencido e conferir o protocolo de autorreferência; não remover o teste nem atribuir uma falha de transporte local à produção.
+
 ## 2026-10-31: build e typecheck concorrentes disputaram os tipos gerados
 
 - Fato observado: `tsc` encontrou arquivos de `.next/types` que o `next build` concorrente havia removido para regenerar.

@@ -127,6 +127,19 @@ test("falhas de cache não mudam o corpo/status da resposta original", async () 
   assert.equal((await lab.read()).text, html);
 });
 
+test("bypass preserva cookies separados, status e destino da autenticação", async () => {
+  const cookies = ["session=one; Path=/; HttpOnly; Secure", "session-extra=two; Path=/; Expires=Wed, 21 Oct 2037 07:28:00 GMT; HttpOnly"];
+  const headers = new Headers({ location: "/conta", "cache-control": "no-store" });
+  for (const value of cookies) headers.append("set-cookie", value);
+  const lab = harness(() => new Response(null, { status: 303, headers }));
+  const result = await lab.read("/auth/callback?code=lab");
+  assert.equal(result.response.status, 303);
+  assert.equal(result.response.headers.get("location"), "/conta");
+  assert.deepEqual(result.response.headers.getSetCookie(), cookies);
+  assert.equal(result.response.headers.get("cache-control"), "no-store");
+  assert.equal(lab.cache.reads, 0);
+});
+
 test("prefixo e UTF-8 em chunks preservam todos os bytes, sem carregar a resposta inteira", async () => {
   const bytes = new TextEncoder().encode(html + "conteúdo".repeat(20_000));
   const lab = harness(() => new Response(new ReadableStream<Uint8Array>({

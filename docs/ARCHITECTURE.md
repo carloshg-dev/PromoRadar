@@ -21,6 +21,7 @@ Este documento descreve fronteiras estáveis. Estado de deploy e incidentes pert
 ## Runtimes
 
 - Cloudflare Worker com OpenNext atende a aplicação web.
+- `cloudflare-worker.ts` preserva o handler gerado e antecipa respostas públicas íntegras pelo Cache API. Elegibilidade, variantes e streaming limitado ficam em `src/infrastructure/cloudflare/public-response-cache.ts`; não substitui autenticação ou cache de dados.
 - GitHub Actions executa coleta, ingestão, manutenção e backup.
 - Playwright e Chromium pertencem ao runtime de coleta e não podem entrar no bundle do Worker.
 - Secrets de servidor nunca usam prefixo `NEXT_PUBLIC_` nem chegam ao navegador.
