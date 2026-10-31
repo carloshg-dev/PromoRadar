@@ -13,9 +13,8 @@ from public.vw_ofertas
 where em_estoque and preco_atual>0 and preco_atual<=1000
   and atualizado_em>=now()-interval '7 days' and atualizado_em<=now()
   and loja_slug<>'aliexpress' and imagem_url is not null
-  and imagem_url not ilike '%noimage%' and imagem_url not ilike '%no-image%'
-  and imagem_url not ilike '%placeholder%' and imagem_url not ilike '%sem-imagem%'
-  and imagem_url not ilike '%image-not-found%'
+  -- Uma passagem, equivalente às assinaturas conhecidas (inclui variantes com _).
+  and imagem_url !~* '(no[-_]?image|placeholder|sem[-_]?imagem|image[-_]?not[-_]?found)'
 order by promo_score desc nulls last,atualizado_em desc,id limit 60;
 \echo CATALOG_RUNTIME_END
 rollback;
