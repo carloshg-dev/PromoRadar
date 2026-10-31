@@ -43,19 +43,12 @@ export interface AchadoDoDia extends Produto {
  * NUNCA carrega os milhares — a query retorna ~120 linhas no pior caso.
  */
 export async function top5DoDia(n = 5, minDesconto = 15): Promise<AchadoDoDia[]> {
-  const sb = createPublicClient();
   const now = Date.now();
-  // Só ORDER BY promo_score + LIMIT (usa índice, rápido — igual listarOfertas).
-  // Filtros de desconto/imagem/estoque vão em MEMÓRIA sobre as ~300 linhas: pôr
-  // as WHERE de coluna computada na view estourava o statement timeout.
-  const { data, error } = await sb.from("vw_ofertas").select(SELECT)
-    .order("promo_score", { ascending: false, nullsFirst: false })
-    .limit(400).abortSignal(AbortSignal.timeout(8_000));
-  if (error) throw error;
+  // Mesma elegibilidade das vitrines; predicados permitem o índice parcial de leitura.
   // FILTRO DE CONTEÚDO (em memória): monetizado (post tem que pagar), com imagem,
   // preço de conteúdo (≥R$20, sem cacareco) e desconto na BANDA CRÍVEL 20-78% —
   // corta a âncora falsa da Shopee (90% off) que envenena a seleção.
-  const pool = (data ?? []).map(map).filter((p) =>
+  const pool = (await listarOfertas({ limit: 400 })).filter((p) =>
     p.emEstoque && validProductImage(p.imagemUrl) && verifiedBrlPrice(p.lojaSlug) && ehLinkMonetizado(p.url) &&
     hasRecentPrice(p.atualizadoEm, now) && (p.precoAtual ?? 0) >= 20 && (p.precoAtual ?? Infinity) <= DEFAULT_CATALOG_PRICE_LIMIT &&
     (p.descontoPct ?? 0) >= minDesconto && (p.descontoPct ?? 0) <= 78);
@@ -118,11 +111,15 @@ export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitri
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
-  const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
-  if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
-  q = q.not("imagem_url", "is", null);
-  q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
-  for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
+  // A home valida o pool limitado em permitidoNaHome; duplicar estes predicados
+  // na view já causou 57014. Listagens completas precisam filtrar antes do limit.
+  if (!leitura) {
+    const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
+    if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
+    q = q.not("imagem_url", "is", null);
+    q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
+    for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
+  }
   q = q.limit(pool);
   const { data, error } = await q;
   if (error) throw error;
