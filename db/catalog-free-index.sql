@@ -17,13 +17,14 @@ do $$ begin
 end $$;
 create index concurrently if not exists idx_produtos_vitrine_ordem
   on public.produtos (promo_score desc nulls last, atualizado_em desc, id)
-  where em_estoque=true and preco_atual>0 and imagem_url is not null;
+  where em_estoque=true and preco_atual>0;
 analyze public.produtos (promo_score, atualizado_em, em_estoque, preco_atual, imagem_url, loja_id, categoria_id);
 do $$ begin
   if not exists (select 1 from pg_index i join pg_class c on c.oid=i.indexrelid
     join pg_namespace n on n.oid=c.relnamespace where n.nspname='public'
     and c.relname='idx_produtos_vitrine_ordem' and i.indisvalid and i.indisready
-    and pg_get_indexdef(c.oid) like '%(promo_score DESC NULLS LAST, atualizado_em DESC, id)%') then
+    and pg_get_indexdef(c.oid) like '%(promo_score DESC NULLS LAST, atualizado_em DESC, id)%'
+    and pg_get_expr(i.indpred,i.indrelid) not like '%imagem_url%') then
     raise exception 'catalog_index_contract_not_confirmed';
   end if;
 end $$;

@@ -18,7 +18,7 @@ create table public.produtos (
 insert into public.lojas select md5('store-'||g)::uuid, case when g=1 then 'aliexpress' else 'fixture-'||g end from generate_series(1,32) g;
 insert into public.produtos
 select md5('product-'||g)::uuid, md5('store-'||(g%32+1))::uuid, 'Produto sintético '||g,
-  case when g%10=0 then 'https://example.invalid/noimage.gif' else 'https://example.invalid/photo.jpg' end,
+  case when g%17=0 then null when g%10=0 then 'https://example.invalid/noimage.gif' else 'https://example.invalid/photo.jpg' end,
   ((g%3000)+1)::numeric/2, case when g%11=0 then null else g%101 end,
   now() - (g%15)*interval '1 day', g<=42567, repeat('fixture sem dados reais ',15)
 from generate_series(1,121927) g;
@@ -49,7 +49,7 @@ select id from public.vw_ofertas where em_estoque and preco_atual>0 and preco_at
 order by promo_score desc nulls last, atualizado_em desc, id limit 60;
 select 'PLAN_LAB_BEFORE='||pg_temp.catalog_plan()::text;
 create index idx_produtos_vitrine_ordem on public.produtos (promo_score desc nulls last, atualizado_em desc, id)
-  where em_estoque=true and preco_atual>0 and imagem_url is not null;
+  where em_estoque=true and preco_atual>0;
 analyze public.produtos;
 select 'PLAN_LAB_AFTER='||pg_temp.catalog_plan()::text;
 do $$ declare same boolean; plan jsonb; begin
