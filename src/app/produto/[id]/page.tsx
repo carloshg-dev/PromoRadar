@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 export default async function ProdutoPage({ params }: { params: { id: string } }) {
   const p = await cachedProduct(params.id).catch(() => null);
   if (!p) notFound();
-  if (!verifiedBrlPrice(p.lojaSlug)) return <main className="mx-auto max-w-page px-4 py-8 sm:px-6 lg:px-10">
+  if (!verifiedBrlPrice(p.lojaSlug)) return <main data-public-cache="ready" className="mx-auto max-w-page px-4 py-8 sm:px-6 lg:px-10">
     <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas", href: "/ofertas" }]} />
     <h1 className="mt-5 text-2xl font-semibold text-ink">{p.titulo}</h1>
     <div role="note" className="mt-5 max-w-prose rounded-xl border border-line bg-white p-5">
@@ -42,14 +42,15 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
     </div>
   </main>;
 
-  const hist = (await historicoPrecos(params.id).catch(() => [])) as SeriePonto[];
+  let readFailed = false;
+  const hist = (await historicoPrecos(params.id).catch(() => { readFailed = true; return []; })) as SeriePonto[];
   const points: ChartPoint[] = hist.map((h) => ({
     data: new Date(h.coletado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
     preco: Number(h.preco),
   }));
   const [comp, rel] = await Promise.all([
-    comparacaoDeProduto(p).catch(() => null),
-    p.categoriaSlug ? relacionados(p.categoriaSlug, p.id, 8).catch(() => []) : Promise.resolve([]),
+    comparacaoDeProduto(p).catch(() => { readFailed = true; return null; }),
+    p.categoriaSlug ? relacionados(p.categoriaSlug, p.id, 8).catch(() => { readFailed = true; return []; }) : Promise.resolve([]),
   ]);
 
   const insights = gerarInsights(p, hist);
@@ -65,7 +66,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
     ? Math.round((1 - p.precoAtual / p.precoOriginal) * 100) : null;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <main data-public-cache={readFailed ? "unavailable" : "ready"} className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productStructuredData(p)) }} />
       <TrackView tipo="ver_produto" produtoId={p.id} lojaSlug={p.lojaSlug} categoriaSlug={p.categoriaSlug} />
       <Breadcrumbs items={[

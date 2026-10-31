@@ -3,15 +3,23 @@ import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { setTimeout as delay } from "node:timers/promises";
 import { parse } from "dotenv";
 
 const root = process.cwd();
 const lab = path.join(root, ".next/worker-lab");
-const origin = "http://127.0.0.1:3215";
+// O adapter direct escolhe HTTP somente para localhost; 127.0.0.1 faria a
+// revalidação ISR tentar TLS contra a porta HTTP do próprio laboratório.
+const origin = "http://localhost:3215";
 const publicNames = new Set(["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SITE_URL", "PROMODETEC_ANALYTICS_DISABLED"]);
 const results: { name: string; passed: boolean; status?: number; ms?: number; bytes?: number; cache?: Record<string, string>; error?: string }[] = [];
+const stress = process.argv.includes("--stress");
+const benchmarks: { mode: string; concurrency: number; requests: number; ms: number; processCpuMs: number | null; rssBytes: number | null; cacheHits: number; failed: number; profile?: ProfileSummary }[] = [];
 let worker: ChildProcess | undefined;
+interface ProfileNode { id: number; callFrame: { functionName: string } }
+interface ProfileSummary { activeSamples: number; samplingIntervalUs: number; approximateActiveMs: number; heapUsedBytes: number; arrayBufferBytes: number; topFunctions: { name: string; samples: number }[] }
+let profiler: { call(method: string, params?: Record<string, unknown>): Promise<unknown>; close(): void } | undefined;
 
 function readLog(file: string) {
   assert.ok(fs.statSync(file).size <= 512 * 1024, "worker_lab_log_exceeds_512kib");
@@ -43,6 +51,7 @@ function prepare() {
     compatibility_date: production.compatibility_date,
     compatibility_flags: production.compatibility_flags,
     assets: { directory: path.join(root, production.assets.directory), binding: "ASSETS" },
+    rules: production.rules,
     services: [{ binding: "WORKER_SELF_REFERENCE", service: "promodetec-lab" }],
     r2_buckets: [{ binding: "NEXT_INC_CACHE_R2_BUCKET", bucket_name: "promodetec-lab-cache", remote: false }],
     vars: { ...values, PROMODETEC_ANALYTICS_DISABLED: "1" },
@@ -75,11 +84,16 @@ async function readResponse(response: Response) {
   } finally { reader.releaseLock(); }
   const body = Buffer.concat(chunks, bytes);
   const cache: Record<string, string> = {};
-  for (const name of ["cache-control", "age", "x-opennext-cache", "x-nextjs-cache", "content-type"]) {
+  for (const name of ["cache-control", "age", "x-opennext-cache", "x-nextjs-cache", "content-type", "x-promodetec-cache", "x-promodetec-build"]) {
     const value = response.headers.get(name);
     if (value) cache[name] = value.slice(0, 256);
   }
-  return { response, body, bytes, cache, sha256: createHash("sha256").update(body).digest("hex") };
+  const text = cache["content-type"]?.includes("text/html") ? body.toString() : "";
+  const start = text.indexOf("<main"), end = text.lastIndexOf("</main>");
+  // Instantes relativos podem mudar entre renders; o datetime e todo o catálogo permanecem comparáveis.
+  const main = start >= 0 && end > start ? text.slice(start, end + 7).replace(/(<time\b[^>]*>)[\s\S]*?(<\/time>)/g, "$1$2") : null;
+  return { response, body, bytes, cache, sha256: createHash("sha256").update(body).digest("hex"),
+    mainSha256: main === null ? null : createHash("sha256").update(main).digest("hex") };
 }
 
 async function request(route: string, init?: RequestInit) {
@@ -88,6 +102,120 @@ async function request(route: string, init?: RequestInit) {
   return { ...await readResponse(response), ms: Math.round(performance.now() - start) };
 }
 type Receipt = Awaited<ReturnType<typeof request>>;
+async function connectProfiler() {
+  const list = await fetch("http://127.0.0.1:9235/json/list", { signal: AbortSignal.timeout(5000) }).then(response => response.json()) as { webSocketDebuggerUrl: string; type: string }[];
+  assert.equal(list.length, 1, "isolated_workerd_debugger_required");
+  const address = new URL(list[0]!.webSocketDebuggerUrl);
+  assert.ok(["localhost", "127.0.0.1"].includes(address.hostname) && address.port === "9235", "local_workerd_debugger_only");
+  // Cliente já distribuído com o Next: o WebSocket global do Node 22 falha
+  // no handshake deste proxy do Wrangler. Nenhuma dependência nova no Worker.
+  const { WebSocket: LocalWebSocket } = createRequire(path.join(root, "package.json"))("next/dist/compiled/ws") as { WebSocket: typeof WebSocket };
+  const socket = new LocalWebSocket(address.href);
+  const pending = new Map<number, { resolve(value: unknown): void; reject(error: Error): void; timer: ReturnType<typeof setTimeout> }>();
+  let sequence = 0;
+  socket.addEventListener("message", event => {
+    const data = typeof event.data === "string" ? event.data : Buffer.isBuffer(event.data) ? event.data.toString() : "";
+    if (!data || data.length > 8 * 1024 * 1024) return;
+    const message = JSON.parse(data) as { id?: number; result?: unknown; error?: { message: string } };
+    const task = message.id === undefined ? undefined : pending.get(message.id);
+    if (!task) return;
+    pending.delete(message.id!); clearTimeout(task.timer);
+    if (message.error) task.reject(new Error("workerd_profiler_command_failed")); else task.resolve(message.result);
+  });
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("workerd_profiler_connect_timeout")), 5000);
+    socket.addEventListener("open", () => { clearTimeout(timer); resolve(); }, { once: true });
+    socket.addEventListener("error", () => { clearTimeout(timer); reject(new Error("workerd_profiler_connect_failed")); }, { once: true });
+  });
+  const client = {
+    call(method: string, params: Record<string, unknown> = {}): Promise<unknown> {
+      const id = ++sequence;
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => { pending.delete(id); reject(new Error("workerd_profiler_timeout")); }, 5000);
+        pending.set(id, { resolve, reject, timer }); socket.send(JSON.stringify({ id, method, params }));
+      });
+    },
+    close() { socket.close(); for (const task of pending.values()) { clearTimeout(task.timer); task.reject(new Error("workerd_profiler_closed")); } pending.clear(); },
+  };
+  try {
+    await client.call("Profiler.enable");
+    await client.call("Profiler.setSamplingInterval", { interval: 100 });
+  } catch (error) { client.close(); throw error; }
+  return client;
+}
+
+async function stopProfile(): Promise<ProfileSummary | undefined> {
+  if (!profiler) return undefined;
+  const result = await profiler.call("Profiler.stop") as { profile: { nodes: ProfileNode[]; samples?: number[] } };
+  const heap = await profiler.call("Runtime.getHeapUsage") as { usedSize: number; backingStorageSize?: number };
+  const names = new Map(result.profile.nodes.map(node => [node.id, node.callFrame.functionName]));
+  const counts = new Map<string, number>();
+  let active = 0;
+  for (const sample of result.profile.samples ?? []) {
+    const name = names.get(sample) ?? "unknown";
+    if (name === "(idle)") continue;
+    active++; counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return { activeSamples: active, samplingIntervalUs: 100, approximateActiveMs: active / 10,
+    heapUsedBytes: heap.usedSize, arrayBufferBytes: heap.backingStorageSize ?? 0,
+    topFunctions: [...counts].sort((a,b) => b[1]-a[1]).slice(0,8).map(([name,samples])=>({name,samples})) };
+}
+function workerUsage(): { ticks: number; rssBytes: number } | null {
+  if (!worker?.pid || process.platform !== "linux") return null;
+  const pending = [worker.pid];
+  for (let count = 0; pending.length && count < 32; count++) {
+    const pid = pending.shift()!;
+    try {
+      const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+      if (stat.slice(stat.indexOf("(") + 1, stat.lastIndexOf(")")) === "workerd") {
+        const fields = stat.slice(stat.lastIndexOf(")") + 2).trim().split(/\s+/);
+        const page = spawnSync("getconf", ["PAGESIZE"], { encoding: "utf8" });
+        const pageBytes = Number(page.stdout.trim());
+        return { ticks: Number(fields[11]) + Number(fields[12]), rssBytes: Number(fields[21]) * pageBytes };
+      }
+      pending.push(...fs.readFileSync(`/proc/${pid}/task/${pid}/children`, "utf8").trim().split(/\s+/).filter(Boolean).map(Number));
+    } catch { /* Filho encerrado; não consultar processos fora do grupo próprio. */ }
+  }
+  return null;
+}
+
+async function cacheHit(route: string, init?: RequestInit): Promise<Receipt> {
+  let receipt = await request(route, init);
+  for (let attempt = 0; receipt.cache["x-promodetec-cache"] !== "HIT" && attempt < 8; attempt++) {
+    await delay(50);
+    receipt = await request(route, init);
+  }
+  assert.equal(receipt.cache["x-promodetec-cache"], "HIT", "public_cache_did_not_warm");
+  return receipt;
+}
+
+async function benchmark(route: string, mode: "baseline" | "cache", concurrency: number, count: number, reference: Receipt) {
+  const ticks = Number(spawnSync("getconf", ["CLK_TCK"], { encoding: "utf8" }).stdout.trim());
+  const before = workerUsage();
+  if (profiler) await profiler.call("Profiler.start");
+  const started = performance.now();
+  let hits = 0, failed = 0;
+  for (let offset = 0; offset < count; offset += concurrency) {
+    const batch = await Promise.all(Array.from({ length: Math.min(concurrency, count - offset) }, async () => {
+      try {
+        const response = await request(route, mode === "baseline" ? { headers: { cookie: "public_cache_lab=baseline" } } : undefined);
+        if (response.cache["x-promodetec-cache"] === "HIT") hits++;
+        const sameContent = mode === "cache" ? response.sha256 === reference.sha256 : response.mainSha256 !== null && response.mainSha256 === reference.mainSha256;
+        if (response.response.status !== 200 || !sameContent) failed++;
+      } catch { failed++; }
+    }));
+    void batch;
+  }
+  const after = workerUsage();
+  const profile = await stopProfile();
+  const row = { mode, concurrency, requests: count, ms: Math.round(performance.now() - started),
+    processCpuMs: before && after && ticks > 0 ? (after.ticks - before.ticks) * 1000 / ticks : null,
+    rssBytes: after?.rssBytes ?? null, cacheHits: hits, failed, profile };
+  benchmarks.push(row);
+  assert.equal(failed, 0, "stress_body_or_status_changed");
+  if (mode === "cache") assert.equal(hits, count, "stress_request_rendered_again");
+  process.stdout.write(`worker_lab: ${mode}, concurrency=${concurrency}, requests=${count}, errors=${failed}\n`);
+}
 async function check(name: string, run: () => Promise<Receipt>, verify: (receipt: Receipt) => void = receipt => assert.equal(receipt.response.status, 200)) {
   let receipt: Receipt | undefined;
   try {
@@ -102,6 +230,7 @@ async function check(name: string, run: () => Promise<Receipt>, verify: (receipt
 }
 
 async function stop() {
+  profiler?.close(); profiler = undefined;
   const child = worker;
   worker = undefined;
   if (!child?.pid) return;
@@ -146,6 +275,7 @@ async function main() {
     assert.equal(receipt.response.status, 200);
     assert.equal(receipt.cache["x-nextjs-cache"], "HIT");
     assert.match(receipt.cache["content-type"] ?? "", /text\/html/);
+    assert.ok(!receipt.body.toString().includes("/_next/image?"), "home_does_not_need_image_proxy");
   });
   await check("home-warm", () => request("/"), receipt => {
     assert.equal(receipt.response.status, 200);
@@ -171,7 +301,8 @@ async function main() {
   for (const route of ["/robots.txt", "/sitemap.xml", "/cupons", "/login"]) await check(route, () => request(route));
   await check("admin-anonymous", () => request("/admin"), receipt => {
     assert.equal(receipt.response.status, 307);
-    const target = new URL(receipt.response.headers.get("location")!);
+    const target = new URL(receipt.response.headers.get("location")!, origin);
+    assert.equal(target.origin, new URL(origin).origin);
     assert.equal(target.pathname, "/login");
     assert.equal(target.searchParams.get("next"), "/admin");
   });
@@ -202,6 +333,45 @@ async function main() {
   else results.push({ name: "product-live-read", passed: false, error: "NoSearchProduct" });
   await check("offers-live-read", () => request("/ofertas?busca=fone"));
   await check("comparison-live-read", () => request("/comparar?categoria=fones-bluetooth"));
+  await check("unused-image-proxy-disabled", () => request("/_next/image?url=https%3A%2F%2Fexample.invalid%2Fphoto.jpg&w=256&q=75"), receipt => assert.ok([403, 404].includes(receipt.response.status), "image_proxy_must_be_blocked"));
+  const cached = await check("public-offers-cache-ready", () => cacheHit("/ofertas?busca=fone"), receipt => {
+    assert.equal(receipt.response.status, 200);
+    assert.match(receipt.body.toString(), /data-public-cache="ready"/);
+    assert.equal(receipt.cache["x-promodetec-build"], fs.readFileSync(path.join(root, ".next/BUILD_ID"), "utf8").trim());
+  });
+  await check("personal-cookie-bypasses-public-cache", () => request("/ofertas?busca=fone", { headers: { cookie: "public_cache_lab=baseline" } }), receipt => {
+    assert.equal(receipt.response.status, 200);
+    assert.equal(receipt.cache["x-promodetec-cache"], "BYPASS");
+    if (cached) assert.equal(receipt.mainSha256, cached.mainSha256);
+  });
+  const routerHeaders = { rsc: "1", "next-router-state-tree": encodeURIComponent(JSON.stringify(["", { children: ["__PAGE__", {}] }, null, null, true])), "next-url": "/" };
+  const rsc = await check("rsc-cache-ready", () => cacheHit("/ofertas?busca=fone&_rsc=lab-one", { headers: routerHeaders }), receipt => {
+    assert.match(receipt.cache["content-type"] ?? "", /text\/x-component/);
+    assert.match(receipt.body.toString(), /"data-public-cache":"ready"/);
+  });
+  await check("rsc-nonce-keeps-variant", () => request("/ofertas?busca=fone&_rsc=lab-two", { headers: routerHeaders }), receipt => {
+    assert.equal(receipt.cache["x-promodetec-cache"], "HIT");
+    if (rsc) assert.equal(receipt.sha256, rsc.sha256);
+  });
+  if (stress && cached) {
+    try { profiler = await connectProfiler(); } catch { process.stdout.write("worker_lab: V8 profile unavailable; OS counters remain diagnostic only\n"); }
+    const expiresAfter = Date.now() + 122_000;
+    await check("baseline-without-response-cache", async () => {
+      await benchmark("/ofertas?busca=fone", "baseline", 2, 16, cached);
+      return request("/ofertas?busca=fone");
+    });
+    for (const concurrency of [1, 8, 32, 64]) await check(`warm-cache-burst-${concurrency}`, async () => {
+      await benchmark("/ofertas?busca=fone", "cache", concurrency, 128, cached);
+      return request("/ofertas?busca=fone");
+    });
+    process.stdout.write("worker_lab: waiting for native Cache API expiry; no requests during wait\n");
+    while (Date.now() < expiresAfter) await delay(Math.min(1000, expiresAfter - Date.now()));
+    await check("public-cache-expiry", () => request("/ofertas?busca=fone"), receipt => {
+      assert.equal(receipt.response.status, 200);
+      assert.equal(receipt.cache["x-promodetec-cache"], "MISS");
+    });
+    await check("public-cache-recovery", () => cacheHit("/ofertas?busca=fone"), receipt => assert.equal(receipt.response.status, 200));
+  }
   const runtimeLog = readLog(logFile);
   const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
   const compatibilityWarning = runtimeLog.match(/latest compatibility date supported[^\n]*"(\d{4}-\d{2}-\d{2})"/);
@@ -214,8 +384,9 @@ async function main() {
     effectiveCompatibilityDate: compatibilityWarning?.[1] ?? config.compatibility_date,
     credentials: "public anon only; no service role or Cloudflare token inherited", analyticsDisabled: true,
     checks: results, passed: results.length - failures.length, failed: failures.length,
+    benchmarks,
     runtimeSignals: { queryTimeout: (runtimeLog.match(/57014|source_unavailable/g) ?? []).length, analyticsWriteFailure: (runtimeLog.match(/analytics_write_failed/g) ?? []).length, cpuExceeded: (runtimeLog.match(/CPU time limit|1102/g) ?? []).length },
-    limits: ["HTTP checks do not validate browser rendering or hydration", "Local latency is not production Worker CPU, startup or Core Web Vitals", "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested", "Cached home reads use the build selection; cache expiry and recovery still need a dedicated test"],
+    limits: ["HTTP checks do not validate browser rendering or hydration", "Local process CPU/RSS are not Cloudflare billed CPU or isolate memory limits", "Local latency is not production Worker CPU, startup or Core Web Vitals", "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested", stress ? "Cache expiry/recovery tested with native local Cache API; distributed POPs and cold bursts remain separate" : "Cache expiry has unit coverage; native expiry/stress require --stress"],
   };
   fs.mkdirSync(path.join(root, "docs/evidence"), { recursive: true });
   const output = path.join(root, `docs/evidence/worker-lab-${new Date().toISOString().slice(0, 10)}.json`);

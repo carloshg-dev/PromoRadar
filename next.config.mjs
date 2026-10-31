@@ -8,13 +8,8 @@ const cloudflareBuild = process.env.OPENNEXT_CLOUDFLARE === "1";
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**" },
-      // Fotos legadas da Kabum vêm em HTTP (images1/images6.kabum.com.br) e o
-      // next/image rejeitava, quebrando o render onde caíam (rodízio da home).
-      // Seguro: o next/image PROXIA a imagem pelo nosso servidor (sem mixed content).
-      { protocol: "http", hostname: "**.kabum.com.br" }
-    ]
+    // Todas as fotos atuais já são diretas; não oferecer um proxy público de imagens.
+    unoptimized: true,
   },
   eslint: { ignoreDuringBuilds: true },
   // Playwright é usado só pela coleta Node (local/runner). No build Cloudflare,

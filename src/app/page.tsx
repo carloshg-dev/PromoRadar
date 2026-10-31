@@ -138,7 +138,7 @@ export default async function Home() {
   const casaVitrine = prateleira(ofertasMonitoradasVisiveis);
 
   return (
-    <main className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
+    <main data-public-cache={falhasOfertas === 0 ? "ready" : "unavailable"} className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
       <DiscoverySearch />
       <nav aria-label="Explorar categorias" className="mt-2 flex gap-2 overflow-x-auto border-b border-line py-1 sm:justify-between">
         {VERTICAIS.map(vertical => {

@@ -14,6 +14,10 @@ on:
         description: "Inspecionar Cloudflare sem build nem publicacao"
         type: boolean
         default: false
+      stress:
+        description: "Ensaiar rajadas e expiracao no Worker local, sem carga em producao"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -170,7 +174,11 @@ jobs:
           fs.writeFileSync(".env.local", names.map(name => `${name}=${values[name]}`).join("\n"), { mode: 0o600 });
           NODE
           export PROMODETEC_WORKER_WRANGLER="$RUNNER_TEMP/promodetec-worker-runtime/node_modules/wrangler/bin/wrangler.js"
-          npm run test:worker
+          if [ "${{ github.event.inputs.stress }}" = "true" ]; then
+            npm run test:worker -- --stress
+          else
+            npm run test:worker
+          fi
           node <<'NODE'
           const fs = require("node:fs");
           const assert = require("node:assert/strict");
