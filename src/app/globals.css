@@ -96,7 +96,9 @@ dialog.shop-dialog::backdrop { background:#000b; }
 @media(max-width:767px) {
   .shop-hero { grid-template-columns:1fr; gap:.8rem; padding:1.1rem 0; }
   .shop-hero h1 { font-size:2rem; }
-  .shop-hero-products { display:none; }
+  .shop-hero-products { gap:.5rem; }
+  .shop-hero-product img { height:76px; }
+  .shop-hero-product strong { font-size:1rem; }
   .shop-hero .campaign-mission-title { margin-top:.65rem; }
   .shop-hero .campaign-mission-copy { max-width:100%; }
   .shop-category { flex-basis:98px; min-height:72px; }

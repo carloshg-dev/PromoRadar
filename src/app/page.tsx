@@ -53,7 +53,7 @@ export default async function Home() {
   const coupons = couponData.coupons.slice(0, 3);
 
   return <main data-public-cache={failures === 0 ? "ready" : "unavailable"} className="mx-auto max-w-page px-3 sm:px-6 lg:px-10">
-    <DiscoverySearch products={cheap.slice(0, 3).map(({ id, titulo, imagemUrl, precoAtual }) => ({ id, titulo, imagemUrl, precoAtual }))} />
+    <DiscoverySearch products={feed.slice(0, 3).map(({ id, titulo, imagemUrl, precoAtual }) => ({ id, titulo, imagemUrl, precoAtual }))} />
     <nav aria-label="Explorar categorias" className="shop-category-rail">{departments.map(({ label, href, Icon }) => <Link prefetch={false} href={href} key={label} className="shop-category"><Icon aria-hidden="true" />{label}</Link>)}</nav>
     <nav aria-label="Comprar por orçamento" className="shop-budget">
       <Link prefetch={false} href="/ofertas?ate=20">Até R$20</Link><Link prefetch={false} href="/ofertas?ate=50">Até R$50</Link><Link prefetch={false} href="/ofertas?ate=100">Até R$100</Link><Link prefetch={false} href="/ofertas?loja=shopee&ate=100">Achadinhos Shopee</Link><Link prefetch={false} href="/cupons">Pegar cupons</Link><Link prefetch={false} href="/comparar">Comparar antes de comprar</Link>
