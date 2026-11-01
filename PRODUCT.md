@@ -29,7 +29,7 @@ Catálogo público em Next.js 14/React/TypeScript, servido no Cloudflare Workers
 - Preços das vitrines têm janela de sete dias. Data e disponibilidade precisam continuar visíveis; erros não equivalem a catálogo vazio.
 - Medição depende do consentimento existente; não acrescentar rastreamento invasivo nem registrar contatos na busca.
 - Preservar login, proteção de rotas, PromoScore, histórico e dados existentes. Manter processamento e quantidade de dados limitados.
-- Não há comprovação atual de receita, visitantes humanos ou eliminação sustentada dos estouros de CPU. Não inventar números, avaliações, depoimentos ou selos.
+- Há uma venda Awin com comissão pendente na janela observada; isso não comprova receita paga. Eventos e redirecionamentos não são pessoas únicas. A eliminação sustentada dos estouros de CPU ainda não foi comprovada. Não inventar números, avaliações, depoimentos ou selos.
 
 ## Brand Commitments
 
@@ -48,4 +48,4 @@ Produtos/imagens/lojas/datas vêm do catálogo existente. Logo em `public/logo.p
 
 ## Open Decisions
 
-A automação de cupons e relatórios foi integrada à `main` pela PR #16, separada do Shop da PR #17. A aparência dark ainda aguarda capturas atuais e revisão final; DESIGN.md conserva o mundo claro e não documenta o candidato. Confirmar sempre o SHA/Builds e a versão que atende o domínio; uma integração Git ou teste local não comprova CPU de produção ou publicação visual.
+A automação de cupons e relatórios foi integrada à `main` pela PR #16. As PRs #19/#20/#21 publicaram a proteção da home e correções de ingestão/atribuição/sitemap, separadas do Shop da PR #17. A aparência dark ainda aguarda capturas atuais e revisão final; DESIGN.md conserva o mundo claro e não documenta o candidato. Confirmar sempre o SHA/Builds e a versão que atende o domínio; uma integração Git ou teste local não comprova CPU de produção ou publicação visual.

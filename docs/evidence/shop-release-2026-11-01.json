@@ -1,0 +1,336 @@
+{
+  "checkedAt": "2026-11-01T09:29:14.425Z",
+  "main": "db3816dae8f33eeccd58c289d8cb0f4b81c5ddd5",
+  "publishedPrs": [
+    16,
+    18,
+    19,
+    20,
+    21
+  ],
+  "cloudflare": {
+    "accountId": "0fcbdab34f0d44e0e948a4bb2f051810",
+    "worker": "promodetec",
+    "buildsCheck": "success",
+    "buildId": "981a9739-2a04-4613-99bf-77d36d84d0b9",
+    "activeVersionOrTrafficPanelRead": false,
+    "initialPublicReceipt": {
+      "checkedAt": "2026-11-01T09:24:05.496Z",
+      "sourceCommit": "db3816dae8f33eeccd58c289d8cb0f4b81c5ddd5",
+      "cloudflareBuild": "981a9739-2a04-4613-99bf-77d36d84d0b9",
+      "cloudflareBuildCheck": "success",
+      "checks": [
+        {
+          "status": 200,
+          "ms": 485,
+          "bytes": 361511,
+          "buildId": "4zNieCo0joYQEkYFxZEre",
+          "cache": "MISS",
+          "catalogState": "unavailable",
+          "cards": 24,
+          "maxPrice": 999.99,
+          "genericPhotoUrls": 0,
+          "quarantinedStorePresent": false,
+          "darkShopMarkup": false,
+          "sha256": "670951054a47eccd527a9c082f39452ab38ba1f50ed1d2ffabb1f9b6d46af1e7"
+        }
+      ],
+      "failure": {
+        "name": "AssertionError",
+        "check": "home_all_sources_available",
+        "code": "ERR_ASSERTION"
+      },
+      "methods": "Up to two anonymous GETs only; stops on failure; no browser JS, analytics writes, affiliate navigation or load test",
+      "limits": [
+        "Build success and public HTTP are separate from dashboard active version/100% traffic",
+        "HTTP latency is not billed CPU",
+        "Dark Shop is still draft; these checks concern home data and cache only"
+      ],
+      "sitemap": {
+        "checkedAt": "2026-11-01T09:24:06.572Z",
+        "status": 200,
+        "ms": 701,
+        "bytes": 146801,
+        "buildId": "4zNieCo0joYQEkYFxZEre",
+        "contentType": "application/xml",
+        "valid": true,
+        "urls": 768,
+        "productUrls": 724,
+        "sha256": "e00fe68a692cc58c274a819a46dc713c3e3665e7171cbecfd1415a2bd50f9eb9",
+        "method": "One anonymous GET; no browser execution or remote writes"
+      }
+    },
+    "earlierPr20PublicReceipt": {
+      "checkedAt": "2026-11-01T09:09:10.119Z",
+      "sourceCommit": "28d33a5077c07602b5e914c159480fafccf34cb7",
+      "cloudflareBuild": "0a17dd70-ec65-4fab-b133-2aa605acddac",
+      "cloudflareBuildCheck": "success",
+      "checks": [
+        {
+          "status": 200,
+          "ms": 1198,
+          "bytes": 367066,
+          "buildId": "3rhvKpLb03CIrku64UIuv",
+          "cache": "MISS",
+          "catalogState": "ready",
+          "cards": 24,
+          "maxPrice": 539.99,
+          "genericPhotoUrls": 0,
+          "quarantinedStorePresent": false,
+          "darkShopMarkup": false,
+          "sha256": "00bf988b6822fbd1eb4afd046610ce7f8eb1093e2f8bcc4b052f8568ff2dd2eb"
+        },
+        {
+          "status": 200,
+          "ms": 64,
+          "bytes": 367066,
+          "buildId": "3rhvKpLb03CIrku64UIuv",
+          "cache": "HIT",
+          "catalogState": "ready",
+          "cards": 24,
+          "maxPrice": 539.99,
+          "genericPhotoUrls": 0,
+          "quarantinedStorePresent": false,
+          "darkShopMarkup": false,
+          "sha256": "00bf988b6822fbd1eb4afd046610ce7f8eb1093e2f8bcc4b052f8568ff2dd2eb"
+        }
+      ],
+      "methods": "Two anonymous GETs only; no browser JS, analytics writes, affiliate navigation or load test",
+      "limits": [
+        "Build success and public HTTP are separate from dashboard active version/100% traffic",
+        "HTTP latency is not billed CPU",
+        "Dark Shop is still draft; these checks concern home data and cache only"
+      ]
+    },
+    "unresolved": "Home remained HTTP 200/24 valid cards but STALE/unavailable/MISS in two observations 48 seconds apart. Recovery not observed. Cause cannot be assigned to SQL, queue or CPU without remote runtime evidence.",
+    "revalidationObservations": [
+      {
+        "checkedAt": "2026-11-01T09:27:42.023Z",
+        "sourceCommit": "db3816dae8f33eeccd58c289d8cb0f4b81c5ddd5",
+        "cloudflareBuild": "981a9739-2a04-4613-99bf-77d36d84d0b9",
+        "cloudflareBuildCheck": "success",
+        "checks": [
+          {
+            "status": 200,
+            "ms": 510,
+            "bytes": 361511,
+            "buildId": "4zNieCo0joYQEkYFxZEre",
+            "cache": "MISS",
+            "nextCache": "STALE",
+            "cacheControl": "s-maxage=2, stale-while-revalidate=2592000",
+            "catalogState": "unavailable",
+            "cards": 24,
+            "maxPrice": 999.99,
+            "genericPhotoUrls": 0,
+            "quarantinedStorePresent": false,
+            "darkShopMarkup": false,
+            "sha256": "670951054a47eccd527a9c082f39452ab38ba1f50ed1d2ffabb1f9b6d46af1e7"
+          }
+        ],
+        "failure": {
+          "name": "AssertionError",
+          "check": "home_all_sources_available",
+          "code": "ERR_ASSERTION"
+        },
+        "methods": "Up to two anonymous GETs only; stops on failure; no browser JS, analytics writes, affiliate navigation or load test",
+        "limits": [
+          "Build success and public HTTP are separate from dashboard active version/100% traffic",
+          "HTTP latency is not billed CPU",
+          "Dark Shop is still draft; these checks concern home data and cache only"
+        ]
+      },
+      {
+        "checkedAt": "2026-11-01T09:28:30.592Z",
+        "sourceCommit": "db3816dae8f33eeccd58c289d8cb0f4b81c5ddd5",
+        "cloudflareBuild": "981a9739-2a04-4613-99bf-77d36d84d0b9",
+        "cloudflareBuildCheck": "success",
+        "checks": [
+          {
+            "status": 200,
+            "ms": 701,
+            "bytes": 361511,
+            "buildId": "4zNieCo0joYQEkYFxZEre",
+            "cache": "MISS",
+            "nextCache": "STALE",
+            "cacheControl": "s-maxage=2, stale-while-revalidate=2592000",
+            "catalogState": "unavailable",
+            "cards": 24,
+            "maxPrice": 999.99,
+            "genericPhotoUrls": 0,
+            "quarantinedStorePresent": false,
+            "darkShopMarkup": false,
+            "sha256": "670951054a47eccd527a9c082f39452ab38ba1f50ed1d2ffabb1f9b6d46af1e7"
+          }
+        ],
+        "failure": {
+          "name": "AssertionError",
+          "check": "home_all_sources_available",
+          "code": "ERR_ASSERTION"
+        },
+        "methods": "Up to two anonymous GETs only; stops on failure; no browser JS, analytics writes, affiliate navigation or load test",
+        "limits": [
+          "Build success and public HTTP are separate from dashboard active version/100% traffic",
+          "HTTP latency is not billed CPU",
+          "Dark Shop is still draft; these checks concern home data and cache only"
+        ]
+      }
+    ]
+  },
+  "candidate": {
+    "pr": 17,
+    "branch": "codex/black-shop",
+    "published": false,
+    "validatedCode": "d3a25eac45ca0c121a51d7bfee3b4e479404cf82",
+    "sourceTree": "f1d9a1c4940f3bf2da2869e74fdb92bb5519e4ed",
+    "growthRun": 41292464089,
+    "growthTests": 112,
+    "collectionTests": 30,
+    "collectionMemory": {
+      "fixtureRows": 200000,
+      "kept": 400,
+      "maxRssMiB": 166.4,
+      "scope": "local process, not Worker isolate"
+    },
+    "workerRun": 41292459925,
+    "gzipKiB": 1576.58,
+    "worker": {
+      "checkedAt": "2026-11-01T09:20:33.872Z",
+      "buildId": "jLE6dQ7DpdIVXWD8QEFnN",
+      "passed": 28,
+      "failed": 0,
+      "wranglerVersion": "4.151.2",
+      "requestedCompatibilityDate": "2026-08-23",
+      "effectiveCompatibilityDate": "2026-08-23",
+      "runtimeSignals": {
+        "queryTimeout": 0,
+        "analyticsWriteFailure": 0,
+        "cpuExceeded": 0
+      },
+      "limits": [
+        "HTTP checks do not validate browser rendering or hydration",
+        "Local process CPU/RSS are not Cloudflare billed CPU or isolate memory limits",
+        "Local latency is not production Worker CPU, startup or Core Web Vitals",
+        "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested",
+        "Cache expiry has unit coverage; native expiry/stress require --stress"
+      ]
+    },
+    "browserReview": "recapture; control disabled, current dark captures unavailable",
+    "designDocumentedFromCurrentRender": false
+  },
+  "failedCandidateBuild": {
+    "run": 41292047304,
+    "code": "6225b35113727809e54754198edea4547f6b1bfb",
+    "stage": "prerender /sitemap.xml",
+    "failure": "TimeoutError",
+    "homeWarnings": {
+      "sql57014": 1,
+      "readFailed": 1
+    },
+    "newReceiptDoesNotEraseFailure": true,
+    "firstPublicProbeRecorderLimitation": "First assertion stopped before saving its receipt; recorder was corrected and an independent completeness failure retained in initialPublicReceipt."
+  },
+  "sitemapPatch": {
+    "pr": 21,
+    "code": "119ea8e9e14f9a3a202e3979a62a0931fe55c5f8",
+    "totalBudgetMs": 12000,
+    "previousPerPageMs": 5000,
+    "maxPages": 4,
+    "maxUrls": 1000,
+    "retries": 0,
+    "swallowErrors": false,
+    "growthRun": 41292426432,
+    "growthTests": 101,
+    "collectionTests": 30,
+    "workerRun": 41292425237,
+    "workerPassed": 28,
+    "workerFailed": 0,
+    "limit": "Longer first-read allowance does not prove a SQL latency or billed CPU fix."
+  },
+  "latestSourceProbe": {
+    "checkedAt": "2026-11-01T09:24:53.969Z",
+    "requests": 17,
+    "successes": 17,
+    "failures": [],
+    "limits": [
+      "Single probe cannot prove sustained source or database health",
+      "Earlier shape probe allowed four store plus two other concurrent reads; no controlled before/after latency claim",
+      "CPU billing and browser rendering not measured"
+    ]
+  },
+  "comparison": {
+    "runId": 41292162523,
+    "event": "schedule",
+    "conclusion": "success",
+    "workflowCheckoutRef": "codex/cloudflare-migration",
+    "runMetadataHead": "28d33a5077c07602b5e914c159480fafccf34cb7",
+    "runMetadataHeadIsNotCheckoutProof": true,
+    "generation": {
+      "schema": 1,
+      "version": "261e148e-fd2a-460e-8a0c-4085db1e642f",
+      "generatedAt": "2026-11-01T09:13:49.342Z",
+      "rows": 12949,
+      "comparisons": 178,
+      "scopes": 45,
+      "maxBatch": 250,
+      "maxGroupStores": 3,
+      "published": true
+    },
+    "currentRead": {
+      "checkedAt": "2026-11-01T09:19:09.938Z",
+      "remoteWrites": false,
+      "environment": "existing local server configuration",
+      "reads": [
+        {
+          "kind": "index",
+          "status": 200
+        },
+        {
+          "kind": "scope",
+          "status": 200
+        }
+      ],
+      "generatedAt": "2026-11-01T09:13:49.342Z",
+      "ageHours": 0.09,
+      "indexValid": true,
+      "versionMatches": true,
+      "groups": 60,
+      "currentGroups": 60
+    },
+    "retention": {
+      "dryRun": true,
+      "removedObjects": 0
+    }
+  },
+  "lastObservedShopeeRun": {
+    "runId": 41282316500,
+    "event": "schedule",
+    "conclusion": "failure",
+    "code": "9d1d5119614cd536307507d7f36436a69e07bb1e",
+    "label": "shopee_upsert_failed",
+    "beforeNewCollector": true,
+    "newProductionCollectionDispatchedByAgent": false
+  },
+  "automationEvidence": "shop-operations-2026-11-01.json",
+  "schedules": {
+    "dailyBrasilia": "08:00",
+    "weeklyBrasilia": "Monday 08:15",
+    "couponBrasilia": [
+      "05:20",
+      "11:20",
+      "17:20",
+      "23:20"
+    ],
+    "workflowsActive": true,
+    "scheduledBusinessOrCouponRunObserved": false
+  },
+  "limits": [
+    "Dark Shop and the new public coupon reader remain draft.",
+    "Private coupon snapshot published: 67 promotions, 22 codes; Lomadee HTTP 500 means partial source coverage.",
+    "Financial coverage is Awin BRL only; pending commission is not paid revenue; basket product names absent in observed window.",
+    "Consented actions and aggregate redirects are not identified contacts or unique visitors.",
+    "No current comparable Cloudflare CPU/1102/WAF window, or proof that CPU exceeded disappeared.",
+    "No new paid plan, Ads submission, remote DDL, DNS/WAF change or public load test.",
+    "Publishing collector rules did not retroactively rewrite historical prices or stock.",
+    "Public revalidation recovery remains unproved; direct 17/17 database reads do not prove successful Worker ISR."
+  ]
+}

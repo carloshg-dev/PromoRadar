@@ -187,3 +187,10 @@ Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transf
 - Causa: o plano SQL não foi perfilado; a forma de consulta é o gargalo observado, sem atribuir a um índice inexistente não verificado.
 - Correção: amostra limitada por cursor/PK e validação de estoque, preço e recência; 1.000 URLs lidas em 1,53 s e build aprovado.
 - Regra preventiva: sitemap não pode depender de ordenação global cara nem converter timeout em catálogo vazio silencioso.
+
+## 2026-11-01: prazo por página do sitemap interrompeu o build
+- Fato observado: build `41292047304`, candidato `6225b35`, falhou no pré-render de `/sitemap.xml` por `TimeoutError`. A home também registrou um 57014 e um `read_failed`; esses avisos não foram apagados do diagnóstico.
+- Causa confirmada: o cliente cancelou a leitura do sitemap no prazo de cinco segundos. A causa da lentidão remota não foi perfilada; não atribuir o timeout a CPU, ataque, layout ou falta de índice sem prova.
+- Correção: prazo único de doze segundos para até quatro páginas, cancelamento antes da próxima consulta e propagação de falha preservada. Antes, quatro prazos separados poderiam acumular vinte segundos. Não adiciona retries nem fallback vazio.
+- Regra preventiva: testar o cancelamento e o estado de erro, preservar o recibo que falhou e validar um novo SHA. Build posterior verde não apaga a falha nem comprova estabilidade SQL ou de CPU em produção.
+- Evidência: [PR #21](https://github.com/carloshg-dev/PromoRadar/pull/21), CI `41292426432`, OpenNext/workerd `41292425237` com 28/28 contratos. Produção e o candidato visual devem ser comprovados separadamente em `docs/PROJECT_STATE.md`.
