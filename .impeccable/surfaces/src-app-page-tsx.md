@@ -17,8 +17,8 @@ OWN-WORLD: Grafite e carvão, laranja vivo #FF7A00 nas ações (ajuste aprovado 
 
 STORY: Escolher uma faixa, explorar categorias e cupons reais, espiar o produto e conferir a loja.
 
-FIRST VIEWPORT: Cabeçalho compacto com busca; campanha baixa com produtos reais à direita; trilho de categorias e preços; seis cards por linha no desktop e dois no celular. Feed continua com até 48 produtos dos pools existentes.
+FIRST VIEWPORT: Cabeçalho compacto; campanha baixa com produtos reais; logos das parceiras entre hero e categorias; faixas de preço; seis cards por linha no desktop e dois no celular. Feed com até 48 produtos reais.
 
-FORM: Feira digital noturna, 6/7, seed 5badb485; brief fixa marketplace. Assinatura: espiar abre consulta rápida sem rede; sugestão pequena aparece no máximo uma vez por sessão e fecha. Movimento curto somente nessas revelações.
+FORM: Feira digital noturna, direção fixa aprovada pelo proprietário. O registro histórico cita 6/7 e seed 5badb485, mas não há recibo independente preservado da rolagem; não é uma seleção comprovada. Assinatura: espiar abre consulta rápida sem rede; sugestão pequena aparece no máximo uma vez por sessão e fecha. Movimento curto somente nessas revelações.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

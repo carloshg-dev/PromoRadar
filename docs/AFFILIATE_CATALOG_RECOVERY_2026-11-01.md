@@ -1,0 +1,47 @@
+# Catálogo, afiliadas e recuperação das vitrines — 01/11/2026
+
+> Atualização posterior: o proprietário autorizou integrar/publicar as alterações e testar o domínio. O resultado do release será registrado em `docs/PROJECT_STATE.md`. Os ensaios e estados descritos abaixo continuam sendo evidências da etapa local anterior.
+
+**Estado:** correções locais na branch `codex/black-shop`, base `f12a611625e4d19d3553137d9a0ea4b5253bebbc`. A suspensão de publicação solicitada pelo proprietário continua vigente. Não houve commit, push, merge, deploy, DDL, mudança de cobrança, adesão a anunciantes ou coleta com gravação remota neste acompanhamento.
+
+## Diagnóstico comprovado
+
+| Fonte | Evidência observada | Consequência |
+|---|---|---|
+| Awin produtos | Run agendado `41322212009`, main `db3816dae8f33eeccd58c289d8cb0f4b81c5ddd5`: job Awin falhou, zero coletados/salvos e dez erros de leitura. | O catálogo Awin não foi renovado por esse job. O sucesso dos outros jobs não torna a execução integral saudável. |
+| Exportação Awin | Três amostras de primeira linha, Olympikus/KaBuM/Eudora, responderam 200 com preço atual e sem coluna de moeda. Solicitando a coluna, as três passaram a declarar BRL. | Manter o bloqueio de moeda desconhecida; corrigir o contrato de exportação em vez de deduzir BRL. A causa específica de todas as dez falhas não foi provada individualmente. |
+| Cupons Lomadee | Run agendado `41319832739` publicou cobertura parcial Awin de 67 campanhas/22 códigos e falhou com `lomadee_campaigns_page_limit`. A API real tem sete páginas de marcas e 17 de campanhas. | O limite antigo interrompia a paginação e descartava o resultado Lomadee. O 500 registrado em uma execução anterior continua no histórico, mas não explica esse novo erro. |
+| Vitrines | Sondagem limitada de 14 lojas: Carrefour, Extra, Ponto Frio e Mercado Livre sem produtos recentes elegíveis. Últimas observações: 04/10, 17/08, 17/08 e 25/06, respectivamente; a atualização de uma linha ML era 02/07. | Não reapresentar esses preços antigos como atuais. Os logs Awin indicam ausência de feed para Carrefour/Extra/Ponto. ML segue fora do workflow após bloqueio anterior; não foi feito um novo teste de autenticação ML. |
+
+## Correções locais e impacto
+
+- **Awin:** o adapter acrescenta moeda e campos obrigatórios à exportação somente nos hosts oficiais `productdata.awin.com` e `datafeed.api.productserve.com`, preservando feed e credencial no processo. Continua exigindo `search_price` válido e BRL explícito. Sem conversão, alteração de preços ou exceção para moeda ausente. O processamento permanece por stream no runner de coleta, fora do Worker público.
+- **Cupons:** paginação Lomadee compatível com `pagination`/`meta`, limite de 20 páginas de marcas e 25 de campanhas, prazo total de 180 segundos e páginas JSON de até 2 MiB lidas por stream. Seleção de até 160 campanhas Lomadee; snapshot combinado limitado a 200. Resultado parcial conserva campanhas válidas e status de falha; falha total preserva o snapshot anterior. Somente marcas ativas com canal `PriceComparator`, links reais e vigência válida. Tipagem do runner real adicionada ao CI.
+- **Produtos Lomadee:** seleção Shopify usa a variante disponível de menor preço e a referência dessa mesma variante. Top N limitado, fotos reais e teto de seleção de R$1.000; removida a antiga expectativa de volume mínimo de 200 produtos. Canal correto é `channel.id`, não o ID do tipo de canal. Não foi executado mint de link nem upsert real para validar o novo caminho.
+- **Vitrines por loja:** sem resultado na primeira página, consulta quatro pools de no máximo 96 linhas, prazo compartilhado de oito segundos/concorrência quatro, cache de 300 segundos. Primeiro mostra produtos recentes da própria loja fora dos filtros de busca/categoria; se não houver, mostra outras lojas explicitamente identificadas. Seleção de achadinhos até o menor entre R$300 e o teto do usuário. Ordenação por preço é somente dentro do pool limitado; não promete menor preço absoluto. Falha de fonte continua sinalizada; ausência total não é preenchida com ficção.
+- **Fotos e consulta rápida:** card cuja imagem falha é retirado; hero tenta outro candidato real já recebido. Não gera novas buscas ou imagens fictícias. O popup informa a data da coleta antes do preço/CTA. O catálogo não foi integralmente auditado nem teve URLs de imagens corrigidas no banco.
+- **UI:** carrossel de 14 parceiras entre hero e categorias, navegação interna por loja, sem autoplay/prefetch. Escuro e laranja vivo aprovados preservados. Ajustes em busca/filtros móveis usam os tokens existentes. Preço, PromoScore, histórico, redirecionamento afiliado e consentimento mantêm seus contratos.
+
+## Automação já existente e convites
+
+- Produtos: workflow diário às **06:00 BRT**, incluindo `lomadee carrefour kabum polishop`. A integração de produtos Lomadee configurada é **Sieno**, não as 133 marcas. O job Lomadee/Carrefour do run `41322212009` concluiu com sucesso; isso não comprova renovação individual de todas as lojas. O agendamento daquele run foi executado com atraso, às 12:38 BRT.
+- Cupons: workflow existente às **05:20, 11:20, 17:20 e 23:20 BRT**. Não foi duplicado o cron. Horário configurado não garante pontualidade do GitHub Actions. As correções novas ainda não participaram de schedule em produção.
+- Awin: painel completo mostrou **14 convites internacionais; zero com filtro Brasil**. Clinique/Ferreira Costa são candidaturas pendentes, não convites aceitos. Nenhuma adesão foi enviada.
+- Lomadee: 133 marcas listadas; 105 com canal Comparador elegível na leitura da API. A UI destacou Óticas Foto Paulo como nova. Coza, Brinox, Bauducco, NutriBullet e Sottile Casa são candidatas para análise de catálogo/condições, não novas integrações prontas. Bauducco informa pedido mínimo de R$120 no site oficial; preço baixo de um item não basta para afirmar compra barata.
+
+## Validação executada
+
+- Ensaio do **AwinAdapter real**, somente leitura: **20 produtos**, até cinco por anunciante, Panasonic/L'Occitane/Spicy/Polishop, sem falhas na amostra. Não percorreu feeds completos, não salvou catálogo e não seguiu links afiliados.
+- Dry-run de cupons reais: **200 campanhas/47 códigos**, Awin e Lomadee com status `ok`; 7/17 páginas Lomadee percorridas. **Não publicado**. O snapshot de produção observado ainda era o parcial anterior.
+- **121 testes de crescimento e 35 de coleta** aprovados; aplicação e runner de cupons tipados. Build Next Linux final **`41avva2PSV3y16i2BO4hR`** em laboratório separado e somente leitura; home com 129 KiB de First Load JS. Dependências compartilhadas no laboratório Next não constituem prova de empacotamento OpenNext/workerd.
+- **6/6 contratos HTTP locais**: recuperação Carrefour/Extra/Ponto/ML com 24 alternativas de outras lojas; busca sem resultado na Spicy com 12 da própria loja; teto R$20 com 11 alternativas, máximo R$19,99. Todas as seis respostas `ready`. São amostras locais, não capacidade/CPU de produção.
+- Chromium real, viewports **320/390/820/1440/1680** emulados: sem overflow horizontal; carrossel rolou e abriu a loja interna; modal abriu/fechou por Escape; fotos conferidas após rolagem. Home amostrada com 40–41 cards após retirar imagens com falha; três fotos do hero carregadas. Carrefour com 24 fotos carregadas. Não são dispositivos físicos nem garantia futura do CDN. A leitura final do buffer do console não continha mensagens; não reconstrói erros anteriores da sessão.
+- Impeccable: revisão visual completa atingiu a barra do mundo escuro e pediu quatro ajustes. O verdict posterior foi **`ship` para os quatro ajustes**, todos `resolved`; não certifica backend/CPU/produção. Uma captura desktop incompleta foi recusada e refeita com as 24 fotos visíveis. Recibos históricos não foram convertidos em prova do novo visual.
+
+## Próxima ativação e limites
+
+Manter a prévia em [localhost:3221](http://127.0.0.1:3221/ofertas?loja=carrefour). Após o proprietário retirar a suspensão, separar os lotes de ingestão/cupons e visual, validar o pacote OpenNext/workerd do novo SHA, integrar e conferir a versão ativa. Depois, exigir execução agendada real, quantidades persistidas e publicação do snapshot, sem confundir dry-run com abastecimento concluído. O gate de CPU/1102 e a recuperação da home pública parcial continuam sem nova medição autenticada nesta checagem; não há base nova para afirmar que um plano pago seja necessário ou que os erros foram eliminados.
+
+Resumo versionável: [evidência agregada](evidence/affiliate-catalog-recovery-2026-11-01.json), incluindo o buildId e hashes de 20 arquivos de fonte/contrato. Evidências locais adicionais: `reports/awin-refresh-diagnosis-2026-11-01.json`, `reports/awin-refresh-currency-2026-11-01.json`, `reports/awin-adapter-read-only-2026-11-01.json`, `reports/coupon-sync.json`, `reports/empty-stores-2026-11-01.json`, `reports/store-recovery-contracts-2026-11-01.json`, `reports/shop-browser-qa-2026-11-01.json` e `.impeccable/review/affiliate-verdict.md`. Valores de secrets, URLs privadas de feeds/hooks, IPs e dados de visitantes não foram incluídos.
+
+Contrato oficial de exportação: [Awin — Create-a-Feed](https://help.awin.com/developers/docs/downloading-feeds-using-create-a-feed). Condição de cesta: [Bauducco oficial](https://www.bauducco.com.br).

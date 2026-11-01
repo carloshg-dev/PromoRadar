@@ -1,5 +1,11 @@
 # Shop PromoDetec — candidato de 01/11/2026
 
+**Atualização posterior:** o proprietário reautorizou explicitamente subir as alterações na main, publicar e testar o domínio. A integração/publicação está em execução; seu resultado deve ser confirmado em [PROJECT_STATE.md](PROJECT_STATE.md). Os registros de suspensão e validações locais abaixo descrevem as etapas anteriores.
+
+**Estado local mais recente:** carrossel de logos entre hero e categorias, recuperação honesta de vitrines vazias, fotos com falha retiradas e data da coleta no popup. Chromium conferido em 320/390/820/1440/1680 emulados, com rolagem, fotos e cliques; não são dispositivos físicos. Revisão Impeccable completa seguida de quatro correções pontuadas `resolved`, disposition `ship` restrita a esses quatro ajustes. Não certifica backend/CPU/produção. Aplicação/runner tipados, 121 testes de crescimento/35 de coleta e seis contratos de recuperação locais aprovados. DESIGN.md/sidecar documentam a substituição escura aprovada. Tudo adicional permanece local, sem envio à main. Relatório atual: [afiliadas e recuperação](AFFILIATE_CATALOG_RECOVERY_2026-11-01.md).
+
+**Registro histórico da aprovação inicial:** o proprietário abriu a prévia, aprovou o visual e autorizou integrar após trocar o laranja por um tom mais vivo. Tokens alterados para #FF7A00/#FF911F em `f12a611`; aprovação e contraste em `docs/evidence/shop-orange-approval-2026-11-01.json`. Naquele momento o navegador estava desativado e a revisão era incompleta; essa limitação foi superada no estado local acima. A autorização foi posteriormente suspensa. O restante deste documento conserva o histórico de validação anterior.
+
 O proprietário fixou Black Friday escura, descoberta de produtos baratos, densidade de marketplace e cupons reais. Autorizou publicar a entrega. O candidato está na [PR #17](https://github.com/carloshg-dev/PromoRadar/pull/17), em rascunho: **o Shop escuro não foi integrado ou publicado**. Os relatórios/coleta de cupons e as correções de home/ingestão/sitemap são lotes separados, já integrados nas PRs #16/#18/#19/#20/#21.
 
 ## Impacto e comportamento
@@ -22,13 +28,13 @@ O proprietário fixou Black Friday escura, descoberta de produtos baratos, densi
 - Supabase local fictício com GoTrue/PostgREST/Postgres reais: **17/17**, incluindo persistência dos 14 tipos de evento, consentimento, atomicidade, sessões, bloqueio de promoção de privilégio e rankings/nomes do relatório. API somente loopback; proxy HTTP local substituiu o Kong por falha de DNS do daemon isolado. Sem browser e sem escrita remota; políticas locais não provam paridade de RLS de produção.
 - Detector Impeccable executado uma vez: 26 avisos advisory de tipografia, paleta e raios diferentes do DESIGN.md claro anterior. Não foram usados para certificar a aparência. Nenhum raster novo foi produzido; fotos vêm do catálogo e o logo é o existente.
 
-## Gate visual ainda aberto
+## Histórico: gate visual anteriormente aberto
 
 O controle do navegador retorna uso local desativado, apesar das reativações informadas pelo usuário. Não foi contornado por outro navegador, CDP, Playwright de terminal ou render sintético. Cliques, console, carregamento visual de imagens, foco do dialog, consentimento, filtros e overflow ainda precisam ser conferidos nesse novo mundo.
 
 A revisão independente Impeccable retornou **`recapture`**: as capturas antigas desktop/mobile mostram a versão clara; tablet 820, mínimo 320 e usuário 1680 não têm evidência válida do candidato. Capturar o Shop atual desde o topo em 1440/820/390/320/1680 e repetir a revisão completa. Capturas antigas não viraram prova do dark.
 
-Após a revisão/fixes, o documenter deve atualizar DESIGN.md e `.impeccable/design.json` a partir do resultado renderizado. Essa etapa não foi declarada concluída a partir de intenções. O gate é o da [skill de validação](../skills/change-validation/SKILL.md): “UI: build mais servidor real, console e inspeção desktop/mobile.” A autorização para publicar já existe; falta a capacidade de realizar essa conferência.
+Esse bloqueio e o pedido de recapture descrevem a etapa anterior. A captura do novo mundo, a conferência e o verdict posterior estão registrados no estado local mais recente acima. A [skill de validação](../skills/change-validation/SKILL.md) exige “UI: build mais servidor real, console e inspeção desktop/mobile”; a cobertura atual é emulada. A autorização inicial foi suspensa: o fechamento visual não autoriza publicar.
 
 ## Operação e limites
 
