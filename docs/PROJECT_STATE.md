@@ -8,6 +8,7 @@
 - Validação local anterior do código: 129 testes de crescimento/35 de coleta, aplicação/runners tipados e build Next `dinN3tcJ0v0jy7FrREGe9`. Gate do pacote OpenNext/workerd do SHA a publicar e smoke público continuam necessários; build local não foi chamado de publicação.
 - O conector Cloudflare disponível acessa outra conta; não será usado para modificar o projeto. A conta do domínio foi confirmada pela sessão já aberta no painel. Verificação de release/100%/bindings deve ser feita ali, sem exibir valores secretos. O token antigo rejeitado não será reutilizado.
 - O resultado da integração, builds, versão ativa e testes reais será registrado nesta seção após confirmação. Os registros abaixo descrevem os estados anteriores e não reinstalam a suspensão.
+- Gate do primeiro candidato `7f61e38`: OpenNext/workerd/stress `41344201276` passou, mas o preflight somente leitura `41344210067` falhou antes de qualquer merge/deploy. A API respondeu integralmente (133 marcas/105 elegíveis); a configuração usa o ID de tipo legado, enquanto o novo guard comparava só a instância. Corrigido em código, sem alterar secrets: tipo resolve uma única instância Comparador da conta, e o link retornado precisa coincidir com essa instância. Ambiguidade, tipo incorreto e resposta divergente seguem bloqueados. Nova homologação do SHA corrigido é obrigatória; o verde do pacote anterior não encerra esse gate. Evidência negativa preservada em `docs/evidence/lomadee-release-preflight-initial-2026-11-01.json`.
 
 ## Histórico: suspensão de publicação posteriormente revogada
 

@@ -5,7 +5,7 @@ import { decodeHtmlEntities } from "@/lib/utils";
 import { LOMADEE_PARCEIROS, lomadeeLogoUrl, type LomadeeParceiro } from "@/core/lomadee-parceiros";
 import { coletarVtex } from "@/infrastructure/scraping/core/vtex";
 import { boundedJson } from "@/infrastructure/affiliates/http";
-import { lomadeeBrands, lomadeeComparatorLink } from "@/infrastructure/lomadee/api";
+import { lomadeeBrands, lomadeeComparatorChannel, lomadeeComparatorLink } from "@/infrastructure/lomadee/api";
 
 /**
  * Lomadee MULTI-LOJA — v2 (02/07/2026). O princípio "dado × dinheiro" completo:
@@ -31,12 +31,11 @@ const MAX_POR_LOJA = Number(process.env.LOMADEE_MAX_POR_LOJA) || 250;
 const MAX_TOTAL = Number(process.env.LOMADEE_MAX_TOTAL) || 600;
 
 /**
- * LOMADEE_SOURCE_ID, quando configurado, identifica o canal do proprietário:
- * corresponde a response.id, não a availableChannel.id (tipo de canal).
- * O body do encurtador não aceita sourceId/channelId/source; a API key escopa
- * a conta. Só aceitamos PriceComparator liberado e descartamos divergências.
+ * LOMADEE_SOURCE_ID legado identifica availableChannel.id (tipo). Também
+ * aceitamos a instância response.id: resolvemos o tipo em uma única instância
+ * da conta e exigimos essa instância no link cunhado. A API key escopa a conta;
+ * o encurtador não aceita sourceId/channelId/source no body.
  */
-const CANAL_ESPERADO = process.env.LOMADEE_SOURCE_ID?.trim() || null;
 
 function incomplete(ctx: AdapterContext, code: string) {
   if (!ctx.reportFailure) throw new Error(code);
@@ -68,6 +67,7 @@ export class LomadeeAdapter extends StoreAdapter {
   async coletar(ctx: AdapterContext): Promise<RawProduct[]> {
     const KEY = process.env.LOMADEE_API_KEY;
     if (!KEY) { ctx.log("warn", "Lomadee sem LOMADEE_API_KEY — pulando."); return []; }
+    const expectedChannel = process.env.LOMADEE_SOURCE_ID?.trim();
 
     // 1) Marcas da conta (paginado) — o guard de pausa/canal mora aqui.
     const marcas = await this.listarMarcas(KEY, ctx);
@@ -82,7 +82,8 @@ export class LomadeeAdapter extends StoreAdapter {
         ctx.log("warn", `Lomadee ${parceiro.nome}: fora da lista ou canal Comparador bloqueado — PULANDO (compliance).`);
         continue;
       }
-      if (CANAL_ESPERADO && !lomadeeComparatorLink(marca.channels, CANAL_ESPERADO)) {
+      const configuredChannel = lomadeeComparatorChannel(marca.channels, expectedChannel);
+      if (expectedChannel && !configuredChannel?.id) {
         incomplete(ctx, "lomadee_expected_channel_missing");
         ctx.log("warn", `Lomadee ${parceiro.nome}: canal esperado não validado; nenhuma URL será cunhada.`);
         continue;
@@ -107,13 +108,11 @@ export class LomadeeAdapter extends StoreAdapter {
         baseUrl: parceiro.baseUrl,
         logoUrl: lomadeeLogoUrl(marca.id),
       };
-      let cunhados = 0, semLink = 0, foraDoCanal = 0;
+      let cunhados = 0, semLink = 0;
       for (const c of candidatos) {
-        const r = await this.cunharLink(KEY, c.urlProduto, marca.id);
+        const r = await this.cunharLink(KEY, c.urlProduto, marca.id, expectedChannel ? configuredChannel!.id! : undefined);
         await this.sleep(THROTTLE_MS);
         if (!r) { semLink++; continue; } // sem link monetizado o produto NÃO entra
-        // GUARDA de comissão: o link deve cair no canal do PromoDetec (LOMADEE_SOURCE_ID).
-        if (CANAL_ESPERADO && r.canal !== CANAL_ESPERADO) { foraDoCanal++; continue; }
         cunhados++;
         out.push({
           skuLoja: `lmd-${parceiro.slug}-${c.skuBase}`.slice(0, 120),
@@ -129,8 +128,7 @@ export class LomadeeAdapter extends StoreAdapter {
           loja,
         });
       }
-      if (semLink || foraDoCanal) incomplete(ctx, "lomadee_affiliate_link_failed");
-      if (foraDoCanal) ctx.log("warn", `Lomadee ${parceiro.slug}: ${foraDoCanal} link(s) sem atribuição ao canal esperado — descartados.`);
+      if (semLink) incomplete(ctx, "lomadee_affiliate_link_failed");
       ctx.log("info", `Lomadee ${parceiro.nome}: ${cunhados} produtos cunhados${semLink ? ` (${semLink} sem link — fora)` : ""}`);
     }
 
@@ -146,7 +144,7 @@ export class LomadeeAdapter extends StoreAdapter {
 
   /** Cunha o link de afiliado; devolve a shortUrl + o canal em que caiu (p/ a
    *  guarda de comissão). O body NÃO leva sourceId: a API rejeita (400). */
-  private async cunharLink(key: string, url: string, organizationId: string): Promise<{ url: string; canal: string | null } | null> {
+  private async cunharLink(key: string, url: string, organizationId: string, expectedChannelId?: string): Promise<{ url: string } | null> {
     try {
       const j = await boundedJson(`${BASE}/affiliate/shortener/url`, {
         method: "POST",
@@ -154,9 +152,9 @@ export class LomadeeAdapter extends StoreAdapter {
         body: JSON.stringify({ url, organizationId, type: "Custom" }),
         signal: AbortSignal.timeout(15_000), redirect: "error",
       }) as Array<{ id?: string; shortUrls?: string[]; availableChannel?: { id?: string; name?: string } }>;
-      const short = lomadeeComparatorLink(j);
-      if (!short) return null;
-      return { url: short, canal: j.find(channel => channel.shortUrls?.includes(short))?.id ?? null };
+      const channel = lomadeeComparatorChannel(j, expectedChannelId);
+      if (!channel || (expectedChannelId && channel.id !== expectedChannelId)) return null;
+      return { url: channel.link };
     } catch { return null; }
   }
 

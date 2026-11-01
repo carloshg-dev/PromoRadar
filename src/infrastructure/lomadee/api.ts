@@ -4,21 +4,34 @@ const BASE = "https://api.lomadee.com.br";
 export const LOMADEE_PAGE_SIZE = 20;
 export const lomadeeRecord = (value: unknown): Record<string, unknown> => value && typeof value === "object" ? value as Record<string, unknown> : {};
 
-/** A API key escopa a conta; somente o canal Comparador com link liberado é elegível. */
-export function lomadeeComparatorLink(value: unknown, expectedChannel?: string): string | null {
+interface ComparatorChannel { id: string | null; link: string; matchedBy: "channel_id" | "legacy_type_id" | "unconfigured" }
+
+/** A configuração legada guarda o tipo. Resolva-o em uma única instância da
+ * conta autenticada, sem alterar secrets nem aceitar outro tipo de canal. */
+export function lomadeeComparatorChannel(value: unknown, expectedChannel?: string): ComparatorChannel | null {
+  let selected: ComparatorChannel | null = null;
   for (const entry of Array.isArray(value) ? value : []) {
     const channel = lomadeeRecord(entry), available = lomadeeRecord(channel.availableChannel);
-    if (available.name !== "PriceComparator" || (expectedChannel && channel.id !== expectedChannel)) continue;
+    if (available.name !== "PriceComparator") continue;
+    const matchedBy = !expectedChannel ? "unconfigured" : channel.id === expectedChannel ? "channel_id" : available.id === expectedChannel ? "legacy_type_id" : null;
+    if (!matchedBy || (expectedChannel && (typeof channel.id !== "string" || !channel.id))) continue;
     for (const link of Array.isArray(channel.shortUrls) ? channel.shortUrls : []) {
       if (typeof link !== "string") continue;
       try {
         const url = new URL(link);
-        if (url.protocol === "https:" && !url.username && !url.password) return link;
+        if (url.protocol !== "https:" || url.username || url.password) continue;
+        const resolved: ComparatorChannel = { id: typeof channel.id === "string" ? channel.id : null, link, matchedBy };
+        if (!expectedChannel) return resolved;
+        if (selected && selected.id !== resolved.id) return null;
+        selected ??= resolved;
+        break;
       } catch { /* Link inválido não autoriza a exibição. */ }
     }
   }
-  return null;
+  return selected;
 }
+
+export const lomadeeComparatorLink = (value: unknown, expectedChannel?: string): string | null => lomadeeComparatorChannel(value, expectedChannel)?.link ?? null;
 
 export async function lomadeePage(endpoint: "brands" | "campaigns", page: number, key: string, signal: AbortSignal) {
   const body = lomadeeRecord(await boundedJson(`${BASE}/affiliate/${endpoint}?limit=${LOMADEE_PAGE_SIZE}&page=${page}${endpoint === "campaigns" ? "&status=onTime" : ""}`, { headers: { "x-api-key": key }, signal }));

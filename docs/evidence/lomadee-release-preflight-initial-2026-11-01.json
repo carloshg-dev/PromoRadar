@@ -1,0 +1,25 @@
+{
+  "candidate": "7f61e389c878bf036dc29c095c66f22b78e9f921",
+  "workflowRun": 41344210067,
+  "job": 124960443252,
+  "checkedAt": "2026-11-01T19:57:01.132Z",
+  "remoteWrites": false,
+  "status": "ok",
+  "pagesRead": 7,
+  "brands": 133,
+  "comparatorEligibleBrands": 105,
+  "channelGuardConfigured": true,
+  "expectedChannelMatchedBrands": 0,
+  "expectedValueMatchesChannelType": true,
+  "passed": false,
+  "failure": "lomadee_expected_id_is_channel_type",
+  "productionModified": false,
+  "followupReadOnly": {
+    "checkedAt": "2026-11-01T20:02:10.853Z",
+    "distinctComparatorInstances": 1,
+    "distinctComparatorTypes": 1,
+    "maximumComparatorChannelsPerBrand": 1,
+    "channelsNamedForProject": 133
+  },
+  "resolution": "Preserve legacy type configuration, resolve to a unique authenticated Comparator instance, and validate the minted response against the resolved instance. Fresh release validation required."
+}

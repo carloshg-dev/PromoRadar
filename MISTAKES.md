@@ -210,3 +210,11 @@ Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transf
 - Correção local: respeitar os schemas reais, páginas e prazos limitados, conservar resultados parciais com status explícito, preservar snapshot anterior na falha total. Dry-run combinado selecionou 200 campanhas/47 códigos, sem publicar.
 - Regra preventiva: page limit protege memória/tempo, mas nunca transforma cobertura parcial em completa nem descarta silenciosamente dados válidos. O runner real precisa ser tipado no CI; schedule verde e HTTP 200 isolado não provam a abrangência da coleta.
 - Evidência/estado: mesmo relatório; ativação e schedule com a correção ainda pendentes.
+
+## 2026-11-01: preflight impediu quebra da configuração legada Lomadee
+
+- Fato observado: todos os testes do candidato `7f61e38` passaram, mas o preflight com a configuração real no run `41344210067` encontrou zero correspondências de instância e confirmou correspondência com o ID de tipo em 105 marcas. Não houve merge/deploy desse candidato.
+- Causa confirmada: o código novo interpretava `LOMADEE_SOURCE_ID` como `channel.id`; a configuração e o coletor legado usam `availableChannel.id`. A hipótese sobre o significado da configuração foi adotada sem testar o conjunto real. Uma leitura adicional encontrou uma única instância Comparador da conta, identificada como PromoDetec.
+- Correção: preservar a configuração e resolver tipo legado/ID de instância para uma única instância Comparador autenticada. Validar essa instância na resposta do encurtador; recusar outro tipo, ambiguidade e divergência. Não girar secrets ou aceitar qualquer canal para obter verde.
+- Regra preventiva: mudanças de atribuição exigem preflight somente leitura com a configuração real e teste do adapter com respostas de canais diferentes. Passar em teste de fixture não prova compatibilidade do valor configurado. Um CI de pacote verde não neutraliza o gate negativo de integração.
+- Evidência/estado: `docs/evidence/lomadee-release-preflight-initial-2026-11-01.json`; nove testes focados e tipagem passaram após correção. A nova homologação do commit corrigido deve preceder a publicação.

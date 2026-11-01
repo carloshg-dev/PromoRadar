@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { collectLomadeeCoupons } from "../../src/infrastructure/coupons/sources";
 import { boundedJson } from "../../src/infrastructure/affiliates/http";
-import { lomadeeComparatorLink } from "../../src/infrastructure/lomadee/api";
+import { lomadeeComparatorChannel, lomadeeComparatorLink } from "../../src/infrastructure/lomadee/api";
 
 const checkedAt = "2026-11-01T12:00:00.000Z";
 const channels = [{ id: "owner-channel", availableChannel: { id: "comparator-type", name: "PriceComparator" }, shortUrls: ["https://lmdee.link/fixture"] }];
@@ -51,8 +51,16 @@ test("marca bloqueada, canal de outro tipo e validade inválida não viram ofert
       { ...campaign("social"), channels: [{ availableChannel: { name: "Social" }, shortUrls: ["https://lmdee.link/social"] }] }], meta: { page: 1, totalPages: 1 } }));
   assert.deepEqual((await collectLomadeeCoupons("fixture-key", checkedAt)).coupons.map(c => c.id), ["lomadee-valid"]);
   assert.equal(lomadeeComparatorLink(channels, "different"), null);
-  assert.equal(lomadeeComparatorLink(channels, "comparator-type"), null);
+  assert.equal(lomadeeComparatorLink(channels, "comparator-type"), "https://lmdee.link/fixture");
   assert.equal(lomadeeComparatorLink(channels, "owner-channel"), "https://lmdee.link/fixture");
+});
+
+test("tipo legado resolve uma única instância da conta; propósito errado e ambiguidade continuam bloqueados", () => {
+  assert.deepEqual(lomadeeComparatorChannel(channels, "comparator-type"), { id: "owner-channel", link: "https://lmdee.link/fixture", matchedBy: "legacy_type_id" });
+  assert.equal(lomadeeComparatorChannel(channels, "owner-channel")?.matchedBy, "channel_id");
+  assert.equal(lomadeeComparatorChannel([{ ...channels[0], id: "other-channel" }], "owner-channel"), null);
+  assert.equal(lomadeeComparatorChannel([...channels, { ...channels[0], id: "second-channel" }], "comparator-type"), null);
+  assert.equal(lomadeeComparatorChannel([{ ...channels[0], availableChannel: { id: "comparator-type", name: "Social" } }], "comparator-type"), null);
 });
 
 test("leitura paginada preserva o cancelamento do orçamento compartilhado", async context => {
