@@ -1,4 +1,6 @@
 import type { CollectionResult } from "@/services/collection.service";
+import { reportCount, reportCsv, reportDateTime, reportLabel, reportText, type CsvCell, type DiscordField } from "@/core/reporting/presentation";
+import { sendDiscordReport } from "./discord-report";
 
 /**
  * Avisos OPERACIONAIS para o DONO (não para usuários): coletas e novos cadastros.
@@ -30,24 +32,35 @@ async function postJson(url: string, body: unknown): Promise<void> {
 interface Embed {
   titulo: string;
   cor: number;
-  campos: Array<{ nome: string; valor: string }>;
+  descricao?: string;
+  campos: Array<{ nome: string; valor: string; inline?: boolean }>;
   rodape?: string;
+  planilha?: { arquivo: string; colunas: string[]; linhas: CsvCell[][] };
 }
 
 async function enviarDiscord(e: Embed): Promise<void> {
   // Aceita o nome padrão OU o que o dono já cadastrou (PROMODETEC_LEADS_...).
   const url = process.env.DISCORD_WEBHOOK_URL || process.env.PROMODETEC_LEADS_DISCORD_WEBHOOK_URL;
   if (!url) return;
-  await postJson(url, {
-    username: "PromoDetec",
+  const fields: DiscordField[] = [];
+  for (const campo of e.campos) {
+    let value = "", part = 1;
+    const append = () => { fields.push({ name: `${campo.nome}${part > 1 ? " · continuação" : ""}`, value: value || "—", inline: campo.inline ?? false }); part++; value = ""; };
+    for (const line of campo.valor.split("\n")) {
+      if (line.length > 900) throw new Error("owner_report_line_invalid");
+      if (value.length + line.length + 1 > 900) append();
+      value += (value ? "\n" : "") + line;
+    }
+    append();
+  }
+  await sendDiscordReport(url, {
+    username: "PromoDetec | Operação", allowed_mentions: { parse: [] },
     embeds: [{
-      title: e.titulo,
-      color: e.cor,
-      fields: e.campos.map((c) => ({ name: c.nome, value: c.valor.slice(0, 1024) || "—", inline: false })),
-      footer: e.rodape ? { text: e.rodape } : undefined,
+      title: e.titulo, description: e.descricao, color: e.cor, fields,
+      footer: { text: [e.planilha ? "📎 CSV completo anexo" : null, e.rodape].filter(Boolean).join(" · ") || SITE },
       timestamp: new Date().toISOString(),
     }],
-  });
+  }, e.planilha ? [{ filename: e.planilha.arquivo, text: reportCsv(e.planilha.colunas, e.planilha.linhas), contentType: "text/csv;charset=utf-8" }] : [], 4000);
 }
 
 async function enviarTelegram(e: Embed): Promise<void> {
@@ -55,9 +68,9 @@ async function enviarTelegram(e: Embed): Promise<void> {
   const chat = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chat) return;
   const corpo = e.campos
-    .map((c) => (c.valor.includes("\n") ? `<b>${esc(c.nome)}</b>\n${esc(c.valor)}` : `<b>${esc(c.nome)}:</b> ${esc(c.valor)}`))
+    .map((c) => { const value = esc(c.valor).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>"); return c.valor.includes("\n") ? `<b>${esc(c.nome)}</b>\n${value}` : `<b>${esc(c.nome)}:</b> ${value}`; })
     .join("\n\n");
-  const text = `${esc(e.titulo)}\n\n${corpo}${e.rodape ? `\n\n<i>${esc(e.rodape)}</i>` : ""}`;
+  const text = `${esc(e.titulo)}${e.descricao ? `\n${esc(e.descricao)}` : ""}\n\n${corpo}${e.rodape ? `\n\n<i>${esc(e.rodape)}</i>` : ""}`;
   await postJson(`https://api.telegram.org/bot${token}/sendMessage`, {
     chat_id: chat, parse_mode: "HTML", disable_web_page_preview: true, text: text.slice(0, 4000),
   });
@@ -72,27 +85,30 @@ export async function notificarColeta(r: CollectionResult): Promise<void> {
   const status = r.erros > 0 && r.salvos > 0 ? "parcial" : r.salvos > 0 ? "sucesso" : "falha";
   const emoji = status === "sucesso" ? "✅" : status === "parcial" ? "⚠️" : "❌";
 
-  const porLoja = Object.entries(r.porAdapter)
-    .sort((a, b) => b[1].salvos - a[1].salvos)
-    .filter(([, s]) => s.salvos > 0 || s.erros > 0)
-    .slice(0, 16)
-    .map(([k, s]) => `• ${k}: ${s.salvos} salvos${s.erros ? ` · ${s.erros} erros` : ""}`)
+  const sources = Object.entries(r.porAdapter).sort((a, b) => b[1].salvos - a[1].salvos);
+  const porLoja = sources.slice(0, 8)
+    .map(([k, s]) => `${s.erros ? "⚠️" : s.salvos ? "✅" : "ℹ️"} **${reportText(k, 50)}**\nRecebidos: ${reportCount(s.coletados)} · salvos: ${reportCount(s.salvos)} · descartados: ${reportCount(s.descartados)} · erros: ${reportCount(s.erros)}`)
     .join("\n");
 
   await avisar({
-    titulo: `🛰️ Coleta concluída — ${emoji} ${status}`,
+    titulo: `🛰️ Coleta | ${emoji} ${status.toLocaleUpperCase("pt-BR")}`,
     cor: COR[status],
+    descricao: "Atualização do catálogo. Este aviso não representa vendas ou comissões.",
     campos: [
-      { nome: "Resumo", valor: `${r.salvos} salvos · ${r.coletados} coletados · ${r.erros} erros` },
-      { nome: "Por loja", valor: porLoja || "nenhuma loja salvou itens" },
+      { nome: "📥 Itens recebidos", valor: `**${reportCount(r.coletados)}**`, inline: true },
+      { nome: "💾 Itens salvos", valor: `**${reportCount(r.salvos)}**`, inline: true },
+      { nome: "⚠️ Erros", valor: `**${reportCount(r.erros)}**`, inline: true },
+      { nome: "🧾 Resultado por fonte · até 8", valor: porLoja || "Nenhuma fonte retornada nesta execução." },
     ],
-    rodape: `job ${r.jobId.slice(0, 8)} · ${SITE}`,
+    rodape: `Execução ${r.jobId.slice(0, 8)} · ${SITE}`,
+    planilha: { arquivo: `coleta-${r.jobId.slice(0, 8)}.csv`, colunas: ["gerado_em_utc", "execucao", "fonte", "coletados", "salvos", "descartados", "erros", "situacao"],
+      linhas: sources.map(([source, value]) => [new Date().toISOString(), r.jobId, source, value.coletados, value.salvos, value.descartados, value.erros, value.erros ? "com_erros" : "sem_erros_reportados"]) },
   });
 }
 
 /**
- * "Lista real de afiliação" — as lojas ATIVAS que monetizam + as guilhotinadas
- * nesta rodada (cortadas por volume < 200). Reflete o estado real pós-guilhotina.
+ * Inventário cadastrado das lojas com rede configurada; não comprova recência,
+ * estoque no checkout, atribuição de cada link ou receita recebida.
  */
 export async function notificarAfiliacao(
   linhas: Array<{ loja: string; rede: string | null; produtos: number }>,
@@ -102,16 +118,21 @@ export async function notificarAfiliacao(
   const afil = linhas.filter((l) => l.rede).sort((a, b) => b.produtos - a.produtos);
   const totAfil = afil.reduce((s, l) => s + l.produtos, 0);
   const campos = [
-    { nome: `✅ Monetizadas — ${afil.length} lojas · ${totAfil} produtos`, valor: afil.length ? afil.map((l) => `• ${l.loja} — ${l.rede} (${l.produtos})`).join("\n") : "—" },
+    { nome: "🏪 Lojas com rede configurada", valor: `**${reportCount(afil.length)}**`, inline: true },
+    { nome: "📦 Produtos no cadastro", valor: `**${reportCount(totAfil)}**`, inline: true },
+    { nome: "🗂️ Maiores inventários · até 8", valor: afil.length ? afil.slice(0, 8).map((l, index) => `**${index + 1}. ${reportText(l.loja, 70)}**\nRede: ${reportText(l.rede ?? "", 40)} · produtos: **${reportCount(l.produtos)}**`).join("\n") : "Nenhuma loja com rede configurada neste recorte.", inline: false },
   ];
   if (guilhotinadas.length) {
-    campos.push({ nome: `⚔️ Guilhotinadas nesta rodada (< 200 produtos)`, valor: guilhotinadas.map((g) => `• ${g}`).join("\n") });
+    campos.push({ nome: "⚠️ Lojas retiradas nesta execução", valor: guilhotinadas.slice(0, 8).map((g) => `• ${reportText(g, 70)}`).join("\n"), inline: false });
   }
   await avisar({
-    titulo: "💰 Lista real de afiliação",
+    titulo: "🏪 Afiliadas | Inventário cadastrado",
     cor: COR.info,
+    descricao: "Produtos marcados em estoque na base. Esta contagem não aplica o filtro de sete dias da vitrine e não garante comissão.",
     campos,
-    rodape: `Todas já monetizam — deeplink embrulhado no clique (/r/) · ${SITE}`,
+    rodape: SITE,
+    planilha: { arquivo: "afiliadas-inventario.csv", colunas: ["gerado_em_utc", "loja", "rede_configurada", "produtos_cadastrados_em_estoque", "situacao", "observacao"],
+      linhas: [...afil.map(l => [new Date().toISOString(), l.loja, l.rede, l.produtos, "rede_configurada", "Sem filtro de recência; não comprova comissão."] as CsvCell[]), ...guilhotinadas.map(loja => [new Date().toISOString(), loja, null, null, "retirada_nesta_execucao", ""] as CsvCell[])] },
   });
 }
 
@@ -131,19 +152,28 @@ export async function notificarResumoDiario(d: {
   eventos: number; buscas: number; produtosVistos: number; novosUsuarios: number;
   topBuscas: Array<[string, number]>; topCategorias: Array<[string, number]>;
   semResultado?: number; salvos?: number; compartilhamentos?: number; saidas?: number; redirects?: number;
+  since?: string; until?: string;
 }): Promise<void> {
-  const buscas = d.topBuscas.length ? d.topBuscas.map(([t, n]) => `• ${t} (${n})`).join("\n") : "—";
-  const cats = d.topCategorias.length ? d.topCategorias.map(([c, n]) => `• ${c.replace(/-/g, " ")} (${n})`).join("\n") : "—";
+  const buscas = d.topBuscas.length ? d.topBuscas.slice(0, 5).map(([t, n], i) => `**${i + 1}.** ${reportText(t, 80)} — **${reportCount(n)}** ${n === 1 ? "busca" : "buscas"}`).join("\n") : "Nenhuma busca registrada.";
+  const cats = d.topCategorias.length ? d.topCategorias.slice(0, 5).map(([c, n], i) => `**${i + 1}.** ${reportText(reportLabel(c), 60)} — **${reportCount(n)}** ${n === 1 ? "ação" : "ações"}`).join("\n") : "Nenhuma ação de categoria registrada.";
+  const metrics: Array<[string, number]> = [["acoes", d.eventos], ["buscas", d.buscas], ["produtos_vistos", d.produtosVistos], ["novos_cadastros", d.novosUsuarios], ["buscas_sem_resultado", d.semResultado ?? 0], ["ofertas_salvas", d.salvos ?? 0], ["compartilhamentos", d.compartilhamentos ?? 0], ["intencoes_saida", d.saidas ?? 0], ["redirecionamentos", d.redirects ?? 0]];
   await avisar({
-    titulo: "📊 Movimento do site — últimas 24h",
+    titulo: "🧭 Movimento | Últimas 24 horas",
     cor: COR.info,
+    descricao: `${d.since && d.until ? `📅 ${reportDateTime(d.since)} até ${reportDateTime(d.until)} · Brasília\n` : ""}Janela móvel de 24 horas, diferente do relatório de dias completos. Ações consentidas e totais agregados.`,
     campos: [
-      { nome: "Resumo", valor: `${d.eventos} interações · ${d.buscas} buscas · ${d.produtosVistos} produtos vistos · ${d.novosUsuarios} novos usuários` },
-      { nome: "Ações para acompanhar", valor: `${d.semResultado ?? 0} buscas sem resultado · ${d.salvos ?? 0} ofertas salvas · ${d.compartilhamentos ?? 0} compartilhamentos · ${d.saidas ?? 0} intenções de saída` },
-      { nome: "Redirecionamentos", valor: `${d.redirects ?? 0} requisições de saída. Não representam pessoas únicas, vendas ou comissões.` },
-      { nome: "Buscas mais feitas", valor: buscas },
-      { nome: "Categorias mais vistas", valor: cats },
+      { nome: "🧭 Ações consentidas", valor: `**${reportCount(d.eventos)}**`, inline: true },
+      { nome: "🔎 Buscas", valor: `**${reportCount(d.buscas)}**`, inline: true },
+      { nome: "📦 Produtos vistos", valor: `**${reportCount(d.produtosVistos)}**`, inline: true },
+      { nome: "👤 Cadastros", valor: `**${reportCount(d.novosUsuarios)}**`, inline: true },
+      { nome: "↗️ Saídas registradas", valor: `**${reportCount(d.redirects ?? 0)}**`, inline: true },
+      { nome: "❤️ Ofertas salvas", valor: `**${reportCount(d.salvos ?? 0)}**`, inline: true },
+      { nome: "🔍 Pontos de atenção", valor: `Buscas sem resultado: **${reportCount(d.semResultado ?? 0)}**\nCompartilhamentos: **${reportCount(d.compartilhamentos ?? 0)}**\nIntenções de saída: **${reportCount(d.saidas ?? 0)}**` },
+      { nome: "01 · 🔎 Buscas mais feitas", valor: buscas },
+      { nome: "02 · 🗂️ Categorias mais vistas", valor: cats },
     ],
-    rodape: SITE,
+    rodape: `Ações não são pessoas únicas; saídas não são vendas · ${SITE}`,
+    planilha: { arquivo: "movimento-24h.csv", colunas: ["inicio_utc", "fim_exclusivo_utc", "secao", "indicador", "item", "quantidade", "unidade"],
+      linhas: [...metrics.map(([key, value]) => [d.since ?? null, d.until ?? null, "resumo", key, "", value, "contagem"] as CsvCell[]), ...d.topBuscas.map(([term, count]) => [d.since ?? null, d.until ?? null, "buscas", "busca", term, count, "acoes"] as CsvCell[]), ...d.topCategorias.map(([category, count]) => [d.since ?? null, d.until ?? null, "categorias", "ver_categoria", category, count, "acoes"] as CsvCell[])] },
   });
 }

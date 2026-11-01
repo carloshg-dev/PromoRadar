@@ -15,10 +15,15 @@ on:
       - "scripts/retain-comparison-snapshots.ts"
       - ".github/workflows/comparison-snapshots.yml"
       - "scripts/run-scraper.ts"
+      - "scripts/sync-coupons.ts"
+      - "scripts/daily-business-report.ts"
+      - "scripts/daily-digest.ts"
+      - "scripts/validate-lomadee-attribution.ts"
       - "scripts/validate-collection-memory.ts"
       - "middleware.ts"
       - "package*.json"
       - "tsconfig.comparisons.json"
+      - "tsconfig.affiliates.json"
       - ".github/workflows/growth-checks.yml"
   workflow_dispatch:
 
@@ -38,9 +43,23 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run typecheck:comparisons
+      - run: npm run typecheck:affiliates
       - run: npm run test:growth
       - run: npm run test:collection
       - run: npm run test:collection:memory
+      - name: Conferir atribuicao Lomadee somente leitura
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }}
+          LOMADEE_SOURCE_ID: ${{ secrets.LOMADEE_SOURCE_ID }}
+        run: npx tsx scripts/validate-lomadee-attribution.ts
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+        with:
+          name: lomadee-attribution-${{ github.run_id }}
+          path: reports/lomadee-attribution-preflight.json
+          if-no-files-found: error
+          retention-days: 14
 
   catalog-index-lab:
     if: ${{ github.event_name == 'workflow_dispatch' }}
