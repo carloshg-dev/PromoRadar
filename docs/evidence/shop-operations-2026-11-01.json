@@ -1,0 +1,211 @@
+{
+  "checkedAt": "2026-11-01T07:58:54.788Z",
+  "main": "71ba632b6897e0fe4c21b34ec2c55270acd8622a",
+  "mergedPr": 16,
+  "cloudflare": {
+    "accountId": "0fcbdab34f0d44e0e948a4bb2f051810",
+    "worker": "promodetec",
+    "buildsCheck": "success",
+    "buildId": "52683ea9-8c8e-458c-9166-701682b0ddf7",
+    "checkedAt": "2026-11-01T07:57:35.777Z",
+    "method": "HEAD only, no affiliate clicks or analytics writes",
+    "checks": [
+      {
+        "status": "fulfilled",
+        "value": {
+          "path": "/",
+          "status": 200,
+          "buildId": "rrHZ3UwkvdkknMs-rhBDW",
+          "cache": "BYPASS"
+        }
+      },
+      {
+        "status": "fulfilled",
+        "value": {
+          "path": "/cupons",
+          "status": 200,
+          "buildId": "rrHZ3UwkvdkknMs-rhBDW",
+          "cache": "BYPASS"
+        }
+      }
+    ],
+    "activeVersionOrCpuPanelRead": false
+  },
+  "reports": [
+    {
+      "runId": 41285341305,
+      "event": "workflow_dispatch",
+      "sent": true,
+      "days": 1,
+      "since": "2026-10-31T03:00:00.000Z",
+      "until": "2026-11-01T03:00:00.000Z",
+      "actions": 35,
+      "redirects": 27,
+      "financeStatus": "ok",
+      "awin": {
+        "statuses": {},
+        "brlRows": 0,
+        "otherCurrency": 0,
+        "nonSale": 0,
+        "topProducts": []
+      },
+      "personalDataIncluded": false
+    },
+    {
+      "runId": 41285343505,
+      "event": "workflow_dispatch",
+      "sent": true,
+      "days": 7,
+      "since": "2026-10-25T03:00:00.000Z",
+      "until": "2026-11-01T03:00:00.000Z",
+      "actions": 177,
+      "redirects": 122,
+      "financeStatus": "ok",
+      "awin": {
+        "statuses": {
+          "pending": {
+            "transactions": 1,
+            "sales": 14249,
+            "commission": 328
+          }
+        },
+        "brlRows": 1,
+        "otherCurrency": 0,
+        "nonSale": 0,
+        "topProducts": []
+      },
+      "personalDataIncluded": false
+    }
+  ],
+  "schedules": {
+    "status": "active in default branch; no schedule execution yet observed",
+    "dailyBrasilia": "08:00",
+    "weeklyBrasilia": "Monday 08:15",
+    "couponsBrasilia": [
+      "05:20",
+      "11:20",
+      "17:20",
+      "23:20"
+    ]
+  },
+  "coupons": {
+    "runId": 41285345625,
+    "event": "workflow_dispatch",
+    "workflowConclusion": "failure",
+    "checkedAt": "2026-11-01T07:35:18.946Z",
+    "published": true,
+    "bytes": 32654,
+    "coupons": 67,
+    "codes": 22,
+    "sources": [
+      {
+        "source": "awin",
+        "status": "ok",
+        "count": 68
+      },
+      {
+        "source": "lomadee",
+        "status": "affiliate_http_500",
+        "count": 0
+      }
+    ],
+    "limitations": [
+      "Cupons podem depender de valor mínimo, público, app e estoque; condições exibidas",
+      "Shopee e Amazon não foram conectadas a uma API de cupons: nenhum código é inventado"
+    ],
+    "publicUiUsesNewSnapshot": false
+  },
+  "laboratory": {
+    "code": "5810d547f88843902aebbabe7f8a4c3d3bd2b9d0 plus report validation runner",
+    "referenceSchema": "measurement-auth-v1",
+    "transport": "Loopback HTTP proxy to owned GoTrue/PostgREST; Kong DNS failed in the isolated daemon. No production network/config change.",
+    "passed": 17,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "all-14-event-types-persist",
+        "passed": true
+      },
+      {
+        "name": "privacy-fields-are-not-persisted",
+        "passed": true
+      },
+      {
+        "name": "denied-events-do-not-change-database",
+        "passed": true
+      },
+      {
+        "name": "database-error-is-503-and-batch-is-atomic",
+        "passed": true
+      },
+      {
+        "name": "anonymous-cannot-insert-events-directly",
+        "passed": true
+      },
+      {
+        "name": "metadata-cannot-promote-new-account",
+        "passed": true
+      },
+      {
+        "name": "authenticated-cannot-promote-profile-or-insert-event",
+        "passed": true
+      },
+      {
+        "name": "anonymous-admin-redirects-to-login",
+        "passed": true
+      },
+      {
+        "name": "real-password-session-user-cannot-open-admin",
+        "passed": true
+      },
+      {
+        "name": "real-password-session-staff-can-open-admin",
+        "passed": true
+      },
+      {
+        "name": "ordinary-user-cannot-use-admin-write-api",
+        "passed": true
+      },
+      {
+        "name": "staff-reaches-admin-body-validation",
+        "passed": true
+      },
+      {
+        "name": "forged-session-is-rejected-by-real-auth",
+        "passed": true
+      },
+      {
+        "name": "affiliate-redirect-persists-local-click-without-following-merchant",
+        "passed": true
+      },
+      {
+        "name": "persisted-events-are-readable-by-report",
+        "passed": true
+      },
+      {
+        "name": "persisted-click-rankings-and-product-names-are-readable-by-report",
+        "passed": true
+      },
+      {
+        "name": "service-role-is-not-in-browser-assets",
+        "passed": true
+      }
+    ],
+    "browserTest": false,
+    "productionWrites": false
+  },
+  "ads": {
+    "status": "LOCAL_DRAFT_NOT_SUBMITTED",
+    "ads": 3,
+    "activeBudgetBRL": 0
+  },
+  "limits": [
+    "Affiliate financial coverage: Awin BRL only",
+    "Pending commission is not paid revenue",
+    "Awin did not supply basket product names in this window",
+    "Actions and redirects are not unique people or confirmed purchases",
+    "Lomadee API returned 500; coupon source is partial",
+    "Coupon collector publishes a private snapshot; redesigned public coupon UI remains draft",
+    "Cloudflare active version and comparable CPU windows were not read because browser control was unavailable"
+  ]
+}

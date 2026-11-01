@@ -8,7 +8,7 @@ import { parse } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { EVENT_TYPES } from "../src/core/analytics/events";
-import { carregarMovimento } from "../src/infrastructure/repositories/analytics.repo";
+import { carregarMovimento, carregarRankingCliques, nomesProdutos } from "../src/infrastructure/repositories/analytics.repo";
 
 const root = process.cwd(), origin = "http://127.0.0.1:3216";
 const productId = "12345678-1234-4234-8234-123456789abc";
@@ -57,6 +57,7 @@ async function main() {
   assert.equal(marker.data?.version, "measurement-auth-v1");
   const since = "2000-01-01T00:00:00Z", until = "2100-01-01T00:00:00Z";
   const beforeSummary = await carregarMovimento(since, until);
+  const beforeRanking = await carregarRankingCliques(since, until);
   const countEvents = async () => {
     const { count, error } = await admin.from("eventos").select("id", { count: "exact", head: true });
     assert.equal(error, null); assert.notEqual(count, null); return count!;
@@ -160,6 +161,13 @@ async function main() {
     assert.equal(summary.redirectRequests - beforeSummary.redirectRequests, 1);
     assert.equal(summary.registrations - beforeSummary.registrations, 2);
   });
+  await check("persisted-click-rankings-and-product-names-are-readable-by-report", async () => {
+    const ranking = await carregarRankingCliques(since, until);
+    assert.equal(ranking.complete, true); assert.equal(ranking.rankingLimited, false);
+    assert.equal((ranking.stores.find(([store]) => store === "amazon")?.[1] ?? 0) - (beforeRanking.stores.find(([store]) => store === "amazon")?.[1] ?? 0), 1);
+    assert.equal((ranking.products.find(([id]) => id === productId)?.[1] ?? 0) - (beforeRanking.products.find(([id]) => id === productId)?.[1] ?? 0), 1);
+    assert.equal((await nomesProdutos([productId])).get(productId), "Produto fictício do laboratório");
+  });
   await check("service-role-is-not-in-browser-assets", async () => {
     let scanned = 0;
     async function scan(directory: string): Promise<void> {
@@ -188,4 +196,8 @@ async function main() {
   process.stdout.write(JSON.stringify({ passed: report.passed, failed: report.failed, failures: checks.filter(item => !item.passed).map(item => item.name), evidence: path.relative(root, output) }) + "\n");
   if (report.failed) process.exitCode = 1;
 }
-main().catch(error => { process.stderr.write(`auth_lab_failed:${error instanceof Error ? error.name : "unknown"}\n`); process.exitCode = 1; }).finally(stop);
+main().catch(error => {
+  const label = error instanceof Error ? error.message.split("\n")[0] ?? "" : "";
+  const reason = /^[a-z0-9_]{1,80}$/.test(label) ? label : error instanceof Error ? error.name : "unknown";
+  process.stderr.write(`auth_lab_failed:${reason}\n`); process.exitCode = 1;
+}).finally(stop);
