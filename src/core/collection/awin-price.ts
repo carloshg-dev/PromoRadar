@@ -9,9 +9,9 @@ export function parseFeedPrice(value: string | undefined): number | null {
   return Number.isFinite(price) && price > 0 ? price : null;
 }
 
-export function awinPrice(row: Record<string, string>, programCurrency?: "BRL" | "USD"): { current: number; reference: number | null } | null {
-  // Awin usa a moeda do programa quando o campo é omitido. Só aceitamos BRL confirmado.
-  if ((row.currency?.trim().toUpperCase() || programCurrency) !== "BRL") return null;
+export function awinPrice(row: Record<string, string>): { current: number; reference: number | null } | null {
+  // A moeda de cada item deve vir declarada no feed; não inferir pelo programa.
+  if (row.currency?.trim().toUpperCase() !== "BRL") return null;
   const current = parseFeedPrice(row.search_price);
   if (current === null) return null;
   const reference = parseFeedPrice(row.rrp_price) ?? parseFeedPrice(row.product_price_old);

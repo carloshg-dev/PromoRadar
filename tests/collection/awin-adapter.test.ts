@@ -56,3 +56,11 @@ test("adapter não publica noimage, preços antigos como atuais ou conversão ca
   assert.equal(result[0]?.precoAtual, 129.9);
   assert.equal(result[0]?.precoOriginal, null);
 });
+
+test("feed sem coluna de moeda reporta fonte parcial em vez de supor BRL", async context => {
+  const failures: string[] = [];
+  context.mock.method(globalThis, "fetch", async (url: unknown) => new Response(new URL(String(url)).pathname === "/list" ? master(["good"]) : headers.replace(",currency", "") + product.replace(",BRL", "")));
+  const rows = await new FastAwin().coletar({ log: () => {}, reportFailure: code => failures.push(code) });
+  assert.equal(rows.length, 0);
+  assert.deepEqual(failures, ["awin_feed_read_failed:aliexpress"]);
+});

@@ -10,7 +10,7 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
   const monetizado = ehLinkMonetizado(p.url);
   const temHistorico = p.precoMinHist != null && p.precoMaxHist != null && p.precoMaxHist > p.precoMinHist;
   const menorHist = temHistorico && p.precoAtual != null && p.precoAtual <= (p.precoMinHist as number);
-  const desconto = p.precoOriginal && p.precoAtual && p.precoOriginal > p.precoAtual ? Math.round((1 - p.precoAtual / p.precoOriginal) * 100) : null;
+  const desconto = p.precoOriginal && p.precoAtual && Number.isFinite(p.precoOriginal) && p.precoOriginal > p.precoAtual ? Math.min(99, Math.floor((1 - p.precoAtual / p.precoOriginal) * 100)) || null : null;
   return <article className="catalog-card group relative isolate flex min-w-0 flex-col overflow-hidden">
     <Link prefetch={false} href={`/produto/${p.id}`} aria-label={p.titulo} className="absolute inset-0 z-10 rounded-2xl" />
     <div className="relative h-36 overflow-hidden bg-white sm:h-40">

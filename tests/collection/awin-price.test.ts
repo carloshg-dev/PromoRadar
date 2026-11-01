@@ -12,10 +12,10 @@ test("moeda estrangeira/ausente não é convertida em preço brasileiro estimado
   for (const currency of ["USD", "EUR", "CNY", ""]) assert.equal(awinPrice({ currency, search_price: "100" }), null);
 });
 
-test("moeda omitida só usa o programa confirmado, e a moeda explícita sempre prevalece", () => {
-  assert.deepEqual(awinPrice({ search_price: "99.90" }, "BRL"), { current: 99.9, reference: null });
-  assert.equal(awinPrice({ search_price: "99.90" }, "USD"), null);
-  assert.equal(awinPrice({ search_price: "99.90", currency: "USD" }, "BRL"), null);
+test("moeda declarada aceita normalização e moeda omitida nunca é adivinhada", () => {
+  assert.deepEqual(awinPrice({ search_price: "99.90", currency: " brl " }), { current: 99.9, reference: null });
+  assert.equal(awinPrice({ search_price: "99.90" }), null);
+  assert.equal(awinPrice({ search_price: "99.90", currency: "USD" }), null);
 });
 
 test("parser preserva valores locais e rejeita sinal, faixas e decimais ambíguos", () => {

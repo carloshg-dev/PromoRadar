@@ -64,7 +64,7 @@ export class AwinAdapter extends StoreAdapter {
             const nome = row.product_name?.trim(), link = row.aw_deep_link?.trim();
             // Imagem direta do lojista primeiro; o proxy Awin pode responder placeholder.
             const image = [row.merchant_image_url, row.aw_image_url].map(value => value?.trim()).find(validProductImage) ?? "";
-            const price = awinPrice(row, advertiser.moedaPadrao);
+            const price = awinPrice(row);
             if (!nome || !link || !validFeedUrl(link) || !validFeedUrl(image) || !price || contemTermoProibido(nome)) return;
             const sku = `awin-${row.aw_product_id?.trim() || `${feed.fid}-${rowNumber}`}`;
             const dedupKey = `${advertiser.slug}:${sku}`;
@@ -76,7 +76,7 @@ export class AwinAdapter extends StoreAdapter {
               precoOriginal: price.reference, emEstoque: true, loja });
             count++;
             if (count >= capProdutos || out.length >= maxTotal) return false;
-          }, { required: ["product_name", "aw_deep_link", "search_price"] });
+          }, { required: ["product_name", "aw_deep_link", "search_price", "currency"] });
           await this.sleep(600);
         } catch { failure(`awin_feed_read_failed:${advertiser.slug}`); }
       }
