@@ -12,23 +12,28 @@ import { limitedFetch } from "@/infrastructure/supabase/limited-fetch";
 import { SELECT_PRODUTO as SELECT, mapProduto as map } from "./produto-row";
 import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
 import { formatShortDate } from "@/core/formatting";
+import { verifiedBrlPrice } from "@/core/catalog-policy";
 
 export interface LeituraVitrine {
   agora: number;
   signal: AbortSignal;
   pools: Map<string, Promise<Produto[]>>;
+  fontesIndisponiveis: Set<string>;
   client: ReturnType<typeof createPublicClient>;
 }
 
 /** Contexto por render: compartilha pools e cancela também as leituras encadeadas. */
 export function criarLeituraVitrine(): LeituraVitrine {
-  return { agora: Date.now(), signal: AbortSignal.timeout(8_000), pools: new Map(), client: createPublicClient(limitedFetch((input, init) => fetch(input, init))) };
+  return { agora: Date.now(), signal: AbortSignal.timeout(8_000), pools: new Map(), fontesIndisponiveis: new Set(), client: createPublicClient(limitedFetch((input, init) => fetch(input, { ...init, next: { revalidate: 300 } }))) };
 }
 
 function consultaVitrine(sb: ReturnType<typeof createPublicClient>, leitura: LeituraVitrine) {
-  // Predicados de preço/data na view causaram 57014 no prerender; validação no pool limitado.
+  // A amostra ordenada por chave substitui a ordenação global por data;
+  // a janela arredondada estabiliza o cache, e mapVitrine valida a data exata.
   return sb.from("vw_ofertas").select(SELECT).eq("em_estoque", true)
-    .not("imagem_url", "is", null).not("preco_atual", "is", null).abortSignal(leitura.signal);
+    .not("imagem_url", "is", null).gt("preco_atual", 0)
+    .gte("atualizado_em", recentPriceSince(Math.floor(leitura.agora / 300_000) * 300_000))
+    .order("id", { ascending: true }).abortSignal(leitura.signal);
 }
 
 export interface AchadoDoDia extends Produto {
@@ -107,7 +112,7 @@ export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitri
   // à frente sem re-buscar. Piso BAIXO (30) protege o egress do Supabase free — vitrine
   // pequena (3-5 itens) não precisa varrer 60 linhas pra achar afiliado no topo.
   const pool = Math.min(400, Math.max(limite * 6, 30));
-  let q = leitura ? consultaVitrine(sb, leitura).order("atualizado_em", { ascending: false })
+  let q = leitura ? consultaVitrine(sb, leitura)
     : sb.from("vw_ofertas").select(SELECT).eq("em_estoque", true).gt("preco_atual", 0)
       .gte("atualizado_em", recentPriceSince(agora)).lte("atualizado_em", new Date(agora).toISOString())
       .order("promo_score", { ascending: false, nullsFirst: false }).abortSignal(AbortSignal.timeout(12_000));
@@ -141,7 +146,6 @@ export async function listarVitrinePorLoja(lojaSlug: string, limit = 48, leitura
   const pool = Math.min(240, Math.max(limite * 3, 60));
   const { data, error } = await consultaVitrine(sb, leitura)
     .eq("loja_slug", lojaSlug)
-    .order("atualizado_em", { ascending: false })
     .limit(pool);
 
   if (error) throw error;
@@ -212,18 +216,25 @@ function poolAfiliadosPorLoja(
     const { data: lojas, error } = await sb.from("lojas").select("slug,adapter_key").eq("ativo", true)
       .limit(200).abortSignal(leitura.signal);
     if (error) throw error;
-    const slugs = (lojas ?? []).filter((l) => redeAfiliada(l.adapter_key as string)).map((l) => l.slug as string);
+    const slugs = (lojas ?? []).filter((l) => redeAfiliada(l.adapter_key as string) && verifiedBrlPrice(l.slug as string)).map((l) => l.slug as string);
     const pool: Produto[] = [];
-    for (let start = 0; start < slugs.length; start += 4) {
-      const fatias = await Promise.all(slugs.slice(start, start + 4).map(async (slug) => {
+    let failed = false;
+    for (let start = 0; start < slugs.length && !leitura.signal.aborted; start += 4) {
+      const group = slugs.slice(start, start + 4);
+      const fatias = await Promise.allSettled(group.map(async (slug) => {
         let q = consultaVitrine(sb, leitura).eq("loja_slug", slug);
         if (categorias?.length) q = q.in("categoria_slug", categorias);
-        const { data, error: readError } = await q.order("atualizado_em", { ascending: false }).limit(POOL_POR_LOJA);
+        const { data, error: readError } = await q.limit(POOL_POR_LOJA);
         if (readError) throw readError;
         return mapVitrine(data ?? [], leitura);
       }));
-      pool.push(...fatias.flat());
+      fatias.forEach((result, index) => {
+        if (result.status === "fulfilled") pool.push(...result.value);
+        else { failed = true; leitura.fontesIndisponiveis.add(`${key}:${group[index]}`); }
+      });
     }
+    if (leitura.signal.aborted) { failed = true; leitura.fontesIndisponiveis.add(`${key}:deadline`); }
+    if (failed && pool.length === 0) throw new Error("home_partner_pool_unavailable");
     return pool;
   })();
   leitura.pools.set(key, pending);
@@ -303,19 +314,11 @@ export async function listarAfiliados(limit = 24, leitura = criarLeituraVitrine(
  */
 export async function achadosPorCategorias(slugs: CategoriaSlug[], n: number, leitura = criarLeituraVitrine()): Promise<Produto[]> {
   const sb = leitura.client;
-  const base = () =>
-    consultaVitrine(sb, leitura).in("categoria_slug", slugs);
-  // DUAS fatias no pool: RECENTES (loja recém-coletada entra na roda no mesmo
-  // dia) + TOP por nota (as consagradas não somem quando chega lote novo).
-  // Uma fatia só — qualquer que fosse — virava parede de uma marca.
-  const [recentes, top] = await Promise.all([
-    base().order("atualizado_em", { ascending: false }).limit(60),
-    base().order("promo_score", { ascending: false, nullsFirst: false }).limit(60),
-  ]);
-  if (recentes.error) throw recentes.error;
-  if (top.error) throw top.error;
+  // Uma janela limitada por chave substitui duas ordenações completas da view.
+  const { data, error } = await consultaVitrine(sb, leitura).in("categoria_slug", slugs).limit(120);
+  if (error) throw error;
   const porId = new Map<string, Produto>();
-  for (const r of [...(recentes.data ?? []), ...(top.data ?? [])]) {
+  for (const r of data ?? []) {
     const p = map(r);
     if (permitidoNaHome(p, leitura.agora)) porId.set(p.id, p);
   }
