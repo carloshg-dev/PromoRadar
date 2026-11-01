@@ -41,6 +41,7 @@ export default async function Home() {
     load(() => listarOfertas({ limit: 80 }, leitura)),
     listarCuponsPublicos().catch(() => ({ coupons: [], updatedAt: null })),
   ]);
+  failures += leitura.fontesIndisponiveis.size;
   const products = new Map<string, Produto>();
   for (const product of [...partners, ...shopee, ...general]) if (permitidoNaHome(product, leitura.agora)) products.set(product.id, product);
   const pool = [...products.values()];

@@ -33,11 +33,11 @@ test("home rejeita preço inválido, estoque ausente, coleta antiga/futura e ima
   const invalid: Partial<Produto>[] = [{ precoAtual: null }, { precoAtual: 0 }, { precoAtual: -1 }, { precoAtual: NaN }, { precoAtual: Infinity },
     { emEstoque: false }, { atualizadoEm: "2026-09-01" }, { atualizadoEm: "2026-10-21" }, { atualizadoEm: "invalid" },
     { imagemUrl: null }, { imagemUrl: "https://images.example/placeholder.png" }, { imagemUrl: "javascript:alert(1)" },
-    { imagemUrl: "http://" }, { imagemUrl: "https://user:password@images.example/fone.jpg" }, { lojaSlug: "kabum" }];
+    { imagemUrl: "http://" }, { imagemUrl: "https://user:password@images.example/fone.jpg" }, { lojaSlug: "kabum" }, { lojaSlug: "aliexpress" }, { precoAtual: 6000 }];
   for (const patch of invalid) assert.equal(permitidoNaHome({ ...product, ...patch }, now), false, JSON.stringify(patch));
 });
 
-test("fontes da home usam pools limitados e cancelamento, sem predicado caro de data na view", async (context) => {
+test("fontes da home usam chave primária, janela estável, cache curto e pools limitados", async (context) => {
   const read = leitura();
   let queries = 0;
   context.mock.method(globalThis, "fetch", async (url: unknown, init?: RequestInit) => {
@@ -48,8 +48,10 @@ test("fontes da home usam pools limitados e cancelamento, sem predicado caro de 
     assert.ok(query.pathname.endsWith("/vw_ofertas"));
     queries++;
     assert.equal(query.searchParams.get("em_estoque"), "eq.true");
-    assert.ok(query.searchParams.getAll("preco_atual").includes("not.is.null"));
-    assert.equal(query.searchParams.has("atualizado_em"), false);
+    assert.equal(query.searchParams.get("preco_atual"), "gt.0");
+    assert.equal(query.searchParams.get("atualizado_em"), "gte.2026-10-13T12:00:00.000Z");
+    assert.match(query.searchParams.get("order") ?? "", /^id\.asc/);
+    assert.equal((init as RequestInit & { next?: { revalidate: number } }).next?.revalidate, 300);
     assert.ok(Number(query.searchParams.get("limit") ?? 1000) <= 1000);
     return Response.json([]);
   });
@@ -58,7 +60,30 @@ test("fontes da home usam pools limitados e cancelamento, sem predicado caro de 
     listarAfiliadosRodizio(4, 12, read), achadosBelezaCarrossel(4, read),
     achadosPorCategorias(["fones-bluetooth"], 4, read), ofertasEmDestaque(4, read),
   ]);
-  assert.equal(queries, 6);
+  assert.equal(queries, 5);
+});
+
+test("uma loja em timeout não descarta as demais nem consulta moeda em quarentena", async context => {
+  const read = leitura(); let quarantinedReads = 0;
+  context.mock.method(globalThis, "fetch", async (url: unknown) => {
+    const query = new URL(String(url));
+    if (query.pathname.endsWith("/lojas")) return Response.json([{ slug: "amazon", adapter_key: "amazon" }, { slug: "shopee", adapter_key: "shopee" }, { slug: "aliexpress", adapter_key: "aliexpress" }]);
+    const store = query.searchParams.get("loja_slug");
+    if (store === "eq.aliexpress") quarantinedReads++;
+    if (store === "eq.shopee") return Response.json({ code: "57014" }, { status: 500 });
+    return Response.json([{ id: product.id, titulo: product.titulo, url: product.url, imagem_url: product.imagemUrl, loja_slug: "amazon", loja_nome: "Amazon", preco_atual: 99, em_estoque: true, atualizado_em: product.atualizadoEm }]);
+  });
+  const products = await listarAfiliados(4, read);
+  assert.deepEqual(products.map(p => p.id), [product.id]);
+  assert.equal(quarantinedReads, 0);
+  assert.ok(read.fontesIndisponiveis.has("*:shopee"));
+});
+
+test("falha de todas as lojas não se transforma em pool vazio válido", async context => {
+  const read = leitura();
+  context.mock.method(globalThis, "fetch", async (url: unknown) => new URL(String(url)).pathname.endsWith("/lojas") ? Response.json([{ slug: "shopee", adapter_key: "shopee" }]) : Response.json({ code: "57014" }, { status: 500 }));
+  await assert.rejects(listarAfiliados(4, read), /home_partner_pool_unavailable/);
+  assert.ok(read.fontesIndisponiveis.has("*:shopee"));
 });
 
 test("pool recente rejeita linhas antigas, preço zero e imagem inválida antes de selecionar", async (context) => {
