@@ -13,7 +13,7 @@ Modo: Persuade na descoberta; Operate ao filtrar e comparar. Pedido de 01/11/202
 
 THESIS: Shop PromoDetec: feira digital de achados baratos; produto e preço ocupam a primeira tela.
 
-OWN-WORLD: Grafite e carvão, laranja quente nas ações, amarelo nos cupons, fotografias brancas, Geist e números tabulares; nenhuma borda luminosa.
+OWN-WORLD: Grafite e carvão, laranja vivo #FF7A00 nas ações (ajuste aprovado pelo proprietário), amarelo nos cupons, fotografias brancas, Geist e números tabulares; nenhuma borda luminosa.
 
 STORY: Escolher uma faixa, explorar categorias e cupons reais, espiar o produto e conferir a loja.
 

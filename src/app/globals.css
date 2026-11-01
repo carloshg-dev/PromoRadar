@@ -16,7 +16,7 @@ html[data-campaign="esquenta-black"], html[data-campaign="black-friday"] {
   color-scheme: dark;
   --page-rgb: 16 17 20; --soft-rgb: 35 37 42; --card-rgb: 26 28 32;
   --ink-rgb: 246 246 247; --muted-rgb: 176 179 188; --line-rgb: 58 60 68;
-  --brand-rgb: 255 129 83; --brand-deep-rgb: 255 158 117; --on-brand-rgb: 25 18 15;
+  --brand-rgb: 255 122 0; --brand-deep-rgb: 255 145 31; --on-brand-rgb: 25 18 15;
   --accent-rgb: 255 218 114; --campaign-rgb: 22 23 27;
 }
 html[data-campaign="cyber-monday"] { --page-rgb: 243 246 251; --soft-rgb: 231 238 248; --ink-rgb: 24 42 64; --line-rgb: 211 222 237; --muted-rgb: 73 92 117; --brand-rgb: 38 74 130; --brand-deep-rgb: 26 52 94; --accent-rgb: 198 221 255; --campaign-rgb: 18 35 58; }
