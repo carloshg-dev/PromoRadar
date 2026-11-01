@@ -1,5 +1,14 @@
 # Estado operacional do PromoDetec
 
+## 01/11/2026: relatórios entregues e cupons oficiais automatizados
+
+- Publicação autorizada pelo proprietário. [PR #16](https://github.com/carloshg-dev/PromoRadar/pull/16) integrada na `main`, **71ba632b6897e0fe4c21b34ec2c55270acd8622a**, às 04:34:19 BRT. Workers Builds confirmou sucesso para esse SHA, build `52683ea9-8c8e-458c-9166-701682b0ddf7`, na conta do domínio. HEAD de home/cupons retornou 200 com buildId `rrHZ3UwkvdkknMs-rhBDW`; a versão ativa/100% e uma janela nova de CPU não foram relidas no painel.
+- Relatórios diário e semanal enviados no Discord pelos runs manuais **41285341305 / 41285343505**, ambos aprovados e com `discordSent: true`. Diário 31/10: 35 ações consentidas e 27 redirecionamentos. Semanal 25–31/10: 177 ações, 122 redirecionamentos e uma venda Awin pendente de R$142,49/comissão R$3,28. Não são pessoas únicas ou receita paga; compras das outras redes não estão integradas e a Awin não forneceu nomes da cesta nessa janela.
+- Workflows ativos na branch padrão: diário 08:00 BRT; semanal segunda 08:15; cupons 05:20/11:20/17:20/23:20. Run manual de cupons **41285345625** publicou snapshot privado de 67 campanhas/22 códigos/32.654 bytes. Lomadee retornou 500; job ficou falho com cobertura parcial explícita. A coleta está ativa, mas o novo leitor público de cupons pertence à [PR #17](https://github.com/carloshg-dev/PromoRadar/pull/17), ainda em rascunho. Execução futura por schedule não foi confundida com os disparos manuais.
+- Integração local de medição/relatórios passou **17/17**, incluindo persistência dos 14 tipos, deltas de rankings por loja/produto e leitura de nomes. Banco de referência fictício, Auth/PostgREST/Postgres reais e API apenas loopback; proxy HTTP local substituiu o Kong após falha de DNS do daemon isolado. Não prova paridade de RLS, navegação de browser ou escrita no Cloudflare de produção.
+- A reformulação dark está separada na PR #17: 35 contratos workerd e testes de código aprovados, porém sem inspeção visual atual. Controle do navegador continua bloqueado para a ferramenta; Impeccable retornou `recapture`, pois capturas disponíveis mostram o mundo claro anterior. Não declarar o Shop dark publicado. Sem contratação de plano, gasto Ads, nova DDL remota ou alteração de DNS/WAF.
+- Recibos agregados em `docs/evidence/shop-operations-2026-11-01.json`; limites e horários em `docs/COUPONS_REPORTS_2026-11-01.md`. A prévia Ads é um rascunho local não submetido, três grupos e orçamento ativo R$0.
+
 ## 31/10/2026: mitigação gratuita de CPU homologada
 
 - Pedido atual do proprietário: ganhar tempo sem contratar plano e preservar a experiência. Correção de infraestrutura separada na [PR #14](https://github.com/carloshg-dev/PromoRadar/pull/14), candidato funcional `95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf` sobre `main/f4e72f2`. Pré-aprovação de integração/publicação já existente; sem contratação, DNS, WAF, nova credencial ou nova dependência paga.
