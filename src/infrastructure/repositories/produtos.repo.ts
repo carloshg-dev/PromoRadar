@@ -494,12 +494,14 @@ export async function obterProduto(id: string): Promise<Produto | null> {
 export async function listarUrlsProdutos(): Promise<{ id: string; atualizadoEm: string }[]> {
   const sb = createCachedPublicClient();
   const now = Date.now();
+  const signal = AbortSignal.timeout(12_000);
   const urls: { id: string; atualizadoEm: string }[] = [];
   let cursor = "";
   // Amostra curada por cursor/PK: ordenar o catálogo por atualização causou 57014 no build.
   for (let page = 0; page < 4 && urls.length < 1000; page++) {
+    signal.throwIfAborted();
     let query = sb.from("produtos").select("id,atualizado_em,em_estoque,preco_atual")
-      .order("id").limit(1000).abortSignal(AbortSignal.timeout(5_000));
+      .order("id").limit(1000).abortSignal(signal);
     if (cursor) query = query.gt("id", cursor);
     const { data, error } = await query;
     if (error) throw error;
