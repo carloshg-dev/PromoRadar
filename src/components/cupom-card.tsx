@@ -11,13 +11,14 @@ import { track } from "./analytics/track";
 export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
   const [copiado, setCopiado] = useState(false);
   const cor = corLoja(cupom.marca);
+  const lojaSlug = cupom.marca.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60);
 
   async function copiar() {
     if (!cupom.codigo) return;
     try {
       await navigator.clipboard.writeText(cupom.codigo);
       setCopiado(true);
-      track("copiar_cupom", { origem: "cupons", lojaSlug: cupom.marca.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60) });
+      track("copiar_cupom", { origem: "cupons", lojaSlug });
       setTimeout(() => setCopiado(false), 2200);
     } catch { /* clipboard bloqueado → usuário copia na mão */ }
   }
@@ -67,6 +68,7 @@ export function CupomCard({ cupom }: { cupom: CupomLomadee }) {
           </span>
         )}
         <a href={cupom.link} target="_blank" rel="nofollow sponsored noopener"
+          onClick={() => track("saida_loja", { origem: "cupons", lojaSlug })}
           className="shop-action inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold">
           Usar <ExternalLink className="h-3.5 w-3.5" />
         </a>
