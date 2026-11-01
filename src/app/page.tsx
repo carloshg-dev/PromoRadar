@@ -77,6 +77,8 @@ export default async function Home() {
     listarNoticias(20, leitura).catch(() => []),
   ]);
 
+  falhasOfertas += leitura.fontesIndisponiveis.size;
+
   const afiliadosHome = filtrarParaHome(afiliados);
   const carrosselBelezaHome = filtrarParaHome(carrosselBeleza);
   const belezaHome = filtrarParaHome(beleza);

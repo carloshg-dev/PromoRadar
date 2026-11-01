@@ -1,5 +1,6 @@
 import type { Produto } from "./domain/types";
 import { hasRecentPrice } from "./offer-freshness";
+import { DEFAULT_CATALOG_PRICE_LIMIT, validProductImage, verifiedBrlPrice } from "./catalog-policy";
 
 export const LOJAS_SOMENTE_COMPARADOR = new Set(["kabum", "terabyteshop", "epocacosmeticos"]);
 
@@ -10,14 +11,11 @@ export function validarDisponibilidadeHome(pools: readonly (readonly Produto[])[
 
 /** Destaque exige observação recente; o catálogo completo mantém os demais itens. */
 export function permitidoNaHome(produto: Produto, now = Date.now()): boolean {
-  if (LOJAS_SOMENTE_COMPARADOR.has(produto.lojaSlug) || !produto.emEstoque
-    || produto.precoAtual === null || !Number.isFinite(produto.precoAtual) || produto.precoAtual <= 0
+  if (LOJAS_SOMENTE_COMPARADOR.has(produto.lojaSlug) || !verifiedBrlPrice(produto.lojaSlug) || !produto.emEstoque
+    || produto.precoAtual === null || !Number.isFinite(produto.precoAtual) || produto.precoAtual <= 0 || produto.precoAtual > DEFAULT_CATALOG_PRICE_LIMIT
     || !hasRecentPrice(produto.atualizadoEm, now) || !produto.imagemUrl
-    || /(?:no[-_]?image|placeholder|sem[-_]?imagem|image[-_]?not[-_]?found)/i.test(produto.imagemUrl)) return false;
-  try {
-    const image = new URL(produto.imagemUrl);
-    return ["https:", "http:"].includes(image.protocol) && !image.username && !image.password;
-  } catch { return false; }
+    || !validProductImage(produto.imagemUrl)) return false;
+  return true;
 }
 
 /** Vitrine de fragrâncias pessoais não inclui aromatizadores automotivos. */
