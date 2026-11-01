@@ -4,11 +4,14 @@ import { ProductShelf } from "@/components/product-shelf";
 import { CupomCard } from "@/components/cupom-card";
 import { SavedRadar } from "@/components/saved-radar";
 import { ProductSuggestion } from "@/components/product-quick-view";
+import { PartnerStoreCarousel } from "@/components/partner-store-carousel";
 import { criarLeituraVitrine, listarAfiliados, listarOfertas, listarVitrinePorLoja, aleatorioSemLojaSeguida } from "@/infrastructure/repositories/produtos.repo";
 import type { Produto } from "@/core/domain/types";
 import { permitidoNaHome, validarDisponibilidadeHome } from "@/core/home-catalog";
 import { listarCuponsPublicos } from "@/infrastructure/repositories/coupon-snapshot.repo";
 import { ehLinkMonetizado } from "@/lib/afiliados";
+import { listarLojasVitrine } from "@/infrastructure/repositories/lojas.repo";
+import { partnerStores } from "@/core/partner-stores";
 import { Candy, House, BriefcaseBusiness, Headphones, SprayCan, Shirt, Ticket, ShoppingBag, ArrowUpRight, Clock3, Scale } from "lucide-react";
 
 export const revalidate = 1800;
@@ -35,11 +38,12 @@ export default async function Home() {
       return [];
     }
   }
-  const [partners, shopee, general, couponData] = await Promise.all([
+  const [partners, shopee, general, couponData, stores] = await Promise.all([
     load(() => listarAfiliados(160, leitura)),
     load(() => listarVitrinePorLoja("shopee", 80, leitura)),
     load(() => listarOfertas({ limit: 80 }, leitura)),
     listarCuponsPublicos().catch(() => ({ coupons: [], updatedAt: null })),
+    listarLojasVitrine(leitura).catch(() => { console.warn("[home] partner_logos_unavailable"); return []; }),
   ]);
   failures += leitura.fontesIndisponiveis.size;
   const products = new Map<string, Produto>();
@@ -53,7 +57,8 @@ export default async function Home() {
   const coupons = couponData.coupons.slice(0, 3);
 
   return <main data-public-cache={failures === 0 ? "ready" : "unavailable"} className="mx-auto max-w-page px-3 sm:px-6 lg:px-10">
-    <DiscoverySearch products={feed.slice(0, 3).map(({ id, titulo, imagemUrl, precoAtual }) => ({ id, titulo, imagemUrl, precoAtual }))} />
+    <DiscoverySearch products={feed.slice(0, 8).map(({ id, titulo, imagemUrl, precoAtual }) => ({ id, titulo, imagemUrl, precoAtual }))} />
+    <PartnerStoreCarousel stores={partnerStores(stores)} />
     <nav aria-label="Explorar categorias" className="shop-category-rail">{departments.map(({ label, href, Icon }) => <Link prefetch={false} href={href} key={label} className="shop-category"><Icon aria-hidden="true" />{label}</Link>)}</nav>
     <nav aria-label="Comprar por orçamento" className="shop-budget">
       <Link prefetch={false} href="/ofertas?ate=20">Até R$20</Link><Link prefetch={false} href="/ofertas?ate=50">Até R$50</Link><Link prefetch={false} href="/ofertas?ate=100">Até R$100</Link><Link prefetch={false} href="/ofertas?loja=shopee&ate=100">Achadinhos Shopee</Link><Link prefetch={false} href="/cupons">Pegar cupons</Link><Link prefetch={false} href="/comparar">Comparar antes de comprar</Link>

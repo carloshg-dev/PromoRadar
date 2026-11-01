@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Eye, X, ArrowUpRight, ChartNoAxesCombined } from "lucide-react";
 import type { Produto } from "@/core/domain/types";
-import { formatBRL } from "@/core/formatting";
+import { formatBRL, formatShortDate } from "@/core/formatting";
 import { track } from "./analytics/track";
 
 export type QuickProduct = Pick<Produto, "id" | "titulo" | "imagemUrl" | "precoAtual" | "lojaNome" | "lojaSlug" | "atualizadoEm" | "precoMinHist"> & { monetizado: boolean };
@@ -24,7 +24,7 @@ export function ProductQuickViewProvider({ children }: { children: React.ReactNo
           <div className="flex flex-col justify-center">
             <p className="text-xs text-muted">{product.lojaNome}</p>
             <h2 id="quick-product-title" className="mt-2 pr-4 text-xl font-semibold leading-snug">{product.titulo}</h2>
-            <p className="mt-5 text-xs text-muted">Preço coletado</p>
+            <p className="mt-5 text-xs text-muted">Preço coletado em <time dateTime={product.atualizadoEm}>{formatShortDate(product.atualizadoEm)}</time></p>
             <p className="price mt-1 text-3xl font-bold text-brand">{formatBRL(product.precoAtual)}</p>
             {product.precoMinHist !== null && <p className="mt-3 text-xs text-muted">Mínimo registrado: {formatBRL(product.precoMinHist)}</p>}
             <p className="mt-3 text-xs leading-5 text-muted">Confirme preço, frete e disponibilidade na loja. O PromoDetec compara e direciona; a compra é feita com a loja.</p>

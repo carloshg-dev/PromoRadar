@@ -14,6 +14,7 @@ import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
 import { catalogPriceLimit, DEFAULT_CATALOG_PRICE_LIMIT, GENERIC_IMAGE_PATTERNS, UNVERIFIED_BRL_STORES, validProductImage, verifiedBrlPrice } from "@/core/catalog-policy";
 import { formatShortDate } from "@/core/formatting";
 import { collectionQuery } from "@/core/shop-collections";
+import { selectStoreRecommendations } from "@/core/store-recommendations";
 
 export interface LeituraVitrine {
   agora: number;
@@ -419,6 +420,26 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   const fallback = await query(false);
   if (fallback.error) throw fallback.error;
   return { produtos: (fallback.data ?? []).slice(0, porPagina).map(map), total: null, hasMore: (fallback.data?.length ?? 0) > porPagina };
+}
+
+/** Só é chamada na recuperação de uma loja vazia: quatro pools pequenos, cacheados,
+ * sem COUNT/ordenação global e dentro de um único prazo de oito segundos. */
+export async function alternativasParaLoja(loja: string, maxPreco: number | null) {
+  const leitura = criarLeituraVitrine();
+  const slugs = [...new Set([loja, "shopee", "spicy", "eudora"])];
+  const results = await Promise.allSettled(slugs.map(async slug => {
+    const { data, error } = await consultaVitrine(leitura.client, leitura).eq("loja_slug", slug)
+      .limit(96);
+    if (error) throw error;
+    // Não usa permitidoNaHome: a loja escolhida pode ser exclusiva do comparador.
+    return selectStoreRecommendations((data ?? []).map(map).filter(p => p.lojaSlug === slug && ehLinkMonetizado(p.url)), maxPreco, leitura.agora);
+  }));
+  const pools = results.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  const mesmaLoja = selectStoreRecommendations(pools.filter(p => p.lojaSlug === loja), maxPreco, leitura.agora);
+  const outrasLojas = selectStoreRecommendations(pools.filter(p => p.lojaSlug !== loja), maxPreco, leitura.agora, 24);
+  const unavailableStores = slugs.filter((_, index) => results[index]?.status === "rejected");
+  if (unavailableStores.length) console.warn("[catalog] store_recovery_partial", unavailableStores.join(","));
+  return { produtos: embaralhar(mesmaLoja.length ? mesmaLoja : outrasLojas), mesmaLoja: mesmaLoja.length > 0, partial: unavailableStores.length > 0, unavailableStores };
 }
 
 /** Comparações já calculadas no runner; a visita nunca varre o catálogo. */

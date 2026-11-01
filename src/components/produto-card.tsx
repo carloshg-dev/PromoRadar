@@ -5,13 +5,14 @@ import { ehLinkMonetizado } from "@/lib/afiliados";
 import { Trophy, ImageOff, ArrowUpRight, Scale } from "lucide-react";
 import { CardSaveButton } from "./card-save-button";
 import { QuickViewButton } from "./product-quick-view";
+import { CatalogProductFrame } from "./catalog-product-frame";
 
 export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
   const monetizado = ehLinkMonetizado(p.url);
   const temHistorico = p.precoMinHist != null && p.precoMaxHist != null && p.precoMaxHist > p.precoMinHist;
   const menorHist = temHistorico && p.precoAtual != null && p.precoAtual <= (p.precoMinHist as number);
   const desconto = p.precoOriginal && p.precoAtual && Number.isFinite(p.precoOriginal) && p.precoOriginal > p.precoAtual ? Math.min(99, Math.floor((1 - p.precoAtual / p.precoOriginal) * 100)) || null : null;
-  return <article className="catalog-card group relative isolate flex min-w-0 flex-col overflow-hidden">
+  return <CatalogProductFrame key={p.imagemUrl ?? p.id}>
     <Link prefetch={false} href={`/produto/${p.id}`} aria-label={p.titulo} className="absolute inset-0 z-10 rounded-2xl" />
     <div className="relative h-36 overflow-hidden bg-white sm:h-40">
       {p.imagemUrl ? <img src={p.imagemUrl} alt={p.titulo} loading="lazy" decoding="async" width={360} height={270} className="product-picture h-full w-full object-contain px-5 py-4 sm:p-5" /> : <div className="grid h-full place-items-center bg-bg-soft"><ImageOff className="h-8 w-8 text-muted" /></div>}
@@ -31,5 +32,5 @@ export function ProdutoCard({ p, rank }: { p: Produto; rank?: number }) {
         {monetizado ? <a href={`/r/${p.id}?o=card`} rel="nofollow sponsored" aria-label={`Ver oferta na ${p.lojaNome}`} className="shop-action relative z-20 mt-3 flex min-h-11 items-center justify-between gap-1 rounded-lg px-2.5 py-2 text-[11px] font-semibold sm:text-xs">Ver oferta na loja<ArrowUpRight className="h-4 w-4 shrink-0" /></a> : <Link prefetch={false} href={`/produto/${p.id}`} className="relative z-20 mt-3 flex min-h-11 items-center justify-between gap-1 rounded-lg border border-line px-3 py-2 text-[11px] font-semibold text-brand hover:bg-bg-soft sm:text-xs">Comparar preço<Scale className="h-4 w-4 shrink-0" /></Link>}
       </div>
     </div>
-  </article>;
+  </CatalogProductFrame>;
 }

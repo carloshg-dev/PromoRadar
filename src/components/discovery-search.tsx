@@ -5,11 +5,20 @@ import { Search, ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useCampaign } from "./campaign-provider";
 import { formatBRL } from "@/core/formatting";
+import { useEffect, useRef, useState } from "react";
 
 type HeroProduct = { id: string; titulo: string; imagemUrl: string | null; precoAtual: number | null };
 export function DiscoverySearch({ products = [] }: { products?: HeroProduct[] }) {
   const theme = useCampaign();
   const warmup = theme?.id === "esquenta-black" || theme?.id === "esquenta-natal";
+  const productArea = useRef<HTMLDivElement>(null);
+  const [failed, setFailed] = useState<Set<string>>(() => new Set());
+  const visibleProducts = products.filter(p => p.imagemUrl && !failed.has(p.id)).slice(0, 3);
+  useEffect(() => {
+    const broken = Array.from(productArea.current?.querySelectorAll<HTMLImageElement>("img[data-product]") ?? [])
+      .filter(image => image.complete && !image.naturalWidth).map(image => image.dataset.product!);
+    if (broken.length) setFailed(previous => new Set([...previous, ...broken]));
+  }, [products, failed]);
   return <section aria-labelledby="discovery-title" className="pt-2 sm:pt-4">
     <div className="shop-hero">
       <div>
@@ -17,9 +26,9 @@ export function DiscoverySearch({ products = [] }: { products?: HeroProduct[] })
         <h2 id="discovery-title" className="campaign-mission-title">Encontre seu próximo bom negócio.</h2>
         <p className="campaign-mission-copy">Compare preços, consulte o histórico e guarde seus achados. A decisão é sua. Nossa missão é apresentar as ofertas e te direcionar as lojas responsáveis pela venda.</p>
       </div>
-      <div className="shop-hero-products" aria-label="Uma amostra dos achados">
-        {products.slice(0, 3).map(product => <Link prefetch={false} href={`/produto/${product.id}`} key={product.id} className="shop-hero-product" aria-label={`${product.titulo}, ${formatBRL(product.precoAtual)}`}>
-          {product.imagemUrl && <img src={product.imagemUrl} alt="" width={140} height={104} loading="eager" decoding="async" />}
+      <div ref={productArea} className="shop-hero-products" aria-label="Uma amostra dos achados">
+        {visibleProducts.map(product => <Link prefetch={false} href={`/produto/${product.id}`} key={product.id} className="shop-hero-product" aria-label={`${product.titulo}, ${formatBRL(product.precoAtual)}`}>
+          {product.imagemUrl && <img src={product.imagemUrl} data-product={product.id} alt="" width={140} height={104} loading="eager" decoding="async" onError={() => setFailed(previous => new Set([...previous, product.id]))} />}
           <strong>{formatBRL(product.precoAtual)}</strong><span className="mt-1 line-clamp-1 text-[11px]">{product.titulo}</span>
         </Link>)}
       </div>
