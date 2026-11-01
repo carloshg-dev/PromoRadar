@@ -29,7 +29,7 @@ export function criarLeituraVitrine(): LeituraVitrine {
 }
 
 function consultaVitrine(sb: ReturnType<typeof createPublicClient>, leitura: LeituraVitrine) {
-  // Evita ordenar a view inteira pela data. O cursor primário limita o trabalho;
+  // A amostra ordenada por chave substitui a ordenação global por data;
   // a janela arredondada estabiliza o cache, e mapVitrine valida a data exata.
   return sb.from("vw_ofertas").select(SELECT).eq("em_estoque", true)
     .not("imagem_url", "is", null).gt("preco_atual", 0)
