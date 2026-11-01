@@ -15,6 +15,7 @@ import { selectTopByCategory } from "../src/core/collection/top-by-category";
 import { persistShopeeFeed } from "../src/services/shopee-persistence.service";
 import { readCsvRows } from "../src/infrastructure/scraping/core/csv-stream";
 import { validFeedUrl } from "../src/core/collection/feed-url";
+import { collectionForTitle, SHOP_COLLECTIONS } from "../src/core/shop-collections";
 
 config({ path: ".env.local" });
 
@@ -255,7 +256,16 @@ async function main() {
     const selection = selectTopByCategory(spool.items(), topN, VALID_CATEGORY_SLUGS,
       (item) => item.categoriaSlug, (a, b) => b.qualityScore - a.qualityScore || a.titulo.localeCompare(b.titulo, "pt-BR"));
     selecionados = selection.items;
+    // Reserva pequena para miudezas: o ranking geral não pode apagar todo um uso cotidiano.
+    const daily = selectTopByCategory(spool.items(), Math.min(60, topN), [...SHOP_COLLECTIONS.map(item => item.id), "outros"],
+      item => item.categoriaSlug === NEUTRAL_CATEGORY && item.precoAtual <= 100 ? collectionForTitle(item.titulo) ?? "outros" : "outros",
+      (a, b) => b.qualityScore - a.qualityScore || a.itemId.localeCompare(b.itemId)).items
+      .filter(item => item.categoriaSlug === NEUTRAL_CATEGORY && item.precoAtual <= 100 && collectionForTitle(item.titulo));
+    const selectedIds = new Set(selecionados.map(item => item.itemId));
+    for (const item of daily) if (!selectedIds.has(item.itemId)) { selecionados.push(item); selectedIds.add(item.itemId); }
     for (const [slug, counts] of selection.stats) stats.porCategoria.set(slug as CategoriaSlug, counts);
+    const neutral = stats.porCategoria.get(NEUTRAL_CATEGORY);
+    if (neutral) { neutral.mantidos = selecionados.filter(item => item.categoriaSlug === NEUTRAL_CATEGORY).length; neutral.cortados = neutral.candidatos - neutral.mantidos; }
   } finally {
     try { spool?.close(); }
     finally { try { await rm(spoolDir, { recursive: true, force: true }); } finally { await input?.cleanup(); } }
