@@ -39,7 +39,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
     <div role="note" className="mt-5 max-w-prose rounded-xl border border-line bg-white p-5">
       <h2 className="text-lg font-semibold text-ink">Preço em verificação</h2>
       <p className="mt-2 text-sm leading-6 text-muted">Estamos conferindo a moeda e o preço desta oferta. Ela ficará fora das vitrines até termos um valor em reais confirmado pela fonte.</p>
-      <Link prefetch={false} href="/ofertas" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-white">Explorar outras ofertas</Link>
+      <Link prefetch={false} href="/ofertas" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-on-brand">Explorar outras ofertas</Link>
     </div>
   </main>;
 
@@ -157,7 +157,7 @@ export default async function ProdutoPage({ params }: { params: { id: string } }
           {Number.isFinite(Date.parse(p.atualizadoEm)) && <time dateTime={p.atualizadoEm} className="mt-2 text-xs text-muted">Última coleta: {timeAgo(p.atualizadoEm)}</time>}
           {/* CTA de saída — /r/ registra o clique (afiliados/conversão) e redireciona à loja */}
           <a href={`/r/${p.id}?o=produto`} target="_blank" rel="noopener noreferrer nofollow sponsored"
-            className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white hover:bg-brand-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">{recentPrice ? "Ir à loja" : "Conferir preço"} — {p.lojaNome}<ExternalLink className="h-4 w-4 shrink-0" /></a>
+            className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-on-brand hover:bg-brand-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">{recentPrice ? "Ir à loja" : "Conferir preço"} — {p.lojaNome}<ExternalLink className="h-4 w-4 shrink-0" /></a>
           <p className="mt-3 text-xs leading-5 text-muted">Você será direcionado ao site da loja para concluir a compra.</p>
           <ProductActions item={{ id: p.id, titulo: p.titulo }} />
           <p className="mt-3 text-[11px] text-muted">Preço e disponibilidade sujeitos a alteração — oferta válida enquanto durarem os estoques. Confirme o valor final na loja antes de comprar.</p>

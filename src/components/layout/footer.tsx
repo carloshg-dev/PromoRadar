@@ -26,7 +26,7 @@ const navigation = [
 
 export function Footer() {
   return (
-    <footer aria-label="Rodapé do PromoDetec" className="mt-12 bg-ink text-white">
+    <footer aria-label="Rodapé do PromoDetec" className="shop-footer mt-12 border-t border-line">
       <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
         <div className="grid gap-x-6 gap-y-8 py-8 sm:grid-cols-2 sm:gap-y-10 sm:py-12 lg:grid-cols-12 lg:py-14">
           <div className="lg:col-span-4">
@@ -37,7 +37,7 @@ export function Footer() {
             <h2 className="mt-6 max-w-[19ch] font-display text-2xl font-medium leading-tight tracking-tight sm:text-3xl">
               Encontre seu próximo bom negócio.
             </h2>
-            <Link prefetch={false} href="/comparar" className="mt-5 inline-flex min-h-11 items-center justify-center gap-5 rounded-lg bg-lime px-5 py-3 text-sm font-semibold text-ink transition-colors hover:bg-white focus-visible:outline-lime">
+            <Link prefetch={false} href="/comparar" className="mt-5 inline-flex min-h-11 items-center justify-center gap-5 rounded-lg bg-lime px-5 py-3 text-sm font-semibold text-[#201b11] transition-colors hover:bg-white focus-visible:outline-lime">
               Comparar preços<ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </div>

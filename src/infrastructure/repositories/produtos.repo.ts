@@ -13,6 +13,7 @@ import { SELECT_PRODUTO as SELECT, mapProduto as map } from "./produto-row";
 import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
 import { catalogPriceLimit, DEFAULT_CATALOG_PRICE_LIMIT, GENERIC_IMAGE_PATTERNS, UNVERIFIED_BRL_STORES, validProductImage, verifiedBrlPrice } from "@/core/catalog-policy";
 import { formatShortDate } from "@/core/formatting";
+import { collectionQuery } from "@/core/shop-collections";
 
 export interface LeituraVitrine {
   agora: number;
@@ -85,6 +86,7 @@ function mapVitrine(rows: Record<string, unknown>[], leitura?: LeituraVitrine): 
 }
 
 export interface OfertaFiltro {
+  colecao?: string;
   maxPreco?: number | null;
   categoria?: string;
   /** filtro por várias categorias (ex: todas as de uma vertical). Tem prioridade sobre `categoria`. */
@@ -112,6 +114,8 @@ export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitri
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  const collection = collectionQuery(f.colecao);
+  if (collection) q = q.or(collection);
   // A home valida o pool limitado em permitidoNaHome; duplicar estes predicados
   // na view já causou 57014. Listagens completas precisam filtrar antes do limit.
   if (!leitura) {
@@ -373,7 +377,7 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
 }
 
 /** Página de ofertas com total — para paginação real nas listas (/ofertas, /categoria). */
-export interface PaginaOfertas { produtos: Produto[]; total: number }
+export interface PaginaOfertas { produtos: Produto[]; total: number | null; hasMore?: boolean }
 
 export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number } = {}): Promise<PaginaOfertas> {
   const sb = createCachedPublicClient();
@@ -382,9 +386,10 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   const porPagina = f.limit ?? 60;
   const pagina = Math.max(1, f.pagina ?? 1);
   const de = (pagina - 1) * porPagina;
+  const query = (count: boolean) => {
   let q = sb
     .from("vw_ofertas")
-    .select(SELECT, { count: "exact" })
+    .select(SELECT, count ? { count: "exact" } : {})
     .eq("em_estoque", true).gt("preco_atual", 0)
     .gte("atualizado_em", recentPriceSince(agora)).lte("atualizado_em", new Date(agora).toISOString())
     .order("promo_score", { ascending: false, nullsFirst: false })
@@ -394,18 +399,24 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  const collection = collectionQuery(f.colecao);
+  if (collection) q = q.or(collection);
   const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
   if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
   q = q.not("imagem_url", "is", null);
   q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
   for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
 
-  // Ordenação e paginação no banco: ler 1000 para exibir 60 gastava CPU/rede
-  // e promovia comissão sobre a nota. O preço e o CTA afiliado ficam intactos.
-  const { data, error, count } = await q.range(de, de + porPagina - 1);
-  if (error) throw error;
-  const total = count ?? 0;
-  return { produtos: (data ?? []).map(map), total };
+  return q.range(de, de + porPagina - 1 + Number(!count));
+  };
+  const result = await query(true);
+  if (!result.error) return { produtos: (result.data ?? []).map(map), total: result.count ?? 0 };
+  // Um timeout com contagem não precisa impedir a página: uma única leitura sem COUNT.
+  if (result.error.code !== "57014") throw result.error;
+  console.warn("[catalog] count_query_timeout");
+  const fallback = await query(false);
+  if (fallback.error) throw fallback.error;
+  return { produtos: (fallback.data ?? []).slice(0, porPagina).map(map), total: null, hasMore: (fallback.data?.length ?? 0) > porPagina };
 }
 
 /** Comparações já calculadas no runner; a visita nunca varre o catálogo. */

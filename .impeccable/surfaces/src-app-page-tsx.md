@@ -2,29 +2,23 @@
 version: 1
 slug: "src-app-page-tsx"
 primary_target: "src/app/page.tsx"
-related_targets: ["src/app/globals.css","tailwind.config.ts","src/components/layout/navbar.tsx","src/components/produto-card.tsx","src/app/ofertas/page.tsx","src/app/comparar/page.tsx"]
+related_targets: ["src/app/globals.css","src/components/produto-card.tsx","src/app/ofertas/page.tsx","src/app/cupons/page.tsx"]
 ---
 
 # Home e identidade pública
 
-Modo: Persuade na descoberta, Operate na comparação. Direção A escolhida explicitamente em 31/10/2026; continuidade e publicação pré-aprovadas. Produto, preço, origem e datas continuam reais.
+Modo: Persuade na descoberta; Operate ao filtrar e comparar. Pedido de 01/11/2026 substitui a base clara por marketplace escuro. Missão e rodapé literais, preço/origem/recência e consentimento preservados.
 
 ## Direction contract
 
-THESIS: Black em evidência: campanha compacta e produtos protagonistas, sem destaque isolado ocupando a primeira tela.
+THESIS: Shop PromoDetec: feira digital de achados baratos; produto e preço ocupam a primeira tela.
 
-OWN-WORLD: Papel claro, tinta verde quase preta, lime, Geist, fotos contidas em branco e preços tabulares. As fases futuras mudam a paleta sazonal, mantendo estrutura e marca.
+OWN-WORLD: Grafite e carvão, laranja quente nas ações, amarelo nos cupons, fotografias brancas, Geist e números tabulares; nenhuma borda luminosa.
 
-STORY: Reconhecer o achado, conferir preço, loja e data, salvar ou consultar histórico e decidir na loja.
+STORY: Escolher uma faixa, explorar categorias e cupons reais, espiar o produto e conferir a loja.
 
-FIRST VIEWPORT: Cabeçalho compacto; campanha à esquerda, missão literal à direita; busca e categorias; quatro produtos no desktop e dois em 390px. Primeira vitrine intercala lojas; nenhum produto isolado precede a grade.
+FIRST VIEWPORT: Cabeçalho compacto com busca; campanha baixa com produtos reais à direita; trilho de categorias e preços; seis cards por linha no desktop e dois no celular. Feed continua com até 48 produtos dos pools existentes.
 
-FORM: Composição 3/7, seed 4412e623, opção A escolhida pelo proprietário. Interação assinatura: salvar na vitrine; calendário sincroniza faixa, hero e cores sem animação automática.
+FORM: Feira digital noturna, 6/7, seed 5badb485; brief fixa marketplace. Assinatura: espiar abre consulta rápida sem rede; sugestão pequena aparece no máximo uma vez por sessão e fecha. Movimento curto somente nessas revelações.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
-
-## Escolha e critérios
-
-Aprovada a prévia A de `reports/seasonal-preview-2026-10-30/a.html`. Screenshot `a-desktop.jpg` é referência crítica da escolha; `buildPath=code`, não reprodução métrica de comp. Frase da missão e conteúdo legal preservados literalmente; rodapé existente mantido.
-
-Reaproveitar pools limitados para variar lojas e evitar repetição, sem novas consultas. Campanhas em Brasília: Esquenta até 26/11; Black 27–29/11; Cyber 30/11; Esquenta Natal 01–13/12; Natal 14–25/12; neutro em 26/12. A troca deve funcionar com ISR e abas abertas.

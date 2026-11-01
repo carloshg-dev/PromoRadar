@@ -1,0 +1,17 @@
+# Home e identidade pública
+
+Modo: Persuade na descoberta; Operate ao filtrar e comparar. Pedido de 01/11/2026 substitui a base clara por marketplace escuro. Missão e rodapé literais, preço/origem/recência e consentimento preservados.
+
+## Direction contract
+
+THESIS: Shop PromoDetec: feira digital de achados baratos; produto e preço ocupam a primeira tela.
+
+OWN-WORLD: Grafite e carvão, laranja quente nas ações, amarelo nos cupons, fotografias brancas, Geist e números tabulares; nenhuma borda luminosa.
+
+STORY: Escolher uma faixa, explorar categorias e cupons reais, espiar o produto e conferir a loja.
+
+FIRST VIEWPORT: Cabeçalho compacto com busca; campanha baixa com produtos reais à direita; trilho de categorias e preços; seis cards por linha no desktop e dois no celular. Feed continua com até 48 produtos dos pools existentes.
+
+FORM: Feira digital noturna, 6/7, seed 5badb485; brief fixa marketplace. Assinatura: espiar abre consulta rápida sem rede; sugestão pequena aparece no máximo uma vez por sessão e fecha. Movimento curto somente nessas revelações.
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

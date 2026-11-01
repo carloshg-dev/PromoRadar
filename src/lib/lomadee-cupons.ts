@@ -31,6 +31,9 @@ export interface CupomLomadee {
   destaque: boolean;
   /** cupom curado a mao (fora da Lomadee, ex. Awin) - sempre no topo. */
   curado?: boolean;
+  source?: "awin" | "lomadee";
+  checkedAt?: string;
+  terms?: string;
 }
 
 interface CampanhaApi {

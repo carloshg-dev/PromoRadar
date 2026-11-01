@@ -8,7 +8,7 @@ import { ProdutoCard } from "@/components/produto-card";
  */
 export function GridProdutos({ produtos }: { produtos: Produto[] }) {
   return (
-    <div className="mt-6 grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+    <div className="shop-feed-grid mt-6">
       {produtos.map((p) => <ProdutoCard key={p.id} p={p} />)}
     </div>
   );

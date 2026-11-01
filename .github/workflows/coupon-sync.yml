@@ -1,0 +1,38 @@
+name: Cupons oficiais das redes
+on:
+  schedule:
+    - cron: "20 2,8,14,20 * * *" # 23:20, 05:20, 11:20, 17:20 Brasília
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publicar snapshot validado no Storage privado
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: coupon-sync
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      AWIN_API_KEY: ${{ secrets.AWIN_API_KEY }}
+      AWIN_PUBLISHER_ID: "2936727"
+      LOMADEE_API_KEY: ${{ secrets.LOMADEE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npx tsx scripts/sync-coupons.ts ${{ (github.event_name == 'schedule' || inputs.publish) && '--publish' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coupon-sync-${{ github.run_id }}
+          path: reports/coupon-sync.json
+          if-no-files-found: error
+          retention-days: 14

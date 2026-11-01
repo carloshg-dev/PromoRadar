@@ -6,15 +6,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
  * é cacheável por URL e amigável a SEO. Os filtros ativos (categoria, busca)
  * são preservados via `params`.
  */
-export function Paginacao({ pagina, total, porPagina, baseHref, params }: {
+export function Paginacao({ pagina, total, hasMore, porPagina, baseHref, params }: {
   pagina: number;
-  total: number;
+  total: number | null;
+  hasMore?: boolean;
   porPagina: number;
   baseHref: string;
   params?: Record<string, string | undefined>;
 }) {
-  const paginas = Math.max(1, Math.ceil(total / porPagina));
-  if (paginas <= 1) return null;
+  const paginas = total === null ? null : Math.max(1, Math.ceil(total / porPagina));
+  if (paginas === 1 || (paginas === null && pagina === 1 && !hasMore)) return null;
+  const next = paginas === null ? hasMore : pagina < paginas;
 
   const href = (p: number) => {
     const sp = new URLSearchParams();
@@ -37,10 +39,10 @@ export function Paginacao({ pagina, total, porPagina, baseHref, params }: {
       )}
 
       <span className="label-mono text-[11px] text-muted">
-        Página {pagina} de {paginas} · {total.toLocaleString("pt-BR")} produtos
+        Página {pagina}{total !== null && <> de {paginas} · {total.toLocaleString("pt-BR")} produtos</>}
       </span>
 
-      {pagina < paginas ? (
+      {next ? (
         <Link prefetch={false} href={href(pagina + 1)} className={`${btn} text-ink hover:border-brand/50 hover:bg-bg-soft`}>
           Próxima <ChevronRight className="h-3.5 w-3.5" />
         </Link>

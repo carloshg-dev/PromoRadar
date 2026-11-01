@@ -1,13 +1,14 @@
 import type { Config } from "tailwindcss";
 
-/** Identidade clara; cores das verticais orientam a navegação do catálogo. */
+/** Superfícies e contraste acompanham o calendário, inclusive o shop escuro. */
 const config: Config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        bg: { DEFAULT: "rgb(var(--page-rgb) / <alpha-value>)", soft: "rgb(var(--soft-rgb) / <alpha-value>)", card: "#ffffff", over: "#e5ecdf", input: "#ffffff" },
+        bg: { DEFAULT: "rgb(var(--page-rgb) / <alpha-value>)", soft: "rgb(var(--soft-rgb) / <alpha-value>)", card: "rgb(var(--card-rgb) / <alpha-value>)", over: "rgb(var(--soft-rgb) / <alpha-value>)", input: "rgb(var(--card-rgb) / <alpha-value>)" },
+        "on-brand": "rgb(var(--on-brand-rgb) / <alpha-value>)",
         ink: "rgb(var(--ink-rgb) / <alpha-value>)", line: "rgb(var(--line-rgb) / <alpha-value>)",
         brand: { DEFAULT: "rgb(var(--brand-rgb) / <alpha-value>)", 2: "rgb(var(--brand-deep-rgb) / <alpha-value>)" }, lime: "rgb(var(--accent-rgb) / <alpha-value>)",
         cyan: { DEFAULT: "#216678", 2: "#216678" },
@@ -21,7 +22,7 @@ const config: Config = {
         // "Signal accents" das lojas (DESIGN.md › Retail Integration)
         loja:  { kabum: "#FF6500", terabyte: "#00D35E", pichau: "#E3000F", mercadolivre: "#FFE600", amazon: "#FF9900" },
       },
-      maxWidth: { page: "1400px" },
+      maxWidth: { page: "1540px" },
       borderRadius: { DEFAULT: "0.5rem", md: "0.625rem", lg: "0.75rem", xl: "0.875rem", "2xl": "1rem", "3xl": "1rem" },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

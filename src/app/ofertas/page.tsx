@@ -16,25 +16,28 @@ import { Search } from "lucide-react";
 import { TODAS_CATEGORIAS } from "@/lib/navigation";
 import { catalogPriceLimit } from "@/core/catalog-policy";
 import { CatalogPriceFilter } from "@/components/catalog-price-filter";
+import { shopCollection } from "@/core/shop-collections";
 
 const POR_PAGINA = 60;
 
 export const metadata = { title: "Melhores ofertas", alternates: { canonical: "/ofertas" }, description: "Encontre ofertas por produto, categoria e loja. Consulte o histórico disponível antes de comprar." };
 export const revalidate = 3600;
 
-export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string; ate?: string } }) {
+export default async function Ofertas({ searchParams }: { searchParams: { categoria?: string; busca?: string; pagina?: string; loja?: string; ate?: string; colecao?: string } }) {
   const categoria = searchParams.categoria ?? "all";
   const busca = searchTerm(searchParams.busca);
   const loja = searchParams.loja ?? "";
   const pagina = pageNumber(searchParams.pagina);
   const maxPreco = catalogPriceLimit(searchParams.ate);
   const ate = maxPreco === null ? "todos" : String(maxPreco);
+  const colecao = shopCollection(searchParams.colecao);
   const selection = `${TODAS_CATEGORIAS.find(item => item.slug === categoria)?.nome ?? "Todas as categorias"} · ${loja ? loja.replace(/-/g, " ").slice(0, 60) : "Todas as lojas"}`;
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
-  let total = 0;
+  let total: number | null = 0;
+  let hasMore = false;
   let available = true;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria, busca, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco }));
+    ({ produtos, total, hasMore = false } = await listarOfertasPaginado({ categoria, busca, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco, colecao: colecao?.id }));
   } catch { available = false; }
 
   return (
@@ -42,32 +45,33 @@ export default async function Ofertas({ searchParams }: { searchParams: { catego
       {busca && <TrackView tipo="busca" termo={busca} origem="ofertas" />}
       {available && busca && produtos.length === 0 && <TrackView tipo="busca_sem_resultado" termo={busca} origem="ofertas" />}
       <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Ofertas" }]} />
-      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Encontre a sua próxima oferta.</h1>
+      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{colecao?.label ?? "Encontre a sua próxima oferta."}</h1>
       <p className="mt-1 text-sm text-muted">
         Preços coletados nos últimos {MAX_PRICE_AGE_DAYS} dias. Confira o valor final e a disponibilidade na loja.
-        {total > 0 && <span className="label-mono ml-2 text-[11px]">{total.toLocaleString("pt-BR")} produtos no radar</span>}
+        {total !== null && total > 0 && <span className="label-mono ml-2 text-[11px]">{total.toLocaleString("pt-BR")} produtos no radar</span>}
       </p>
 
       <form className="mt-5 flex flex-wrap gap-2" action="/ofertas">
         <label htmlFor="offers-search" className="sr-only">Buscar produto</label>
         <Input id="offers-search" name="busca" type="search" maxLength={80} defaultValue={busca} placeholder="Buscar produto…" className="min-w-0 flex-1" />
         <input type="hidden" name="categoria" value={categoria} />
+        {colecao && <input type="hidden" name="colecao" value={colecao.id} />}
         {loja && <input type="hidden" name="loja" value={loja} />}
         <CatalogPriceFilter value={maxPreco} id="offers-price-limit" />
         <Button>Buscar</Button>
       </form>
 
       <CatalogFilters selection={selection}>
-        <CategoriaFiltro baseHref="/ofertas" ativo={categoria} params={{ busca: busca || undefined, loja: loja || undefined, ate }} />
+        <CategoriaFiltro baseHref="/ofertas" ativo={categoria} params={{ busca: busca || undefined, loja: loja || undefined, ate, colecao: colecao?.id }} />
         <BarraLojas baseHref="/ofertas" ativa={loja}
-          params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, ate }} />
+          params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, ate, colecao: colecao?.id }} />
       </CatalogFilters>
 
       {produtos.length ? (
         <>
           <GridProdutos produtos={produtos} />
-          <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref="/ofertas"
-            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined, ate }} />
+          <Paginacao pagina={pagina} total={total} hasMore={hasMore} porPagina={POR_PAGINA} baseHref="/ofertas"
+            params={{ categoria: categoria !== "all" ? categoria : undefined, busca: busca || undefined, loja: loja || undefined, ate, colecao: colecao?.id }} />
         </>
       ) : (
         <EmptyState className="mt-8" icon={<Search className="h-6 w-6 text-brand" />} title={available ? "Nenhuma oferta neste filtro" : "Não foi possível carregar as ofertas"}

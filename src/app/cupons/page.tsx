@@ -1,83 +1,19 @@
-import { listarCupons, type CupomLomadee } from "@/lib/lomadee-cupons";
-import { cuponsCurados } from "@/lib/cupons-curados";
-import { CupomCard } from "@/components/cupom-card";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Ticket } from "lucide-react";
+import { Ticket, ArrowUpRight } from "lucide-react";
+import { listarCuponsPublicos } from "@/infrastructure/repositories/coupon-snapshot.repo";
+import { CouponDirectory } from "@/components/coupon-directory";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
-export const metadata = {
-  title: "Cupons de desconto",
-  alternates: { canonical: "/cupons" },
-  description: "Cupons e ofertas das lojas parceiras do PromoDetec — atualizados automaticamente, direto das marcas.",
-};
-// Se a API estiver temporariamente limitada durante o build, a pagina tenta se
-// recompor em poucos minutos. Uma coleta bem-sucedida continua cacheada por
-// 30 minutos dentro de `listarCupons`.
+export const metadata = { title: "Cupons e ofertas das lojas", alternates: { canonical: "/cupons" }, description: "Cupons e campanhas reais das redes parceiras. Confira código, validade e condições antes de usar na loja." };
 export const revalidate = 300;
 
-function chavesDoCupom(cupom: CupomLomadee): string[] {
-  const chaves = [`id:${cupom.id}`, `link:${cupom.link.trim().toLowerCase()}`];
-  const codigo = cupom.codigo?.trim().toLowerCase();
-  if (codigo) chaves.push(`codigo:${cupom.marca.trim().toLowerCase()}:${codigo}`);
-  return chaves;
-}
-
-function mesclarComCurados(
-  curados: CupomLomadee[],
-  automaticos: CupomLomadee[],
-): CupomLomadee[] {
-  const vistos = new Set(curados.flatMap(chavesDoCupom));
-  const resultado = [...curados];
-
-  for (const cupom of automaticos) {
-    const chaves = chavesDoCupom(cupom);
-    if (chaves.some((chave) => vistos.has(chave))) continue;
-    chaves.forEach((chave) => vistos.add(chave));
-    resultado.push(cupom);
-  }
-
-  return resultado;
-}
-
 export default async function Cupons() {
-  // Curados manuais sempre sobrevivem e ficam antes da coleta automatica.
-  const curados = cuponsCurados();
-  let automaticos: CupomLomadee[] = [];
-  try {
-    automaticos = await listarCupons(60);
-  } catch (error) {
-    console.warn(
-      "[cupons] coleta automatica indisponivel:",
-      error instanceof Error ? error.message : "erro desconhecido",
-    );
-    // Uma falha externa nao remove campanhas curadas ja validadas.
-  }
-  const cupons = mesclarComCurados(curados, automaticos);
-
-  return (
-    <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
-      <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Cupons" }]} />
-      <h1 className="mt-3 flex items-center gap-2 text-2xl font-bold">
-        <Ticket className="h-6 w-6 text-brand-2" /> Cupons de desconto
-      </h1>
-      <p className="mt-1 text-sm text-muted">
-        Direto das marcas parceiras, sem caça ao tesouro — copia o código, aplica no site da loja e pronto.
-        {cupons.length > 0 && (
-          <span className="label-mono ml-2 text-[11px]">{cupons.length} cupons ativos agora</span>
-        )}
-      </p>
-
-      {cupons.length ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cupons.map((c) => <CupomCard key={c.id} cupom={c} />)}
-        </div>
-      ) : (
-        <EmptyState className="mt-8" icon="🎟️" title="Sem cupons no momento"
-          hint="As campanhas das marcas renovam ao longo do dia — volta daqui a pouco."
-          action={<Link href="/ofertas"><Button variant="outline" size="sm">Ver ofertas</Button></Link>} />
-      )}
-    </main>
-  );
+  let data: Awaited<ReturnType<typeof listarCuponsPublicos>> = { coupons: [], updatedAt: null }, available = true;
+  try { data = await listarCuponsPublicos(); } catch { available = false; }
+  return <main className="mx-auto max-w-page px-4 py-6 sm:px-6 lg:px-10">
+    <Breadcrumbs items={[{ label: "Início", href: "/" }, { label: "Cupons" }]} />
+    <div className="my-6 flex flex-wrap items-end justify-between gap-4"><div><h1 className="flex items-center gap-3 text-3xl font-bold sm:text-4xl"><Ticket className="h-8 w-8 text-lime" />Cupons para o seu próximo achado.</h1><p className="mt-3 max-w-prose text-sm leading-6 text-muted">Copie o código ou ative a oferta na loja. Valor mínimo, público elegível, frete e estoque podem mudar o resultado; confira as condições.</p></div><Link prefetch={false} href="/ofertas?ate=100" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">Achados até R$100<ArrowUpRight className="h-4 w-4" /></Link></div>
+    {data.coupons.length > 0 ? <CouponDirectory coupons={data.coupons} /> : <div className="rounded-xl border border-line bg-bg-card p-7"><h2 className="text-xl font-semibold">{available ? "Novos cupons estão a caminho" : "Não foi possível atualizar os cupons"}</h2><p className="mt-2 text-sm text-muted">Só exibimos campanhas recebidas das redes e verificadas recentemente. Volte em alguns instantes ou explore os produtos.</p><Link prefetch={false} href="/ofertas" className="shop-action mt-5 inline-flex min-h-11 items-center rounded-lg px-4 text-sm font-semibold">Ver ofertas</Link></div>}
+    {data.updatedAt && <p className="mt-6 text-xs text-muted">Última consulta às redes: <time dateTime={data.updatedAt}>{new Date(data.updatedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</time> (Brasília). A aceitação do código é confirmada no checkout da loja.</p>}
+  </main>;
 }

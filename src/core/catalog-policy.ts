@@ -1,7 +1,7 @@
 /** Teto de exposição; nunca modifica o preço recebido da loja. */
 export const DEFAULT_CATALOG_PRICE_LIMIT = 1000;
 export const HOME_HIGHLIGHT_PRICE_LIMIT = 300;
-export const CATALOG_PRICE_OPTIONS = [100, 300, 500, 1000, 2000, 5000] as const;
+export const CATALOG_PRICE_OPTIONS = [20, 50, 100, 300, 500, 1000, 2000, 5000] as const;
 // Legado AliExpress contém conversão estimada sem moeda de origem persistida.
 // Liberar após reingestão BRL com proveniência; preservar os registros para auditoria.
 export const UNVERIFIED_BRL_STORES = ["aliexpress"] as const;

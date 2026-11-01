@@ -45,6 +45,19 @@ test("falha de consulta paginada não vira catálogo vazio válido", async conte
   await assert.rejects(listarOfertasPaginado({ busca: "fone" }));
 });
 
+test("timeout da contagem recupera só a página com os mesmos filtros e sem inventar total", async context => {
+  let calls = 0;
+  context.mock.method(globalThis, "fetch", async (url: unknown, init?: RequestInit) => {
+    calls++; const query = new URL(String(url)); assertRecent(query);
+    assert.ok(query.searchParams.getAll("preco_atual").includes("lte.300"));
+    if (calls === 1) { assert.match(new Headers(init?.headers).get("prefer") ?? "", /count=exact/); return Response.json({ code: "57014", message: "timeout" }, { status: 500 }); }
+    assert.equal(query.searchParams.get("limit"), "61"); assert.ok(!new Headers(init?.headers).get("prefer")?.includes("count=exact"));
+    return Response.json(Array.from({ length: 61 }, (_, i) => ({ id: String(i), titulo: "Produto", preco_atual: 20, em_estoque: true })));
+  });
+  const result = await listarOfertasPaginado({ maxPreco: 300 });
+  assert.equal(calls, 2); assert.equal(result.produtos.length, 60); assert.equal(result.total, null); assert.equal(result.hasMore, true);
+});
+
 test("posts automáticos não promovem moeda pendente, foto genérica, preço antigo ou acima do teto", async context => {
   const item = { id: "valid", titulo: "Fone", loja_slug: "amazon", loja_nome: "Amazon", categoria_slug: "fones-bluetooth", url: "https://www.amazon.com.br/dp/B0TEST", imagem_url: "https://cdn.test/product.jpg", em_estoque: true, preco_atual: 99, desconto_pct: 25, atualizado_em: new Date().toISOString() };
   context.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) => {

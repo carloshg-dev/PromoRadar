@@ -31,10 +31,11 @@ export default async function Categoria({ params, searchParams }: {
   const maxPreco = catalogPriceLimit(searchParams.ate);
   const ate = maxPreco === null ? "todos" : String(maxPreco);
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
-  let total = 0;
+  let total: number | null = 0;
+  let hasMore = false;
   let available = true;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria: params.slug, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco }));
+    ({ produtos, total, hasMore = false } = await listarOfertasPaginado({ categoria: params.slug, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco }));
   } catch { available = false; }
   const nome = nomeCategoria(params.slug);
 
@@ -44,7 +45,7 @@ export default async function Categoria({ params, searchParams }: {
       <TrackView tipo="ver_categoria" categoriaSlug={params.slug} origem="categoria" />
       <h1 className="mt-3 text-2xl font-bold">{nome}</h1>
       <p className="mt-1 text-sm text-muted">Preços coletados nos últimos {MAX_PRICE_AGE_DAYS} dias. Confira as condições atuais na loja.</p>
-      {total > 0 && (
+      {total !== null && total > 0 && (
         <p className="label-mono mt-1 text-[11px] text-muted">{total.toLocaleString("pt-BR")} produtos no radar</p>
       )}
       <SubcategoriaNav slugAtivo={params.slug} ate={ate} />
@@ -57,7 +58,7 @@ export default async function Categoria({ params, searchParams }: {
       {produtos.length ? (
         <>
           <GridProdutos produtos={produtos} />
-          <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`}
+          <Paginacao pagina={pagina} total={total} hasMore={hasMore} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`}
             params={{ loja: loja || undefined, ate }} />
         </>
       ) : (

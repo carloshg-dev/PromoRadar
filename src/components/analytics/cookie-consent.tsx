@@ -54,7 +54,7 @@ export function CookieConsent() {
             Rejeitar
           </button>
           <button type="button" onClick={() => decidir("accepted")}
-            className="min-h-11 flex-1 rounded-lg bg-brand px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-brand/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand sm:flex-none">
+            className="min-h-11 flex-1 rounded-lg bg-brand px-5 py-2 text-xs font-bold text-on-brand transition-colors hover:bg-brand/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand sm:flex-none">
             Aceitar
           </button>
         </div>

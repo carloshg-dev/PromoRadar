@@ -1,0 +1,38 @@
+name: Resumo diário e semanal no Discord
+on:
+  schedule:
+    - cron: "0 11 * * *" # Diário, 08:00 Brasília, dia anterior completo
+    - cron: "15 11 * * 1" # Semanal, segunda 08:15 Brasília
+  workflow_dispatch:
+    inputs:
+      weekly: { description: Relatório semanal, type: boolean, default: false }
+      send: { description: Enviar no Discord, type: boolean, default: false }
+permissions:
+  contents: read
+concurrency:
+  group: business-report
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      AWIN_API_KEY: ${{ secrets.AWIN_API_KEY }}
+      AWIN_PUBLISHER_ID: "2936727"
+      PROMODETEC_LEADS_DISCORD_WEBHOOK_URL: ${{ secrets.PROMODETEC_LEADS_DISCORD_WEBHOOK_URL }}
+      PROMODETEC_REPORT_DISCORD_WEBHOOK_URL: ${{ secrets.PROMODETEC_REPORT_DISCORD_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npx tsx scripts/daily-business-report.ts ${{ (github.event.schedule == '15 11 * * 1' || inputs.weekly) && '--weekly' || '' }} ${{ (github.event_name == 'schedule' || inputs.send) && '--send' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: business-report-${{ github.run_id }}
+          path: reports/business-*
+          retention-days: 30
+          if-no-files-found: error
