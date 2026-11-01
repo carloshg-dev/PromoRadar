@@ -4,7 +4,9 @@ Data: 31/10/2026. Pedido atual: ganhar tempo no plano gratuito preservando a nav
 
 ## Entrega de infraestrutura
 
-Candidato funcional `95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf`, [PR #14](https://github.com/carloshg-dev/PromoRadar/pull/14), baseado em `main/f4e72f2`. A publicação será registrada separadamente após o merge e a comprovação pública.
+Candidato funcional `95fe010a2dd5a96a4843f9acb8d9c3743ad9feaf`, [PR #14](https://github.com/carloshg-dev/PromoRadar/pull/14), baseado em `main/f4e72f2`. Integrado na main em **`5ea0ec4d7287f0de2e5cf5b6af32d7e7cf9bbdb1`** às 12:34:05 UTC. Workers Builds `promodetec` concluiu com sucesso na conta do domínio, build **`3c5f692e-fb1b-4b26-8d3b-04117bcbea39`**. Domínio público confirmou app buildId **`ASiBOyGyT3SDp14c5VT1e`**, HTML/RSC e cache HIT. O UUID interno da versão não foi consultado no painel; não inferir Ready/100% a partir desses recibos.
+
+Comprovação pública encerrada às 12:39:31 UTC: **20 observações HTTP** com estados esperados. Home: primeira leitura 1.459 ms, repetição 47 ms; ofertas: 4.353/63 ms, mesmos corpos SHA-256. HTML e RSC permaneceram separados; nonce RSC reaproveitou a variante correta; cookie desconhecido fez BYPASS. Produto, HEAD de saída, busca, login/admin, cupons, comparador, categoria e JS/CSS responderam conforme o contrato. São latências de uma amostra, não CPU ou ganho sustentado. A URL de teste do proxy foi recusada com 403/`Blocked`, sem o header do Worker, igual ao observado no laboratório; não atribuir essa recusa a uma regra WAF específica.
 
 - Entry point próprio chama o Worker gerado pelo OpenNext. Antes de renderizar, consulta o Cache API para GETs públicos elegíveis da home, ofertas, categorias, produto e comparador.
 - Resposta íntegra reaproveitada por **120 segundos**, por POP. Host, URL, filtros, HTML/RSC, árvore do roteador e build têm chaves distintas. O nonce de transporte RSC é retirado apenas quando os headers da variante também entram na chave.
@@ -16,7 +18,7 @@ Não há alteração de classes CSS, texto, navegação, desenho do hero/rodapé
 
 ## Validação do pacote exato
 
-- [CI de contratos 41185478419](https://github.com/carloshg-dev/PromoRadar/actions/runs/41185478419): tipos da aplicação/runners, 85 testes de crescimento, 28 de coleta e ensaio de memória aprovados. Um teste adicional de cookies separados foi aprovado depois; somente testes/documentação mudaram após o candidato funcional.
+- [CI de contratos 41185478419](https://github.com/carloshg-dev/PromoRadar/actions/runs/41185478419): tipos da aplicação/runners, 85 testes de crescimento, 28 de coleta e ensaio de memória aprovados. O head posterior, somente testes/documentação, passou no [run 41201506341](https://github.com/carloshg-dev/PromoRadar/actions/runs/41201506341), com 86 testes de crescimento e 28 de coleta. Tipagem estrita explícita do entrypoint/runner também passou localmente.
 - [OpenNext/workerd 41185469428](https://github.com/carloshg-dev/PromoRadar/actions/runs/41185469428): **35/35 contratos**, expiração nativa e recuperação do cache, HTML/RSC, rotas anônimas/protegidas e saída técnica sem clique. BuildId `GhYTqcZJ2Wtn1mUJZKs3-`, Wrangler 4.151.2, compatibilidade efetiva `2026-08-23`, **1.575,51 KiB gzip** de 3.072 KiB.
 - **512/512 respostas quentes** com status/conteúdo esperados, concorrência 1/8/32/64 e zero falhas nessa amostra. Baseline de 16 renderizações, concorrência 2, também preservou o catálogo. Os testes foram locais; não submetemos Supabase ou o site publicado a essas rajadas.
 - O profiler V8 local observou muito menos amostras ativas no caminho HIT. Os valores no recibo são contagens e intervalo solicitado de 100 µs; não são CPU faturada ou garantia de cumprimento de 10 ms em produção. RSS do processo Miniflare/workerd não representa memória de um isolate.

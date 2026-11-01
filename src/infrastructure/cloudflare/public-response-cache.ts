@@ -29,7 +29,7 @@ function eligibleUrl(request: Request): URL | null {
   const category = /^\/categoria\/[a-z0-9-]{1,80}$/.test(url.pathname);
   const product = /^\/produto\/[0-9a-f-]{36}$/i.test(url.pathname);
   if (!PUBLIC_PATHS.has(url.pathname) && !category && !product) return null;
-  const allowed = url.pathname === "/ofertas" ? ["categoria", "busca", "loja", "pagina", "ate"]
+  const allowed = url.pathname === "/ofertas" ? ["categoria", "busca", "loja", "pagina", "ate", "colecao"]
     : category ? ["loja", "pagina", "ate"] : url.pathname === "/comparar" ? ["categoria", "vertical"] : [];
   const seen = new Set<string>();
   for (const [name, value] of url.searchParams) {

@@ -7,7 +7,7 @@ import { verticalDaCategoria } from "@/lib/navigation";
  * a ativa na cor da vertical. Aparece no topo das páginas de categoria. Some se
  * a categoria não pertence a uma vertical mapeada (não há irmãs para listar).
  */
-export function SubcategoriaNav({ slugAtivo }: { slugAtivo: string }) {
+export function SubcategoriaNav({ slugAtivo, ate }: { slugAtivo: string; ate?: string }) {
   const vertical = verticalDaCategoria(slugAtivo);
   if (!vertical || vertical.categorias.length < 2) return null;
   const { accent } = vertical;
@@ -24,7 +24,7 @@ export function SubcategoriaNav({ slugAtivo }: { slugAtivo: string }) {
           <Link
             prefetch={false}
             key={slug}
-            href={`/categoria/${slug}`}
+            href={`/categoria/${slug}${ate ? `?${new URLSearchParams({ ate })}` : ""}`}
             aria-current={ativo ? "page" : undefined}
             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
               ativo

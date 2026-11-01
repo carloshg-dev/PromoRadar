@@ -11,6 +11,7 @@ import { Journey } from "@/components/analytics/journey";
 import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { CampaignProvider } from "@/components/campaign-provider";
 import { scriptTemaSazonal, temaSazonal } from "@/lib/seasonal";
+import { ProductQuickViewProvider } from "@/components/product-quick-view";
 
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f6f7f3",
+  themeColor: "#101114",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head><script dangerouslySetInnerHTML={{ __html: scriptTemaSazonal() }} /></head>
       <body className="min-h-screen font-sans antialiased">
         <CampaignProvider initialTheme={theme}>
+        <ProductQuickViewProvider>
         <Clarity />
         <GoogleAnalytics />
         <Journey />
@@ -57,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Footer />
         <CookieConsent />
+        </ProductQuickViewProvider>
         </CampaignProvider>
       </body>
     </html>

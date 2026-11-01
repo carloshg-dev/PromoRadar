@@ -1,0 +1,124 @@
+{
+  "recordedAt": "2026-11-01T14:41:00.623Z",
+  "candidateCode": "f12a611625e4d19d3553137d9a0ea4b5253bebbc",
+  "candidateSourceTree": "f3f8853693373d1be1a3a303888d5435c4427799",
+  "approval": {
+    "kind": "owner inspected running local preview",
+    "preview": "http://127.0.0.1:3221/",
+    "acceptedLayout": true,
+    "requestedAdjustment": "Replace pumpkin tone with a more vivid orange",
+    "historicalMainApproval": true,
+    "explicitMainApproval": false,
+    "publicationOnHold": true,
+    "latestOwnerInstruction": "calma ai não sobe na main ainda",
+    "deviceCoverage": "not specified by owner"
+  },
+  "palette": {
+    "action": "#FF7A00",
+    "hover": "#FF911F",
+    "onAction": "#19120F"
+  },
+  "contrast": [
+    {
+      "role": "texto dos botões",
+      "foreground": [
+        25,
+        18,
+        15
+      ],
+      "background": [
+        255,
+        122,
+        0
+      ],
+      "minimum": 4.5,
+      "ratio": 7.08,
+      "passed": true
+    },
+    {
+      "role": "texto dos botões em hover",
+      "foreground": [
+        25,
+        18,
+        15
+      ],
+      "background": [
+        255,
+        145,
+        31
+      ],
+      "minimum": 4.5,
+      "ratio": 8.21,
+      "passed": true
+    },
+    {
+      "role": "links no card",
+      "foreground": [
+        255,
+        122,
+        0
+      ],
+      "background": [
+        26,
+        28,
+        32
+      ],
+      "minimum": 4.5,
+      "ratio": 6.53,
+      "passed": true
+    },
+    {
+      "role": "links na superfície elevada",
+      "foreground": [
+        255,
+        122,
+        0
+      ],
+      "background": [
+        35,
+        37,
+        42
+      ],
+      "minimum": 4.5,
+      "ratio": 5.87,
+      "passed": true
+    },
+    {
+      "role": "título no hero",
+      "foreground": [
+        255,
+        122,
+        0
+      ],
+      "background": [
+        22,
+        23,
+        27
+      ],
+      "minimum": 3,
+      "ratio": 6.85,
+      "passed": true
+    }
+  ],
+  "previewRead": {
+    "status": 200,
+    "cards": 48,
+    "cssStatus": 200,
+    "vividOrange": true,
+    "browserRenderedByAgent": false
+  },
+  "validation": {
+    "growthRun": 41317013826,
+    "growthTests": 112,
+    "collectionTests": 30,
+    "types": "passed",
+    "workerRun": 41317009139,
+    "workerStatusAtRecord": "in progress"
+  },
+  "limits": [
+    "Owner visual approval is recorded separately from automated review; browser control still reports disabled.",
+    "Previous Impeccable reviewer disposition remains recapture; no automated ship verdict is claimed.",
+    "This is pre-integration evidence; deployment and public HTTP must be verified separately in PR 17.",
+    "No new paid plan, Ads activation, remote DDL, DNS/WAF or credential change."
+  ]
+}

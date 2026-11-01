@@ -18,6 +18,8 @@ export type AwinIngestao =
   | "cron-proprio"; // tem pipeline dedicado (ex. Diesel: scripts/ingest-awin-diesel.js)
 
 export interface AwinAnunciante {
+  /** Moeda do programa confirmada pela API Awin em 31/10/2026; não é cotação. */
+  moedaPadrao?: "BRL" | "USD";
   mid: string;              // awinmid (fallback público)
   envKey: string;           // override opcional no .env.local
   nome: string;             // exibição (vira lojas.nome)
@@ -32,81 +34,65 @@ export interface AwinAnunciante {
 
 export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
   {
-    mid: "18879", envKey: "AWIN_MID_AliexpressBR&LATAM", nome: "AliExpress", slug: "aliexpress",
+    mid: "18879", moedaPadrao: "USD", envKey: "AWIN_MID_AliexpressBR&LATAM", nome: "AliExpress", slug: "aliexpress",
     dominios: ["aliexpress.com", "pt.aliexpress.com"], baseUrl: "https://pt.aliexpress.com",
     categoria: "ofertas-parceiros", ingestao: "adapter", maxFeeds: 4, maxProdutos: 1500,
   },
   {
-    mid: "78382", envKey: "AWIN_MID_PANASONICBR", nome: "Panasonic", slug: "panasonic",
+    mid: "78382", moedaPadrao: "BRL", envKey: "AWIN_MID_PANASONICBR", nome: "Panasonic", slug: "panasonic",
     dominios: ["panasonic.com.br", "loja.panasonic.com.br"], baseUrl: "https://loja.panasonic.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },
   {
-    mid: "17874", envKey: "AWIN_MID_EXTRA", nome: "Extra", slug: "extra",
-    dominios: ["extra.com.br"], baseUrl: "https://www.extra.com.br",
-    categoria: "ofertas-parceiros", ingestao: "adapter",
-  },
-  {
-    mid: "17891", envKey: "AWIN_MID_L'OCCITANE", nome: "L'Occitane", slug: "loccitane",
+    mid: "17891", moedaPadrao: "BRL", envKey: "AWIN_MID_L'OCCITANE", nome: "L'Occitane", slug: "loccitane",
     dominios: ["loccitane.com.br", "br.loccitane.com"], baseUrl: "https://br.loccitane.com",
     categoria: "skincare", ingestao: "adapter",
   },
   {
-    mid: "30615", envKey: "AWIN_MID_SPICY", nome: "Spicy", slug: "spicy",
+    mid: "30615", moedaPadrao: "BRL", envKey: "AWIN_MID_SPICY", nome: "Spicy", slug: "spicy",
     dominios: ["spicy.com.br"], baseUrl: "https://www.spicy.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },
   {
-    mid: "76888", envKey: "AWIN_MID_DOCEBELEZA", nome: "Doce Beleza", slug: "docebeleza",
+    mid: "76888", moedaPadrao: "BRL", envKey: "AWIN_MID_DOCEBELEZA", nome: "Doce Beleza", slug: "docebeleza",
     dominios: ["docebeleza.com.br"], baseUrl: "https://www.docebeleza.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter", // catálogo misto (perfume+make+skin); split por produto = fase 2
   },
   {
-    mid: "117737", envKey: "AWIN_MID_SANAVITA", nome: "Sanavita", slug: "sanavita",
-    dominios: ["sanavita.com.br"], baseUrl: "https://www.sanavita.com.br",
-    categoria: "fit-outros", ingestao: "adapter",
-  },
-  {
-    mid: "17665", envKey: "AWIN_MID_CARREFOURBR", nome: "Carrefour", slug: "carrefour",
+    mid: "17665", moedaPadrao: "BRL", envKey: "AWIN_MID_CARREFOURBR", nome: "Carrefour", slug: "carrefour",
     dominios: ["carrefour.com.br"], baseUrl: "https://www.carrefour.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },
   {
-    mid: "17621", envKey: "AWIN_MID_PONTOFRIO", nome: "Ponto Frio", slug: "pontofrio",
-    dominios: ["pontofrio.com.br"], baseUrl: "https://www.pontofrio.com.br",
-    categoria: "ofertas-parceiros", ingestao: "adapter",
-  },
-  {
-    mid: "26113", envKey: "AWIN_MID_POLISHOP", nome: "Polishop", slug: "polishop",
+    mid: "26113", moedaPadrao: "BRL", envKey: "AWIN_MID_POLISHOP", nome: "Polishop", slug: "polishop",
     dominios: ["polishop.com.br"], baseUrl: "https://www.polishop.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },
   {
-    // Diesel fica FORA do adapter: scripts/ingest-awin-diesel.js (cron 06:30) já
-    // cuida dela com lógica própria (inversão search/rrp, dedup por título, split
-    // perfume/moda). Incluir aqui = ingestão DUPLA (skus awin-* vs diesel-*).
-    mid: "17846", envKey: "AWIN_MID_DieselBR", nome: "Diesel", slug: "diesel",
-    dominios: ["diesel.com.br"], baseUrl: "https://www.diesel.com.br",
+    // Diesel fica FORA do adapter: importador legado dedicado, somente manual.
+    // Revalidar moeda, preço e streaming antes de reativá-lo; não duplicar SKUs.
+    mid: "17846", moedaPadrao: "BRL", envKey: "AWIN_MID_DieselBR", nome: "Diesel", slug: "diesel",
+    dominios: ["diesel.com.br", "br.diesel.com"], baseUrl: "https://br.diesel.com",
     categoria: "moda", ingestao: "cron-proprio",
   },
   {
-    mid: "17698", envKey: "AWIN_MID_OlympikusBR", nome: "Olympikus", slug: "olympikus",
+    mid: "17698", moedaPadrao: "BRL", envKey: "AWIN_MID_OlympikusBR", nome: "Olympikus", slug: "olympikus",
     dominios: ["olympikus.com.br"], baseUrl: "https://www.olympikus.com.br",
     categoria: "moda", ingestao: "adapter",
   },
-  // Nova leva aprovada (04/07) — a Guilhotina de volume avalia o feed delas na 1ª coleta.
+  // Programas aprovados: disponibilidade de feed não é prova de ingestão.
   {
-    mid: "18878", envKey: "AWIN_Acer_BR", nome: "Acer", slug: "acer",
-    dominios: ["acer.com.br", "store.acer.com.br"], baseUrl: "https://store.acer.com.br",
+    mid: "18878", moedaPadrao: "BRL", envKey: "AWIN_Acer_BR", nome: "Acer", slug: "acer",
+    dominios: ["acer.com.br", "store.acer.com.br", "br-store.acer.com"], baseUrl: "https://br-store.acer.com",
     categoria: "notebooks", ingestao: "adapter",
   },
   {
-    mid: "17837", envKey: "AWIN_Eudora_BR", nome: "Eudora", slug: "eudora",
+    mid: "17837", moedaPadrao: "BRL", envKey: "AWIN_Eudora_BR", nome: "Eudora", slug: "eudora",
     dominios: ["eudora.com.br"], baseUrl: "https://www.eudora.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter", // beleza mista (perfume+make+skin)
   },
   {
-    mid: "23524", envKey: "AWIN_Dufrio_BR", nome: "Dufrio", slug: "dufrio",
+    mid: "23524", moedaPadrao: "BRL", envKey: "AWIN_Dufrio_BR", nome: "Dufrio", slug: "dufrio",
     dominios: ["dufrio.com.br"], baseUrl: "https://www.dufrio.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter", // eletro/linha branca
   },
@@ -115,10 +101,14 @@ export const AWIN_ANUNCIANTES: AwinAnunciante[] = [
     // ⚠️ 2936727 NÃO é o mid — é o PUBLISHER ID (awinaffid) da conta; usado como
     // mid, o deeplink travava na Awin ("erro de redirecionamento" 14/07). envKey
     // proposital ≠ AWIN_KABUM pra NÃO herdar o override errado do .env.
-    // Sem datafeed na Awin → produtos via kabum.adapter (API interna); o deeplink
-    // do /r/ é quem monetiza o clique.
-    mid: "17729", envKey: "AWIN_MID_KABUM", nome: "Kabum", slug: "kabum",
+    // O kabum.adapter também coleta a API da loja; /r/ aplica o deeplink.
+    mid: "17729", moedaPadrao: "BRL", envKey: "AWIN_MID_KABUM", nome: "Kabum", slug: "kabum",
     dominios: ["kabum.com.br"], baseUrl: "https://www.kabum.com.br",
+    categoria: "ofertas-parceiros", ingestao: "adapter",
+  },
+  {
+    mid: "51277", moedaPadrao: "BRL", envKey: "AWIN_MID_TROCAFY", nome: "Trocafy", slug: "trocafy",
+    dominios: ["trocafy.com.br"], baseUrl: "https://www.trocafy.com.br",
     categoria: "ofertas-parceiros", ingestao: "adapter",
   },
 ];

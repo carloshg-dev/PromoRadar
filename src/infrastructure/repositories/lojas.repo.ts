@@ -1,4 +1,4 @@
-import { createPublicClient } from "@/infrastructure/supabase/client";
+import { createPublicClient, createCachedPublicClient } from "@/infrastructure/supabase/client";
 import { redeAfiliada } from "@/lib/afiliados";
 
 /** Loja pronta pra vitrine/Barra de lojas. */
@@ -17,13 +17,13 @@ export interface LojaVitrine {
  * quem paga comissão vira destaque), depois alfabético. Data-driven: loja nova
  * criada pela coleta multi-loja aparece sozinha; loja desativada some.
  */
-export async function listarLojasVitrine(): Promise<LojaVitrine[]> {
-  const sb = createPublicClient();
+export async function listarLojasVitrine(leitura?: { client: ReturnType<typeof createPublicClient>; signal: AbortSignal }): Promise<LojaVitrine[]> {
+  const sb = leitura?.client ?? createCachedPublicClient();
   const { data, error } = await sb
     .from("lojas")
     .select("slug,nome,logo_url,base_url,adapter_key")
     .eq("ativo", true)
-    .order("nome");
+    .order("nome").limit(200).abortSignal(leitura?.signal ?? AbortSignal.timeout(5_000));
   if (error) throw error;
   const lojas: LojaVitrine[] = (data ?? []).map((l) => ({
     slug: l.slug as string,

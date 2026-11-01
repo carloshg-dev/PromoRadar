@@ -187,3 +187,34 @@ Quando um erro novo ocorrer: corrija o sistema, adicione a entrada aqui e transf
 - Causa: o plano SQL não foi perfilado; a forma de consulta é o gargalo observado, sem atribuir a um índice inexistente não verificado.
 - Correção: amostra limitada por cursor/PK e validação de estoque, preço e recência; 1.000 URLs lidas em 1,53 s e build aprovado.
 - Regra preventiva: sitemap não pode depender de ordenação global cara nem converter timeout em catálogo vazio silencioso.
+
+## 2026-11-01: prazo por página do sitemap interrompeu o build
+- Fato observado: build `41292047304`, candidato `6225b35`, falhou no pré-render de `/sitemap.xml` por `TimeoutError`. A home também registrou um 57014 e um `read_failed`; esses avisos não foram apagados do diagnóstico.
+- Causa confirmada: o cliente cancelou a leitura do sitemap no prazo de cinco segundos. A causa da lentidão remota não foi perfilada; não atribuir o timeout a CPU, ataque, layout ou falta de índice sem prova.
+- Correção: prazo único de doze segundos para até quatro páginas, cancelamento antes da próxima consulta e propagação de falha preservada. Antes, quatro prazos separados poderiam acumular vinte segundos. Não adiciona retries nem fallback vazio.
+- Regra preventiva: testar o cancelamento e o estado de erro, preservar o recibo que falhou e validar um novo SHA. Build posterior verde não apaga a falha nem comprova estabilidade SQL ou de CPU em produção.
+- Evidência: [PR #21](https://github.com/carloshg-dev/PromoRadar/pull/21), CI `41292426432`, OpenNext/workerd `41292425237` com 28/28 contratos. Produção e o candidato visual devem ser comprovados separadamente em `docs/PROJECT_STATE.md`.
+
+## 2026-11-01: contrato de moeda Awin sem coluna solicitada
+
+- Fato observado: job Awin agendado `41322212009` terminou com zero coletados/salvos e dez erros. Três feeds amostrados responderam 200 com `search_price` e sem `currency`; o bloqueio de moeda desconhecida os rejeitava corretamente.
+- Causa confirmada: nesses três exports, a coluna não era solicitada pela URL entregue no índice. Não foi demonstrada a causa específica de todas as dez falhas.
+- Correção local: pedir a coluna e os campos obrigatórios nos dois hosts oficiais, preservando feed/credencial e a exigência de BRL explícito. As três novas amostras declararam BRL; ensaio do adapter real trouxe 20 produtos de quatro anunciantes sem falhas.
+- Regra preventiva: ao endurecer um schema, validar a seleção de colunas da fonte real. Não deduzir moeda do país, converter preços sem prova ou enfraquecer a validação para obter volume. Falhas registram código sanitizado, sem URL privada.
+- Evidência/estado: `docs/AFFILIATE_CATALOG_RECOVERY_2026-11-01.md`; somente leitura, sem persistência e sem publicação da correção.
+
+## 2026-11-01: limite fixo descartou cupons Lomadee válidos
+
+- Fato observado: run agendado `41319832739` publicou cobertura Awin parcial e falhou com `lomadee_campaigns_page_limit`. A leitura real identificou sete páginas de marcas e 17 de campanhas, acima dos limites antigos.
+- Causa confirmada: a paginação interrompia a fonte com exceção e perdia as campanhas válidas já lidas. Marcas e campanhas também usam campos de paginação diferentes.
+- Correção local: respeitar os schemas reais, páginas e prazos limitados, conservar resultados parciais com status explícito, preservar snapshot anterior na falha total. Dry-run combinado selecionou 200 campanhas/47 códigos, sem publicar.
+- Regra preventiva: page limit protege memória/tempo, mas nunca transforma cobertura parcial em completa nem descarta silenciosamente dados válidos. O runner real precisa ser tipado no CI; schedule verde e HTTP 200 isolado não provam a abrangência da coleta.
+- Evidência/estado: mesmo relatório; ativação e schedule com a correção ainda pendentes.
+
+## 2026-11-01: preflight impediu quebra da configuração legada Lomadee
+
+- Fato observado: todos os testes do candidato `7f61e38` passaram, mas o preflight com a configuração real no run `41344210067` encontrou zero correspondências de instância e confirmou correspondência com o ID de tipo em 105 marcas. Não houve merge/deploy desse candidato.
+- Causa confirmada: o código novo interpretava `LOMADEE_SOURCE_ID` como `channel.id`; a configuração e o coletor legado usam `availableChannel.id`. A hipótese sobre o significado da configuração foi adotada sem testar o conjunto real. Uma leitura adicional encontrou uma única instância Comparador da conta, identificada como PromoDetec.
+- Correção: preservar a configuração e resolver tipo legado/ID de instância para uma única instância Comparador autenticada. Validar essa instância na resposta do encurtador; recusar outro tipo, ambiguidade e divergência. Não girar secrets ou aceitar qualquer canal para obter verde.
+- Regra preventiva: mudanças de atribuição exigem preflight somente leitura com a configuração real e teste do adapter com respostas de canais diferentes. Passar em teste de fixture não prova compatibilidade do valor configurado. Um CI de pacote verde não neutraliza o gate negativo de integração.
+- Evidência/estado: `docs/evidence/lomadee-release-preflight-initial-2026-11-01.json`; nove testes focados e tipagem passaram após correção. A nova homologação do commit corrigido deve preceder a publicação.

@@ -15,6 +15,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "typecheck:comparisons": "tsc --noEmit -p tsconfig.comparisons.json",
+    "typecheck:affiliates": "tsc --noEmit -p tsconfig.affiliates.json",
     "scrape": "tsx scripts/run-scraper.ts",
     "scrape:all": "tsx scripts/run-scraper.ts all",
     "news": "tsx scripts/run-news.ts",

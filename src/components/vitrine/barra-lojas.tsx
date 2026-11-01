@@ -21,16 +21,18 @@ function logoDaLoja(l: LojaVitrine): string | null {
   } catch { return null; }
 }
 
-export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }: {
+export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [], lojas: preloaded }: {
   baseHref: string;
   ativa?: string | null;
   /** filtros a preservar nos links (categoria, busca…) */
   params?: Record<string, string | undefined>;
   /** lojas ocultas somente nesta instancia da barra */
   excluir?: string[];
+  /** Reutiliza os metadados já lidos pela página. */
+  lojas?: LojaVitrine[];
 }) {
-  let lojas: LojaVitrine[] = [];
-  try { lojas = await listarLojasVitrine(); } catch { return null; }
+  let lojas: LojaVitrine[] = preloaded ?? [];
+  if (!preloaded) { try { lojas = await listarLojasVitrine(); } catch { return null; } }
   // "lomadee" é REDE, não loja de verdade — os achados dela seguem no grid geral.
   const ocultas = new Set(["lomadee", ...excluir]);
   lojas = lojas.filter((l) => !ocultas.has(l.slug));
@@ -68,9 +70,8 @@ export async function BarraLojas({ baseHref, ativa, params = {}, excluir = [] }:
               href={href(l.slug)}
               title={l.rede ? `${l.nome} · parceira ${l.rede}` : l.nome}
               className={`flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition ${
-                on ? "text-ink" : "border-line text-muted hover:bg-bg-soft hover:text-ink"
+                on ? "border-brand bg-brand/10 text-ink" : "border-line text-muted hover:bg-bg-soft hover:text-ink"
               }`}
-              style={on ? { borderColor: "#1b6549", backgroundColor: "#edf1e8" } : undefined}
             >
               {logo ? (
                 // eslint-disable-next-line @next/next/no-img-element

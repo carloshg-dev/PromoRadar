@@ -20,7 +20,7 @@ export function CardSaveButton({ item }: { item: RadarItem }) {
           : "Não foi possível salvar. Confira a permissão de armazenamento do navegador.");
         if (action === "saved" || action === "removed") track(action === "saved" ? "salvar_produto" : "remover_salvo", { produtoId: item.id, origem: "card" });
       }}
-      className={`absolute right-2 top-2 z-20 grid h-11 w-11 place-items-center rounded-full border bg-white text-brand transition-colors hover:bg-lime disabled:opacity-50 ${saved ? "border-brand" : "border-line"}`}>
+      className={`absolute right-2 top-2 z-20 grid h-11 w-11 place-items-center rounded-full border bg-white text-[#24272c] transition-colors hover:bg-lime disabled:opacity-50 ${saved ? "border-brand" : "border-[#d8dade]"}`}>
       <Heart className={`h-[18px] w-[18px] ${saved ? "fill-current" : ""}`} aria-hidden="true" />
     </button>
     <span className="sr-only" role="status" aria-live="polite">{message}</span>

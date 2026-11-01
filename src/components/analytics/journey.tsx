@@ -28,8 +28,8 @@ export function Journey() {
       const params = new URL(link.href).searchParams;
       const outbound = /^\/r\/([0-9a-f-]{36})$/i.exec(link.pathname);
       if (outbound) track("saida_loja", { produtoId: outbound[1], origem: params.get("o") || "link" });
-      else if (link.pathname === "/ofertas" && (params.has("loja") || params.has("categoria"))) {
-        track("filtrar_ofertas", { origem: params.has("loja") ? "loja" : "categoria" });
+      else if (link.pathname === "/ofertas" && ["loja", "categoria", "ate", "colecao"].some(key => params.has(key))) {
+        track("filtrar_ofertas", { origem: params.has("loja") ? "loja" : "categoria", lojaSlug: params.get("loja"), categoriaSlug: params.get("categoria") ?? params.get("colecao") });
       }
     };
     document.addEventListener("click", onClick);

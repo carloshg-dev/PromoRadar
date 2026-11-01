@@ -23,13 +23,13 @@ export function UserMenu() {
     return (
       <div className="flex items-center gap-2">
         <Link prefetch={false} href="/login" className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-sm font-semibold transition-colors hover:bg-bg-soft sm:w-auto sm:px-3"><UserRound className="h-4 w-4 sm:hidden" aria-hidden="true" /><span className="hidden sm:inline">Entrar</span><span className="sr-only sm:hidden">Entrar</span></Link>
-        <Link prefetch={false} href="/cadastro" className="hidden min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-2 xl:inline-flex">Criar conta</Link>
+        <Link prefetch={false} href="/cadastro" className="hidden min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-2 xl:inline-flex">Criar conta</Link>
       </div>
     );
   }
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} aria-label="Menu da conta" aria-expanded={open} className="grid h-11 w-11 place-items-center rounded-full bg-brand text-xs font-bold text-white">
+      <button onClick={() => setOpen((o) => !o)} aria-label="Menu da conta" aria-expanded={open} className="grid h-11 w-11 place-items-center rounded-full bg-brand text-xs font-bold text-on-brand">
         {email[0]?.toUpperCase()}
       </button>
       {open && (

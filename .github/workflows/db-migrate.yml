@@ -40,8 +40,10 @@ jobs:
             echo "::error::Arquivo SQL invalido ou ausente em db/."
             exit 1
           fi
-          if [ "$SQL_FILE" = "db/inspect-measurement-contract.sql" ]; then
-            export PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=5000"
+          if [ "$SQL_FILE" = "db/inspect-measurement-contract.sql" ] || [ "$SQL_FILE" = "db/inspect-catalog-contract.sql" ] || [ "$SQL_FILE" = "db/inspect-catalog-runtime.sql" ] || [ "$SQL_FILE" = "db/catalog-free-index.sql" ]; then
+            if [ "$SQL_FILE" != "db/catalog-free-index.sql" ]; then
+              export PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=5000"
+            fi
             node <<'NODE'
           const expected = "sksjukjkxkptresysbno";
           try {

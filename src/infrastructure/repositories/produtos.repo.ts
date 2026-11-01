@@ -11,8 +11,10 @@ import { permitidoNaHome } from "@/core/home-catalog";
 import { limitedFetch } from "@/infrastructure/supabase/limited-fetch";
 import { SELECT_PRODUTO as SELECT, mapProduto as map } from "./produto-row";
 import { recentPriceSince, hasRecentPrice } from "@/core/offer-freshness";
+import { catalogPriceLimit, DEFAULT_CATALOG_PRICE_LIMIT, GENERIC_IMAGE_PATTERNS, UNVERIFIED_BRL_STORES, validProductImage, verifiedBrlPrice } from "@/core/catalog-policy";
 import { formatShortDate } from "@/core/formatting";
-import { verifiedBrlPrice } from "@/core/catalog-policy";
+import { collectionQuery } from "@/core/shop-collections";
+import { selectStoreRecommendations } from "@/core/store-recommendations";
 
 export interface LeituraVitrine {
   agora: number;
@@ -48,20 +50,14 @@ export interface AchadoDoDia extends Produto {
  * NUNCA carrega os milhares — a query retorna ~120 linhas no pior caso.
  */
 export async function top5DoDia(n = 5, minDesconto = 15): Promise<AchadoDoDia[]> {
-  const sb = createPublicClient();
-  // Só ORDER BY promo_score + LIMIT (usa índice, rápido — igual listarOfertas).
-  // Filtros de desconto/imagem/estoque vão em MEMÓRIA sobre as ~300 linhas: pôr
-  // as WHERE de coluna computada na view estourava o statement timeout.
-  const { data, error } = await sb.from("vw_ofertas").select(SELECT)
-    .order("promo_score", { ascending: false, nullsFirst: false })
-    .limit(400);
-  if (error) throw error;
+  const now = Date.now();
+  // Mesma elegibilidade das vitrines; predicados permitem o índice parcial de leitura.
   // FILTRO DE CONTEÚDO (em memória): monetizado (post tem que pagar), com imagem,
   // preço de conteúdo (≥R$20, sem cacareco) e desconto na BANDA CRÍVEL 20-78% —
   // corta a âncora falsa da Shopee (90% off) que envenena a seleção.
-  const pool = (data ?? []).map(map).filter((p) =>
-    p.emEstoque && p.imagemUrl && ehLinkMonetizado(p.url) &&
-    (p.precoAtual ?? 0) >= 20 &&
+  const pool = (await listarOfertas({ limit: 400 })).filter((p) =>
+    p.emEstoque && validProductImage(p.imagemUrl) && verifiedBrlPrice(p.lojaSlug) && ehLinkMonetizado(p.url) &&
+    hasRecentPrice(p.atualizadoEm, now) && (p.precoAtual ?? 0) >= 20 && (p.precoAtual ?? Infinity) <= DEFAULT_CATALOG_PRICE_LIMIT &&
     (p.descontoPct ?? 0) >= minDesconto && (p.descontoPct ?? 0) <= 78);
   const ranqueado = pool
     .map((o) => ({ o, sc: scoreConteudo(o) }))
@@ -95,6 +91,8 @@ function mapVitrine(rows: Record<string, unknown>[], leitura?: LeituraVitrine): 
 }
 
 export interface OfertaFiltro {
+  colecao?: string;
+  maxPreco?: number | null;
   categoria?: string;
   /** filtro por várias categorias (ex: todas as de uma vertical). Tem prioridade sobre `categoria`. */
   categorias?: string[];
@@ -121,6 +119,17 @@ export async function listarOfertas(f: OfertaFiltro = {}, leitura?: LeituraVitri
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  const collection = collectionQuery(f.colecao);
+  if (collection) q = q.or(collection);
+  // A home valida o pool limitado em permitidoNaHome; duplicar estes predicados
+  // na view já causou 57014. Listagens completas precisam filtrar antes do limit.
+  if (!leitura) {
+    const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
+    if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
+    q = q.not("imagem_url", "is", null);
+    q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
+    for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
+  }
   q = q.limit(pool);
   const { data, error } = await q;
   if (error) throw error;
@@ -371,10 +380,7 @@ export async function listarAfiliadosRodizio(limit = 9, historicoPorProduto = 12
 }
 
 /** Página de ofertas com total — para paginação real nas listas (/ofertas, /categoria). */
-export interface PaginaOfertas { produtos: Produto[]; total: number }
-
-/** Teto do pool p/ reordenar "monetizado primeiro" — cobre as páginas rasas (99% do tráfego). */
-const POOL_ORDENACAO = 1000;
+export interface PaginaOfertas { produtos: Produto[]; total: number | null; hasMore?: boolean }
 
 export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number } = {}): Promise<PaginaOfertas> {
   const sb = createCachedPublicClient();
@@ -383,9 +389,10 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   const porPagina = f.limit ?? 60;
   const pagina = Math.max(1, f.pagina ?? 1);
   const de = (pagina - 1) * porPagina;
+  const query = (count: boolean) => {
   let q = sb
     .from("vw_ofertas")
-    .select(SELECT, { count: "exact" })
+    .select(SELECT, count ? { count: "exact" } : {})
     .eq("em_estoque", true).gt("preco_atual", 0)
     .gte("atualizado_em", recentPriceSince(agora)).lte("atualizado_em", new Date(agora).toISOString())
     .order("promo_score", { ascending: false, nullsFirst: false })
@@ -395,27 +402,44 @@ export async function listarOfertasPaginado(f: OfertaFiltro & { pagina?: number 
   if (f.loja) q = q.eq("loja_slug", f.loja);
   if (f.minScore) q = q.gte("promo_score", f.minScore);
   if (f.busca) q = q.ilike("titulo", titlePattern(f.busca));
+  const collection = collectionQuery(f.colecao);
+  if (collection) q = q.or(collection);
+  const maxPreco = f.maxPreco === null ? null : catalogPriceLimit(f.maxPreco);
+  if (maxPreco !== null) q = q.lte("preco_atual", maxPreco);
+  q = q.not("imagem_url", "is", null);
+  q = q.not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`);
+  for (const pattern of GENERIC_IMAGE_PATTERNS) q = q.not("imagem_url", "ilike", pattern);
 
-  // Páginas rasas: puxa o pool (top por nota) e reordena MONETIZADO PRIMEIRO — a loja que
-  // te paga comissão vira destaque, mesmo com nota menor (a nota vira só desempate interno).
-  // Assim o gamer que entra na Tech vê Amazon/Shopee/AliExpress no topo, não quem nos rejeitou.
-  //
-  // EXCEÇÃO — filtro de LOJA ÚNICA (f.loja): todos os produtos são da mesma loja, então o
-  // re-sort "monetizado primeiro" é INÓCUO. Puxar o pool de 1000 linhas nesse caso fazia a
-  // query estourar em loja gigante (Kabum: 2919 produtos → statement timeout no ambiente
-  // publicado → página "Nenhuma oferta"). Vai ranged puro (60 linhas), rápido. Idem página funda.
-  const usarPool = de < POOL_ORDENACAO && !f.loja;
-  const { data, error, count } = await q.range(usarPool ? 0 : de, usarPool ? POOL_ORDENACAO - 1 : de + porPagina - 1);
-  if (error) throw error;
-  const total = count ?? 0;
-  if (!usarPool) return { produtos: (data ?? []).map(map), total };
+  return q.range(de, de + porPagina - 1 + Number(!count));
+  };
+  const result = await query(true);
+  if (!result.error) return { produtos: (result.data ?? []).map(map), total: result.count ?? 0 };
+  // Um timeout com contagem não precisa impedir a página: uma única leitura sem COUNT.
+  if (result.error.code !== "57014") throw result.error;
+  console.warn("[catalog] count_query_timeout");
+  const fallback = await query(false);
+  if (fallback.error) throw fallback.error;
+  return { produtos: (fallback.data ?? []).slice(0, porPagina).map(map), total: null, hasMore: (fallback.data?.length ?? 0) > porPagina };
+}
 
-  const pool = (data ?? []).map(map);
-  pool.sort((a, b) => {
-    const m = (ehLinkMonetizado(b.url) ? 1 : 0) - (ehLinkMonetizado(a.url) ? 1 : 0);
-    return m !== 0 ? m : (b.promoScore ?? 0) - (a.promoScore ?? 0);
-  });
-  return { produtos: pool.slice(de, de + porPagina), total };
+/** Só é chamada na recuperação de uma loja vazia: quatro pools pequenos, cacheados,
+ * sem COUNT/ordenação global e dentro de um único prazo de oito segundos. */
+export async function alternativasParaLoja(loja: string, maxPreco: number | null) {
+  const leitura = criarLeituraVitrine();
+  const slugs = [...new Set([loja, "shopee", "spicy", "eudora"])];
+  const results = await Promise.allSettled(slugs.map(async slug => {
+    const { data, error } = await consultaVitrine(leitura.client, leitura).eq("loja_slug", slug)
+      .limit(96);
+    if (error) throw error;
+    // Não usa permitidoNaHome: a loja escolhida pode ser exclusiva do comparador.
+    return selectStoreRecommendations((data ?? []).map(map).filter(p => p.lojaSlug === slug && ehLinkMonetizado(p.url)), maxPreco, leitura.agora);
+  }));
+  const pools = results.flatMap(result => result.status === "fulfilled" ? result.value : []);
+  const mesmaLoja = selectStoreRecommendations(pools.filter(p => p.lojaSlug === loja), maxPreco, leitura.agora);
+  const outrasLojas = selectStoreRecommendations(pools.filter(p => p.lojaSlug !== loja), maxPreco, leitura.agora, 24);
+  const unavailableStores = slugs.filter((_, index) => results[index]?.status === "rejected");
+  if (unavailableStores.length) console.warn("[catalog] store_recovery_partial", unavailableStores.join(","));
+  return { produtos: embaralhar(mesmaLoja.length ? mesmaLoja : outrasLojas), mesmaLoja: mesmaLoja.length > 0, partial: unavailableStores.length > 0, unavailableStores };
 }
 
 /** Comparações já calculadas no runner; a visita nunca varre o catálogo. */

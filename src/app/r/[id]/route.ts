@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/infrastructure/supabase/admin";
 import { linkAfiliado, ehLinkMonetizado } from "@/lib/afiliados";
 import { isAutomatedRequest, safeOrigin } from "@/core/analytics/events";
+import { verifiedBrlPrice } from "@/core/catalog-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   // tem que estar AQUI (servidor), não só escondido atrás do botão do card. Assim,
   // mesmo que algum link antigo/direto aponte pra /r/{id} de um produto de loja que
   // não nos afiliou, ele NUNCA sai de graça — cai na página interna de comparação.
-  if (!ehLinkMonetizado(data.url)) {
+  if (!verifiedBrlPrice(data.loja_slug ?? "") || !ehLinkMonetizado(data.url)) {
     return NextResponse.redirect(new URL(`/produto/${data.id}`, req.url));
   }
 

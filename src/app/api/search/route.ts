@@ -3,6 +3,7 @@ import { createPublicClient } from "@/infrastructure/supabase/client";
 import { ehLinkMonetizado } from "@/lib/afiliados";
 import { searchTerm, titlePattern } from "@/core/search";
 import { recentPriceSince } from "@/core/offer-freshness";
+import { UNVERIFIED_BRL_STORES } from "@/core/catalog-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
     .from("vw_ofertas")
     .select("id,titulo,loja_nome,preco_atual,promo_score,categoria_emoji,url")
     .eq("em_estoque", true)
+    .not("loja_slug", "in", `(${UNVERIFIED_BRL_STORES.join(",")})`)
     .gt("preco_atual", 0)
     .gte("atualizado_em", recentPriceSince(now))
     .lte("atualizado_em", new Date(now).toISOString())

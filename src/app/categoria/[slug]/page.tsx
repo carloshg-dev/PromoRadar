@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { pageNumber } from "@/core/search";
 import { MAX_PRICE_AGE_DAYS } from "@/core/offer-freshness";
+import { catalogPriceLimit } from "@/core/catalog-policy";
+import { CatalogPriceFilter } from "@/components/catalog-price-filter";
 
 export const revalidate = 3600;
 const POR_PAGINA = 60;
@@ -22,15 +24,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function Categoria({ params, searchParams }: {
   params: { slug: string };
-  searchParams: { pagina?: string; loja?: string };
+  searchParams: { pagina?: string; loja?: string; ate?: string };
 }) {
   const pagina = pageNumber(searchParams.pagina);
   const loja = searchParams.loja ?? "";
+  const maxPreco = catalogPriceLimit(searchParams.ate);
+  const ate = maxPreco === null ? "todos" : String(maxPreco);
   let produtos: Awaited<ReturnType<typeof listarOfertasPaginado>>["produtos"] = [];
-  let total = 0;
+  let total: number | null = 0;
+  let hasMore = false;
   let available = true;
   try {
-    ({ produtos, total } = await listarOfertasPaginado({ categoria: params.slug, loja: loja || undefined, limit: POR_PAGINA, pagina }));
+    ({ produtos, total, hasMore = false } = await listarOfertasPaginado({ categoria: params.slug, loja: loja || undefined, limit: POR_PAGINA, pagina, maxPreco }));
   } catch { available = false; }
   const nome = nomeCategoria(params.slug);
 
@@ -40,16 +45,21 @@ export default async function Categoria({ params, searchParams }: {
       <TrackView tipo="ver_categoria" categoriaSlug={params.slug} origem="categoria" />
       <h1 className="mt-3 text-2xl font-bold">{nome}</h1>
       <p className="mt-1 text-sm text-muted">Preços coletados nos últimos {MAX_PRICE_AGE_DAYS} dias. Confira as condições atuais na loja.</p>
-      {total > 0 && (
+      {total !== null && total > 0 && (
         <p className="label-mono mt-1 text-[11px] text-muted">{total.toLocaleString("pt-BR")} produtos no radar</p>
       )}
-      <SubcategoriaNav slugAtivo={params.slug} />
-      <BarraLojas baseHref={`/categoria/${params.slug}`} ativa={loja} />
+      <SubcategoriaNav slugAtivo={params.slug} ate={ate} />
+      <form className="mt-4 flex flex-wrap items-center gap-2" action={`/categoria/${params.slug}`}>
+        {loja && <input type="hidden" name="loja" value={loja} />}
+        <CatalogPriceFilter value={maxPreco} id="category-price-limit" />
+        <Button type="submit" variant="outline">Aplicar</Button>
+      </form>
+      <BarraLojas baseHref={`/categoria/${params.slug}`} ativa={loja} params={{ ate }} />
       {produtos.length ? (
         <>
           <GridProdutos produtos={produtos} />
-          <Paginacao pagina={pagina} total={total} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`}
-            params={{ loja: loja || undefined }} />
+          <Paginacao pagina={pagina} total={total} hasMore={hasMore} porPagina={POR_PAGINA} baseHref={`/categoria/${params.slug}`}
+            params={{ loja: loja || undefined, ate }} />
         </>
       ) : (
         <EmptyState className="mt-8" icon="📦" title={available ? "Sem ofertas recentes nesta categoria" : "Não foi possível carregar esta categoria"}

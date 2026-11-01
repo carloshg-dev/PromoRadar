@@ -7,7 +7,7 @@ import type { CategoriaSlug } from "@/core/domain/types";
  *
  * AUTO-COMPLIANCE: o adapter só coleta se a marca estiver na lista da API
  * `/affiliate/brands` (pausada SOME da lista) E com o canal Comparador liberado
- * (channels[0].shortUrls preenchido) — a lição Época/Terabyte virou código.
+ * (canal PriceComparator com shortUrls preenchido).
  */
 
 export type PlataformaLoja = "shopify" | "vtex" | "woo";
@@ -28,9 +28,8 @@ export interface LomadeeParceiro {
   maxProdutos?: number; // default 150
 }
 
-// GUILHOTINA DE VOLUME (04/07): só catálogo de alto volume roda. NutriBullet (~88)
-// e Bio Bran (~56) REMOVIDAS por não alcançarem o piso de 200 produtos válidos.
-// Sieno (~246) sobrevive. Casa do Fitness já saíra (cloud-bloqueada).
+// Novas lojas exigem catálogo, preços BRL e canal validados. Não há piso de volume:
+// catálogos pequenos com achadinhos válidos também podem ser integrados.
 export const LOMADEE_PARCEIROS: LomadeeParceiro[] = [
   {
     matchMarca: /sieno/i,

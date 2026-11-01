@@ -16,8 +16,9 @@ import { carregarMovimento } from "@/infrastructure/repositories/analytics.repo"
 async function main() {
   const sb = createAdminClient();
   const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const ate = new Date().toISOString();
 
-  const movimento = await carregarMovimento(desde);
+  const movimento = await carregarMovimento(desde, ate);
   if (!movimento.complete || movimento.rankingLimited) throw new Error("Resumo incompleto; não enviar totais parciais como completos");
   const buscas = movimento.counts.busca ?? 0;
   const produtosVistos = movimento.counts.ver_produto ?? 0;
@@ -35,6 +36,7 @@ async function main() {
     compartilhamentos: movimento.counts.compartilhar_produto ?? 0,
     saidas: movimento.counts.saida_loja ?? 0,
     redirects: movimento.redirectRequests,
+    since: desde, until: ate,
   });
   console.log(`✅ Resumo diário enviado: ${movimento.totalEventos} ações · ${buscas} buscas · ${produtosVistos} views · ${novosUsuarios} novos usuários`);
 

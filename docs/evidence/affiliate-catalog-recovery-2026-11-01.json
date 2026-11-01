@@ -1,0 +1,257 @@
+{
+  "checkedAt": "2026-11-01T17:35:08.902Z",
+  "branch": "codex/black-shop",
+  "baseCommit": "f12a611625e4d19d3553137d9a0ea4b5253bebbc",
+  "uncommittedChanges": true,
+  "remoteWritesByThisCheck": false,
+  "productionDeployment": false,
+  "mainPush": false,
+  "publicationHold": true,
+  "preview": {
+    "origin": "http://127.0.0.1:3221",
+    "serverReadOnlyGuard": true,
+    "analyticsDisabled": true,
+    "keptRunningForOwner": true
+  },
+  "validation": {
+    "nextBuild": {
+      "passed": true,
+      "buildId": "41avva2PSV3y16i2BO4hR",
+      "lab": "isolated Linux Next production build; current src/scripts copied; shared dependency installation",
+      "homeFirstLoadJsKiB": 129
+    },
+    "applicationTypecheck": "passed",
+    "couponRunnerTypecheck": "passed",
+    "growthTests": {
+      "passed": 121,
+      "failed": 0
+    },
+    "collectionTests": {
+      "passed": 35,
+      "failed": 0
+    },
+    "localHttp": {
+      "passed": 6,
+      "failed": 0,
+      "checks": [
+        {
+          "store": "carrefour",
+          "requestedCap": 300,
+          "status": 200,
+          "state": "ready",
+          "recovery": "other-stores",
+          "cards": 24,
+          "maxPrice": 28.99,
+          "passed": true
+        },
+        {
+          "store": "extra",
+          "requestedCap": 300,
+          "status": 200,
+          "state": "ready",
+          "recovery": "other-stores",
+          "cards": 24,
+          "maxPrice": 28.99,
+          "passed": true
+        },
+        {
+          "store": "pontofrio",
+          "requestedCap": 300,
+          "status": 200,
+          "state": "ready",
+          "recovery": "other-stores",
+          "cards": 24,
+          "maxPrice": 28.99,
+          "passed": true
+        },
+        {
+          "store": "mercadolivre",
+          "requestedCap": 300,
+          "status": 200,
+          "state": "ready",
+          "recovery": "other-stores",
+          "cards": 24,
+          "maxPrice": 28.99,
+          "passed": true
+        },
+        {
+          "store": "spicy",
+          "requestedCap": 300,
+          "status": 200,
+          "state": "ready",
+          "recovery": "same-store",
+          "cards": 12,
+          "maxPrice": 69.9,
+          "passed": true
+        },
+        {
+          "store": "carrefour",
+          "requestedCap": 20,
+          "status": 200,
+          "state": "ready",
+          "recovery": "other-stores",
+          "cards": 11,
+          "maxPrice": 19.99,
+          "passed": true
+        }
+      ]
+    },
+    "visual": {
+      "browser": "Chromium",
+      "emulatedWidths": [
+        320,
+        390,
+        820,
+        1440,
+        1680
+      ],
+      "physicalDevices": false,
+      "horizontalOverflowObserved": false,
+      "sampleHomeCardsAfterImageFailuresRemoved": [
+        40,
+        41
+      ],
+      "heroImagesLoaded": 3,
+      "carrefourImagesLoaded": 24,
+      "modalOpenAndEscape": true,
+      "finalConsoleBufferMessages": 0,
+      "consoleLimit": "empty final captured buffer does not reconstruct previous errors",
+      "review": "full review requested four fixes; subsequent verdict ship scores those four resolved only",
+      "historicalSeedIndependentReceipt": false
+    },
+    "currentTreeOpenNextWorkerd": "not_run",
+    "productionCpu1102Waf": "not_measured"
+  },
+  "coupons": {
+    "observedAt": "2026-11-01T16:09:27.369Z",
+    "published": false,
+    "selectedCampaigns": 200,
+    "codes": 47,
+    "sources": [
+      {
+        "source": "awin",
+        "status": "ok",
+        "count": 68
+      },
+      {
+        "source": "lomadee",
+        "status": "ok",
+        "brands": 105,
+        "brandPages": 7,
+        "campaignPages": 17,
+        "reportedPages": 17,
+        "count": 160
+      }
+    ]
+  },
+  "awin": {
+    "observedScheduledRun": "41322212009",
+    "scheduledJobStatus": "failure",
+    "collected": 0,
+    "saved": 0,
+    "feedErrors": 10,
+    "currencySamples": [
+      {
+        "store": "Olympikus",
+        "status": 200,
+        "hasCurrency": true,
+        "currencyExportChanged": true,
+        "currency": "BRL"
+      },
+      {
+        "store": "Kabum",
+        "status": 200,
+        "hasCurrency": true,
+        "currencyExportChanged": true,
+        "currency": "BRL"
+      },
+      {
+        "store": "Eudora",
+        "status": 200,
+        "hasCurrency": true,
+        "currencyExportChanged": true,
+        "currency": "BRL"
+      }
+    ],
+    "actualAdapterReadOnly": {
+      "observedAt": "2026-11-01T17:18:10.343Z",
+      "fullFeedsRead": false,
+      "products": 20,
+      "stores": [
+        {
+          "store": "panasonic",
+          "products": 5
+        },
+        {
+          "store": "loccitane",
+          "products": 5
+        },
+        {
+          "store": "spicy",
+          "products": 5
+        },
+        {
+          "store": "polishop",
+          "products": 5
+        }
+      ],
+      "failures": []
+    }
+  },
+  "lomadee": {
+    "listedBrands": 133,
+    "priceComparatorEligible": 105,
+    "configuredProductStores": [
+      "sieno"
+    ],
+    "existingProductScheduleBrt": "06:00",
+    "existingCouponSchedulesBrt": [
+      "05:20",
+      "11:20",
+      "17:20",
+      "23:20"
+    ],
+    "schedulePunctualityGuaranteed": false,
+    "newCodeScheduledPersistenceProved": false
+  },
+  "invitations": {
+    "source": "read-only authenticated panels during this continuation",
+    "awinAllRegions": 14,
+    "awinBrazilFilter": 0,
+    "newApplicationsSent": 0,
+    "lomadeeUiMarkedNew": [
+      "Óticas Foto Paulo"
+    ],
+    "listedBrandsAreNotInvitations": true
+  },
+  "sourceHashes": {
+    "src/app/page.tsx": "a2ccc58e560f6839ff03efcd9e2bd08ee5c85ab6f669d3b224c4fe58e301323c",
+    "src/app/ofertas/page.tsx": "652355349a243583ce44cf18b15f01cc1cacc164cf442c4450bb102818127cd4",
+    "src/app/globals.css": "784fc8a64ec4694ade194b231b23d3b1846da0bfede28402a027a3682276e22e",
+    "src/components/partner-store-carousel.tsx": "fddbdb8a0bf0e6cedb29a4fe8f60ced3a7bb8676dc516363d202f5d02aa520ef",
+    "src/components/store-catalog-recovery.tsx": "4b8e7994bf439e66e16a721af418185b099c2a5946b8d92a62336e9be6f2b522",
+    "src/components/product-quick-view.tsx": "4f3d8baee0fba216c719b0e73b656d4aa7ab6b46e1f2765fc2757561aa243c51",
+    "src/components/catalog-product-frame.tsx": "b88da0f3fae75dac82a09abdd8f2effde3e1e66a6ed8774fc14420e6e53def92",
+    "src/core/collection/awin-feed-url.ts": "87f8e73f0946a76e29a26bb8b41253dc1435eefd58e3135955aba14d71906eb6",
+    "src/core/lomadee-catalog.ts": "02fe7fc35fcc6598ba63638fda9555a6cb7b5e97e2b5b2e89d1bfc3c910b0c5e",
+    "src/core/store-recommendations.ts": "17bf608e409d5b1301872b82cef0b2a6be8572d0ae0ce0d8824aa980f7b8f8d9",
+    "src/infrastructure/scraping/adapters/awin.adapter.ts": "8fbe5333fb9f07321b6466e30c0051de3437672c197b2c9b6cf7583d32b53067",
+    "src/infrastructure/scraping/adapters/lomadee.adapter.ts": "17e253714429d5bae6a69da1e920a99370283380542b565fbdd1a4607661f22d",
+    "src/infrastructure/lomadee/api.ts": "29f95ced92a3adb93ab9fabdd9a337bbb8432db17e1b8fbd336ea87df3f2813e",
+    "src/infrastructure/affiliates/http.ts": "72bfa790bbc2d155d6ef5ede326233e618c94104a909232aee001fb4109963bf",
+    "src/infrastructure/coupons/sources.ts": "04cbe5c05ac97894e83e9f789a189aab0c78ab5590036bc61fd63e6b90d13673",
+    "src/infrastructure/repositories/produtos.repo.ts": "e0b926ffa99a59a807927eeb608fd12805ddcb4981f5f0694d62a7ab3ca2950e",
+    "src/services/public-catalog-cache.ts": "e0808f78e841dae3af459db079a0caacfffabc346400843c8e6216228e44c4af",
+    "scripts/sync-coupons.ts": "eacf3f3c3453b79f27f10fe00b78d606dcc5250aa516d00adcaf64560c2fcdcb",
+    "tsconfig.affiliates.json": "5aef8528fd2762bcf12f43ecdef5515fc5772f51ad83dad8187c8da08954a887",
+    ".github/workflows/growth-checks.yml": "5e2fd93d7dfd6bab802563fa89208d88108ae78e961d4f27354aad7bcfb0e061"
+  },
+  "nextGates": [
+    "owner lifts main publication hold",
+    "separate ingestion/coupon and visual batches",
+    "OpenNext/workerd validation of exact release SHA",
+    "confirm active Cloudflare version and public routes",
+    "observe actual scheduled writes and source coverage",
+    "measure comparable production CPU/error windows"
+  ]
+}
