@@ -33,7 +33,7 @@ Catálogo público em Next.js 14/React/TypeScript, servido no Cloudflare Workers
 
 ## Brand Commitments
 
-Preservar o nome PromoDetec, o logo existente e o português brasileiro. O usuário pediu modernização da temática e escolheu implementar diretamente e mostrar uma prévia funcionando. A seleção de detalhes visuais foi delegada nesta etapa; publicação da nova aparência vem depois da prévia.
+Preservar o nome PromoDetec, o logo existente e o português brasileiro. Em 01/11/2026 o proprietário fixou um Shop escuro para Esquenta Black Friday/Black Friday, com densidade de marketplace, produtos baratos, categorias cotidianas, cupons oficiais e popups dispensáveis de produtos reais. Esta direção substitui a base clara anterior. O caminho é implementação direta, já com publicação autorizada; a inspeção do novo visual e o fechamento Impeccable continuam obrigatórios antes da entrega.
 
 ## Evidence on Hand
 
@@ -48,4 +48,4 @@ Produtos/imagens/lojas/datas vêm do catálogo existente. Logo em `public/logo.p
 
 ## Open Decisions
 
-A promoção da base atual para `main` foi autorizada e validada na PR #7. O ramo configurado no Cloudflare e o checkout operacional de comparações continuam explícitos e separados da integração Git. Estratégia comercial e público demográfico específico não foram redefinidos nesta modernização.
+A automação de cupons e relatórios foi integrada à `main` pela PR #16, separada do Shop da PR #17. A aparência dark ainda aguarda capturas atuais e revisão final; DESIGN.md conserva o mundo claro e não documenta o candidato. Confirmar sempre o SHA/Builds e a versão que atende o domínio; uma integração Git ou teste local não comprova CPU de produção ou publicação visual.
