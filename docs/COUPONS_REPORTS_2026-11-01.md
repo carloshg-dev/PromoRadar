@@ -31,3 +31,13 @@ Workflow `business-report.yml`: diário 08:00 Brasília (dia anterior completo);
 Seis testes novos cobrem vínculo/região/tracking de cupons, expiração, deduplicação, limite de corpo, separação financeira e dias completos em Brasília. Foram exercitadas as consultas reais e a geração do draft. O relatório semanal inicial foi gerado sem envio. O projeto Supabase alvo não aparece no conector de Management; usam-se as credenciais de servidor já existentes sem recuperar conta ou ampliar RLS. API Cloudflare conectada é de outra conta e não foi usada para alterações.
 
 Este lote não publica a reformulação visual nem conclui a falha intermitente do catálogo da PR #13. A interface permanece em outro ramo até a homologação visual. Evidências detalhadas ficam locais em `reports/` sem credenciais. A publicação deste lote e os runs manuais devem ser confirmados na PR e no estado operacional.
+
+## Ativação comprovada
+
+PR #16 integrada na `main/71ba632b6897e0fe4c21b34ec2c55270acd8622a` às 04:34:19 BRT. CI de contratos e OpenNext/workerd passaram, com 28 contratos locais para esse lote. Workers Builds marcou sucesso para o SHA na conta do domínio; home/cupons responderam HEAD 200, buildId `rrHZ3UwkvdkknMs-rhBDW`. Isso não substitui a leitura da versão ativa/CPU no painel, ainda bloqueada.
+
+Os runs manuais diário `41285341305` e semanal `41285343505` concluíram com envio HTTP aceito pelo Discord, `discordSent: true` nos artefatos relidos. No diário de 31/10 foram 35 ações/27 redirecionamentos; o semanal teve os 177/122 e a transação pendente descritos acima. Não foi feita leitura visual do canal. As rotinas estão `active`; ainda não há prova de execução por `schedule` desta nova automação.
+
+O run `41285345625` repetiu a publicação do snapshot: 67 campanhas, 22 códigos, Lomadee HTTP 500. Permaneceu falho para sinalizar a fonte ausente, apesar da publicação Awin. A interface pública que usa esse snapshot está na PR #17; não confundir coleta publicada com nova página de cupons no domínio.
+
+Foi repetida a integração em Supabase local com dados fictícios: 17 contratos passaram, incluindo agora os rankings de cliques persistidos e a consulta limitada de nomes usados pelo relatório. Foi necessário substituir o Kong por um proxy HTTP somente loopback para os containers próprios de GoTrue/PostgREST, devido à falha de DNS do laboratório. Nenhuma política, conta ou evento de produção foi alterado. Recibo agregado: `docs/evidence/shop-operations-2026-11-01.json`.
