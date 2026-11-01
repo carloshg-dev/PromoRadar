@@ -7,6 +7,7 @@ import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
 import { validFeedUrl } from "@/core/collection/feed-url";
 import { awinPrice } from "@/core/collection/awin-price";
 import { validProductImage } from "@/core/catalog-policy";
+import { awinFeedWithCurrency } from "@/core/collection/awin-feed-url";
 
 /** Feeds oficiais por anunciante; Diesel permanece no cron próprio. */
 function limitEnv(name: string, fallback: number, max: number) {
@@ -56,8 +57,8 @@ export class AwinAdapter extends StoreAdapter {
       for (const feed of feeds.slice(0, capFeeds)) {
         if (count >= capProdutos || out.length >= maxTotal) break;
         try {
-          const response = await fetch(feed.url, { headers: { "User-Agent": this.UA }, signal: AbortSignal.timeout(120_000) });
-          if (!response.ok || !response.body) { await response.body?.cancel(); throw new Error("awin_feed_http_failed"); }
+          const response = await fetch(awinFeedWithCurrency(feed.url), { headers: { "User-Agent": this.UA }, signal: AbortSignal.timeout(120_000) });
+          if (!response.ok || !response.body) { await response.body?.cancel(); throw new Error(`awin_feed_http_${response.status}`); }
           let rowNumber = 0;
           await readCsvRows(Readable.fromWeb(response.body as never), (row) => {
             rowNumber++;
@@ -78,7 +79,11 @@ export class AwinAdapter extends StoreAdapter {
             if (count >= capProdutos || out.length >= maxTotal) return false;
           }, { required: ["product_name", "aw_deep_link", "search_price", "currency"] });
           await this.sleep(600);
-        } catch { failure(`awin_feed_read_failed:${advertiser.slug}`); }
+        } catch (error) {
+          const reason = error instanceof Error && /^(csv_required_headers_missing|awin_feed_http_\d{3})$/.test(error.message) ? error.message : "parse_or_transport_failure";
+          ctx.log("warn", `Awin ${advertiser.nome}: ${reason}`);
+          failure(`awin_feed_read_failed:${advertiser.slug}`);
+        }
       }
       if (count) ctx.log("info", `Awin ${advertiser.nome}: ${count} produtos (${Math.min(feeds.length, capFeeds)}/${feeds.length} feeds)`);
     }

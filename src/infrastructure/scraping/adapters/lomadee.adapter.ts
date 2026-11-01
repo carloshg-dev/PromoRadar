@@ -1,9 +1,11 @@
 import { StoreAdapter, type AdapterContext } from "@/infrastructure/scraping/core/adapter";
 import type { RawProduct } from "@/core/domain/types";
-import { contemTermoProibido } from "@/core/blacklist-nicho";
+import { lomadeeAffordableCandidates, shopifyAvailablePrice } from "@/core/lomadee-catalog";
 import { decodeHtmlEntities } from "@/lib/utils";
 import { LOMADEE_PARCEIROS, lomadeeLogoUrl, type LomadeeParceiro } from "@/core/lomadee-parceiros";
 import { coletarVtex } from "@/infrastructure/scraping/core/vtex";
+import { boundedJson } from "@/infrastructure/affiliates/http";
+import { lomadeeBrands, lomadeeComparatorLink } from "@/infrastructure/lomadee/api";
 
 /**
  * Lomadee MULTI-LOJA — v2 (02/07/2026). O princípio "dado × dinheiro" completo:
@@ -29,22 +31,23 @@ const MAX_POR_LOJA = Number(process.env.LOMADEE_MAX_POR_LOJA) || 250;
 const MAX_TOTAL = Number(process.env.LOMADEE_MAX_TOTAL) || 600;
 
 /**
- * LOMADEE_SOURCE_ID = canal PriceComparator do PromoDetec (66222f2a-…). ATENÇÃO:
- * a API do encurtador NÃO aceita esse id como parâmetro — testado ao vivo,
- * `sourceId`/`channelId`/`source` no body retornam HTTP 400 "property should
- * not exist" (validação estrita). Injetar quebraria a geração de TODO link →
- * prateleira vazia. O canal JÁ vem embutido automaticamente em cada shortUrl
- * (a API key escopa conta+canal). Então usamos o env como GUARDA: valida que
- * cada link cunhado caiu no canal certo e ALERTA se divergir — tripwire de
- * comissão, sem risco de quebrar o dinheiro. Ver também src/lib/lomadee-cupons.
+ * LOMADEE_SOURCE_ID, quando configurado, identifica o canal do proprietário:
+ * corresponde a response.id, não a availableChannel.id (tipo de canal).
+ * O body do encurtador não aceita sourceId/channelId/source; a API key escopa
+ * a conta. Só aceitamos PriceComparator liberado e descartamos divergências.
  */
 const CANAL_ESPERADO = process.env.LOMADEE_SOURCE_ID?.trim() || null;
+
+function incomplete(ctx: AdapterContext, code: string) {
+  if (!ctx.reportFailure) throw new Error(code);
+  ctx.reportFailure(code);
+}
 
 interface MarcaLomadee {
   id: string;
   name: string;
   network?: { active?: boolean };
-  channels?: Array<{ shortUrls?: string[] }>;
+  channels?: unknown;
 }
 
 interface Candidato {
@@ -74,9 +77,14 @@ export class LomadeeAdapter extends StoreAdapter {
     for (const parceiro of LOMADEE_PARCEIROS) {
       if (out.length >= MAX_TOTAL) break;
       const marca = marcas.find((m) => parceiro.matchMarca.test(m.name));
-      const canalOk = marca?.network?.active && (marca.channels?.[0]?.shortUrls?.length ?? 0) > 0;
+      const canalOk = marca?.network?.active && lomadeeComparatorLink(marca.channels);
       if (!marca || !canalOk) {
         ctx.log("warn", `Lomadee ${parceiro.nome}: fora da lista ou canal Comparador bloqueado — PULANDO (compliance).`);
+        continue;
+      }
+      if (CANAL_ESPERADO && !lomadeeComparatorLink(marca.channels, CANAL_ESPERADO)) {
+        incomplete(ctx, "lomadee_expected_channel_missing");
+        ctx.log("warn", `Lomadee ${parceiro.nome}: canal esperado não validado; nenhuma URL será cunhada.`);
         continue;
       }
 
@@ -84,16 +92,13 @@ export class LomadeeAdapter extends StoreAdapter {
       let candidatos: Candidato[] = [];
       try {
         candidatos = await this.catalogoDaLoja(parceiro, ctx);
-      } catch (e) {
-        ctx.log("warn", `Lomadee ${parceiro.slug}: catálogo falhou: ${(e as Error).message}`);
+      } catch {
+        incomplete(ctx, "lomadee_catalog_failed");
+        ctx.log("warn", `Lomadee ${parceiro.slug}: catálogo indisponível.`);
         continue;
       }
       const cap = Math.min(parceiro.maxProdutos ?? MAX_POR_LOJA, MAX_TOTAL - out.length);
-      candidatos = candidatos
-        .filter((c) => c.titulo && c.urlProduto && c.imagemUrl && c.precoAtual > 0)
-        .filter((c) => !contemTermoProibido(c.titulo))
-        .filter((c) => !(parceiro.excluir?.test(c.titulo)))
-        .slice(0, cap);
+      candidatos = lomadeeAffordableCandidates(candidatos, cap, parceiro.excluir);
 
       // 3) DINHEIRO: cunha o link de afiliado por produto (throttle 60/min).
       const loja = {
@@ -108,7 +113,7 @@ export class LomadeeAdapter extends StoreAdapter {
         await this.sleep(THROTTLE_MS);
         if (!r) { semLink++; continue; } // sem link monetizado o produto NÃO entra
         // GUARDA de comissão: o link deve cair no canal do PromoDetec (LOMADEE_SOURCE_ID).
-        if (CANAL_ESPERADO && r.canal && r.canal !== CANAL_ESPERADO) foraDoCanal++;
+        if (CANAL_ESPERADO && r.canal !== CANAL_ESPERADO) { foraDoCanal++; continue; }
         cunhados++;
         out.push({
           skuLoja: `lmd-${parceiro.slug}-${c.skuBase}`.slice(0, 120),
@@ -124,7 +129,8 @@ export class LomadeeAdapter extends StoreAdapter {
           loja,
         });
       }
-      if (foraDoCanal) ctx.log("warn", `Lomadee ${parceiro.slug}: ${foraDoCanal} link(s) FORA do canal esperado (${CANAL_ESPERADO}) — comissão pode não atribuir!`);
+      if (semLink || foraDoCanal) incomplete(ctx, "lomadee_affiliate_link_failed");
+      if (foraDoCanal) ctx.log("warn", `Lomadee ${parceiro.slug}: ${foraDoCanal} link(s) sem atribuição ao canal esperado — descartados.`);
       ctx.log("info", `Lomadee ${parceiro.nome}: ${cunhados} produtos cunhados${semLink ? ` (${semLink} sem link — fora)` : ""}`);
     }
 
@@ -133,34 +139,24 @@ export class LomadeeAdapter extends StoreAdapter {
   }
 
   private async listarMarcas(key: string, ctx: AdapterContext): Promise<MarcaLomadee[]> {
-    const all: MarcaLomadee[] = [];
-    try {
-      for (let page = 1; page <= 7; page++) {
-        const r = await fetch(`${BASE}/affiliate/brands?limit=100&page=${page}`, { headers: { "x-api-key": key } });
-        if (!r.ok) { ctx.log("warn", `Lomadee brands: HTTP ${r.status}`); break; }
-        const j = (await r.json()) as { data?: MarcaLomadee[] };
-        const data = j.data ?? [];
-        all.push(...data);
-        if (!data.length) break;
-      }
-    } catch (e) { ctx.log("warn", `Lomadee brands falhou: ${(e as Error).message}`); }
-    return all;
+    const result = await lomadeeBrands(key, AbortSignal.timeout(60_000));
+    if (result.status !== "ok") { incomplete(ctx, "lomadee_brands_incomplete"); ctx.log("warn", "Lomadee: leitura das marcas incompleta."); }
+    return result.brands.filter(row => typeof row.id === "string" && typeof row.name === "string") as unknown as MarcaLomadee[];
   }
 
   /** Cunha o link de afiliado; devolve a shortUrl + o canal em que caiu (p/ a
    *  guarda de comissão). O body NÃO leva sourceId: a API rejeita (400). */
   private async cunharLink(key: string, url: string, organizationId: string): Promise<{ url: string; canal: string | null } | null> {
     try {
-      const r = await fetch(`${BASE}/affiliate/shortener/url`, {
+      const j = await boundedJson(`${BASE}/affiliate/shortener/url`, {
         method: "POST",
         headers: { "x-api-key": key, "Content-Type": "application/json" },
         body: JSON.stringify({ url, organizationId, type: "Custom" }),
-      });
-      if (r.status !== 201) return null;
-      const j = (await r.json()) as Array<{ shortUrls?: string[]; availableChannel?: { id?: string } }>;
-      const short = j?.[0]?.shortUrls?.[0];
+        signal: AbortSignal.timeout(15_000), redirect: "error",
+      }) as Array<{ id?: string; shortUrls?: string[]; availableChannel?: { id?: string; name?: string } }>;
+      const short = lomadeeComparatorLink(j);
       if (!short) return null;
-      return { url: short, canal: j?.[0]?.availableChannel?.id ?? null };
+      return { url: short, canal: j.find(channel => channel.shortUrls?.includes(short))?.id ?? null };
     } catch { return null; }
   }
 
@@ -170,7 +166,7 @@ export class LomadeeAdapter extends StoreAdapter {
     return this.catalogoVtex(p, ctx);
   }
 
-  /** Shopify: /products.json público, PAGINADO (?limit=250&page=N) até acabar. */
+  /** Shopify: páginas pequenas e Top-N limitado, sem reter o catálogo inteiro. */
   private async catalogoShopify(p: LomadeeParceiro): Promise<Candidato[]> {
     interface ShopifyProduct {
       id: number; title?: string; handle?: string; vendor?: string;
@@ -178,29 +174,28 @@ export class LomadeeAdapter extends StoreAdapter {
       variants?: Array<{ price?: string; compare_at_price?: string | null; available?: boolean }>;
     }
     const out: Candidato[] = [];
-    const cap = p.maxProdutos ?? MAX_POR_LOJA;
-    for (let page = 1; page <= 20 && out.length < cap; page++) {
-      const j = await this.fetchJson<{ products?: ShopifyProduct[] }>(`${p.baseUrl}/products.json?limit=250&page=${page}`);
+    const cap = Math.min(250, p.maxProdutos ?? MAX_POR_LOJA);
+    for (let page = 1; page <= 8; page++) {
+      const j = await boundedJson(`${p.baseUrl}/products.json?limit=100&page=${page}`) as { products?: ShopifyProduct[] };
       const lote = j.products ?? [];
+      if (!Array.isArray(lote) || lote.length > 100) throw new Error("lomadee_shopify_schema");
       if (!lote.length) break;
       for (const prod of lote) {
-        const precos = (prod.variants ?? []).map((v) => Number(v.price)).filter((n) => Number.isFinite(n) && n > 0);
-        const cheios = (prod.variants ?? []).map((v) => Number(v.compare_at_price)).filter((n) => Number.isFinite(n) && n > 0);
-        const preco = precos.length ? Math.min(...precos) : NaN;
-        if (!Number.isFinite(preco)) continue;
-        const cheio = cheios.length ? Math.max(...cheios) : NaN;
+        const price = shopifyAvailablePrice(prod.variants ?? []);
+        if (!price || !prod.id || !prod.handle) continue;
         out.push({
           titulo: prod.title ?? "",
           urlProduto: `${p.baseUrl}/products/${prod.handle}`,
           imagemUrl: prod.images?.[0]?.src ?? null,
-          precoAtual: preco,
-          precoOriginal: Number.isFinite(cheio) && cheio > preco ? cheio : null,
+          ...price,
           marca: prod.vendor || p.nome,
           categoriaSlug: p.categoria,
           skuBase: String(prod.id),
         });
       }
-      if (lote.length < 250) break; // última página
+      const selected = lomadeeAffordableCandidates(out, cap, p.excluir);
+      out.splice(0, out.length, ...selected);
+      if (lote.length < 100) break;
       await this.sleep(300);
     }
     return out;
@@ -213,15 +208,15 @@ export class LomadeeAdapter extends StoreAdapter {
       short_description?: string;
       is_in_stock?: boolean;
       images?: Array<{ src?: string }>;
-      prices?: { price?: string; regular_price?: string; currency_minor_unit?: number };
+      prices?: { price?: string; regular_price?: string; currency_minor_unit?: number; currency_code?: string };
     }
     const out: Candidato[] = [];
-    const capPaginas = Math.ceil((p.maxProdutos ?? MAX_POR_LOJA) / 100);
+    const capPaginas = Math.ceil(Math.min(250, p.maxProdutos ?? MAX_POR_LOJA) / 100);
     for (let page = 1; page <= Math.min(20, capPaginas) ; page++) {
-      const lote = await this.fetchJson<WooProduct[]>(`${p.baseUrl}/wp-json/wc/store/v1/products?per_page=100&page=${page}`);
+      const lote = await boundedJson(`${p.baseUrl}/wp-json/wc/store/v1/products?per_page=100&page=${page}`) as WooProduct[];
       if (!Array.isArray(lote) || !lote.length) break;
       for (const prod of lote) {
-        if (prod.is_in_stock === false) continue;
+        if (prod.is_in_stock !== true || prod.prices?.currency_code !== "BRL" || prod.prices.currency_minor_unit !== 2) continue;
         // kits B2B/atacado escondem o aviso na descrição — filtra nos dois campos
         if (p.excluir?.test(`${prod.name ?? ""} ${prod.short_description ?? ""}`)) continue;
         const divisor = 10 ** (prod.prices?.currency_minor_unit ?? 2);
@@ -248,7 +243,7 @@ export class LomadeeAdapter extends StoreAdapter {
   private async catalogoVtex(p: LomadeeParceiro, ctx: AdapterContext): Promise<Candidato[]> {
     const buscas = (p.buscasVtex ?? [{ termo: p.nome, slug: p.categoria }]).map((b) => ({ termo: b.termo, slug: b.slug }));
     const itens = await coletarVtex(p.baseUrl, buscas, { marca: p.nome, porTermo: 50, paginasPorTermo: 3, log: ctx.log });
-    return itens.map((i) => ({
+    return itens.filter(i => i.emEstoque).map((i) => ({
       titulo: i.titulo,
       urlProduto: i.url,
       imagemUrl: i.imagemUrl ?? null,

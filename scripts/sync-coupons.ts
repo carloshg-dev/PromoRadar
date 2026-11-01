@@ -8,14 +8,14 @@ import { COUPON_BUCKET, COUPON_OBJECT, COUPON_MAX_BYTES, activeCoupon, couponSna
 async function main() {
   const checkedAt = new Date().toISOString(), coupons: Coupon[] = [], sources: { source: string; status: string; count: number }[] = [];
   for (const [source, key, collect] of [
-    ["awin", process.env.AWIN_API_KEY, (key: string) => collectAwinCoupons(key, process.env.AWIN_PUBLISHER_ID || "2936727", checkedAt)],
+    ["awin", process.env.AWIN_API_KEY, async (key: string) => ({ coupons: await collectAwinCoupons(key, process.env.AWIN_PUBLISHER_ID || "2936727", checkedAt), status: "ok" })],
     ["lomadee", process.env.LOMADEE_API_KEY, (key: string) => collectLomadeeCoupons(key, checkedAt)],
   ] as const) {
     if (!key) { sources.push({ source, status: "not_configured", count: 0 }); continue; }
-    try { const rows = await collect(key); coupons.push(...rows); sources.push({ source, status: "ok", count: rows.length }); }
+    try { const { coupons: rows, ...coverage } = await collect(key); coupons.push(...rows); sources.push({ source, ...coverage, count: rows.length }); }
     catch (error) { const code = error instanceof Error && /^[a-z0-9_]+$/.test(error.message) ? error.message : "read_failed"; sources.push({ source, status: code, count: 0 }); }
   }
-  if (!sources.some(s => s.status === "ok")) throw new Error("all_coupon_sources_unavailable");
+  if (!sources.some(s => s.status === "ok") && !coupons.length) throw new Error("all_coupon_sources_unavailable");
   const seen = new Set<string>();
   const rows = coupons.filter(c => { const identity = `${c.marca.toLowerCase()}:${c.codigo ?? c.link}`; if (!activeCoupon(c) || seen.has(identity)) return false; seen.add(identity); return true; }).slice(0, 200);
   const snapshot = couponSnapshotSchema.parse({ schema: 1, generatedAt: checkedAt, coupons: rows });

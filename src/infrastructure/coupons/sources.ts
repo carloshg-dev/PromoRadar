@@ -1,15 +1,7 @@
-import { couponSchema, type Coupon } from "@/core/coupons";
-
-/** Respostas paginadas são limitadas antes do parse; jamais registrar URL autenticada/payload da rede. */
-export async function boundedJson(url: string, init: RequestInit = {}): Promise<unknown> {
-  const response = await fetch(url, { ...init, redirect: "error", signal: AbortSignal.timeout(20_000) });
-  if (!response.ok || !response.body) { await response.body?.cancel(); throw new Error(`affiliate_http_${response.status}`); }
-  const reader = response.body.getReader(), decoder = new TextDecoder(); let bytes = 0, text = "";
-  try {
-    while (true) { const part = await reader.read(); if (part.done) break; bytes += part.value.byteLength; if (bytes > 2 * 1024 * 1024) throw new Error("affiliate_response_limit"); text += decoder.decode(part.value, { stream: true }); }
-    return JSON.parse(text + decoder.decode());
-  } finally { await reader.cancel(); reader.releaseLock(); }
-}
+import { activeCoupon, couponSchema, type Coupon } from "@/core/coupons";
+import { affiliateError, boundedJson } from "@/infrastructure/affiliates/http";
+import { lomadeeBrands, lomadeeComparatorLink, lomadeePage } from "@/infrastructure/lomadee/api";
+export { boundedJson } from "@/infrastructure/affiliates/http";
 const plain = (value: unknown, max = 240) => typeof value === "string" ? value.replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().slice(0, max) : "";
 function utc(value: unknown): string | null {
   if (typeof value !== "string" || !value) return null;
@@ -49,30 +41,34 @@ export async function collectAwinCoupons(key: string, publisher: string, checked
   throw new Error("awin_promotions_page_limit");
 }
 
-export async function collectLomadeeCoupons(key: string, checkedAt: string): Promise<Coupon[]> {
-  const headers = { "x-api-key": key };
+export async function collectLomadeeCoupons(key: string, checkedAt: string) {
+  const signal = AbortSignal.timeout(180_000);
+  const brandResult = await lomadeeBrands(key, signal);
   const brands = new Map<string, string>();
-  for (let page = 1; page <= 4; page++) {
-    const body = obj(await boundedJson(`https://api.lomadee.com.br/affiliate/brands?limit=20&page=${page}`, { headers }));
-    if (!Array.isArray(body.data)) throw new Error("lomadee_brands_schema");
-    for (const value of body.data) { const row = obj(value); if (row.id && row.name) brands.set(String(row.id), plain(row.name, 100)); }
-    if (body.data.length < 20) break;
+  for (const row of brandResult.brands) {
+    if (row.id && row.name && obj(row.network).active === true && lomadeeComparatorLink(row.channels)) brands.set(String(row.id), plain(row.name, 100));
   }
   const coupons: Coupon[] = [];
-  for (let page = 1; page <= 8; page++) {
-    const body = obj(await boundedJson(`https://api.lomadee.com.br/affiliate/campaigns?status=onTime&limit=20&page=${page}`, { headers }));
-    if (!Array.isArray(body.data)) throw new Error("lomadee_campaigns_schema");
-    for (const value of body.data) {
-      const row = obj(value), period = obj(row.period), brand = brands.get(String(row.organizationId));
-      if (!brand || (row.status && row.status !== "onTime")) continue;
-      const channels = Array.isArray(row.channels) ? row.channels.map(obj).filter(c => c.availableChannel !== false) : [];
-      const link = channels.flatMap(c => Array.isArray(c.shortUrls) ? c.shortUrls : []).find(url => typeof url === "string" && /^https:\/\//.test(url));
-      const parsed = couponSchema.safeParse({ id: `lomadee-${row.id}`, marca: brand, marcaLogo: null, titulo: plain(row.name), codigo: plain(row.code, 100) || null, link,
-        terminaEm: utc(period.endAt), startsAt: utc(period.startAt), destaque: row.isHighlight === true, source: "lomadee", checkedAt, terms: plain(row.description, 4000) });
-      if (parsed.success && coupons.length < 160) coupons.push(parsed.data);
+  let campaignPages = 0, reportedPages: number | null = null;
+  const result = (status: string) => ({ coupons, status, brands: brands.size, brandStatus: brandResult.status, brandPages: brandResult.pagesRead, campaignPages, reportedPages, selectionLimit: 160 });
+  if (!brands.size && brandResult.status !== "ok") return result(brandResult.status);
+  const seen = new Set<string>();
+  try {
+    for (let page = 1; page <= 25; page++) {
+      const body = await lomadeePage("campaigns", page, key, signal);
+      campaignPages++; reportedPages = body.reportedPages;
+      for (const row of body.rows) {
+        const period = obj(row.period), brand = brands.get(String(row.organizationId));
+        if (!row.id || !brand || row.status !== "onTime" || (period.startAt && !utc(period.startAt)) || (period.endAt && !utc(period.endAt))) continue;
+        const parsed = couponSchema.safeParse({ id: `lomadee-${row.id}`, marca: brand, marcaLogo: null, titulo: plain(row.name), codigo: plain(row.code, 100) || null,
+          link: lomadeeComparatorLink(row.channels), terminaEm: utc(period.endAt), startsAt: utc(period.startAt), destaque: row.isHighlight === true, source: "lomadee", checkedAt, terms: plain(row.description, 4000) });
+        if (parsed.success && activeCoupon(parsed.data, Date.parse(checkedAt)) && !seen.has(parsed.data.id)) {
+          seen.add(parsed.data.id);
+          if (coupons.length < 160) coupons.push(parsed.data);
+        }
+      }
+      if (body.done) return result(brandResult.status);
     }
-    const pages = Number(obj(body.meta ?? body.pagination).totalPages);
-    if (body.data.length < 20 || (Number.isFinite(pages) && page >= pages)) return coupons;
-  }
-  throw new Error("lomadee_campaigns_page_limit");
+    return result("lomadee_campaigns_page_limit");
+  } catch (error) { return result(affiliateError(error)); }
 }
