@@ -72,7 +72,7 @@ export function linkAfiliado(url: string, _lojaSlug?: string | null): string {
   // Já é link de afiliado pronto → não mexe (Lomadee encurtado; Shopee manual).
   // Shopee: a Open API deles ainda não liberou pra gente, então os links curtos
   // shope.ee/... entram como URL final estática (já carregam o afiliado embutido).
-  if (host === "lmdee.link" || host === "awin1.com" || host === "meli.la" || host === "shope.ee" || host.endsWith("shopee.com.br")) return url;
+  if (host === "lmdee.link" || host === "awin1.com" || host === "meli.la" || host === "shope.ee" || host === "shopee.com.br" || host.endsWith(".shopee.com.br")) return url;
 
   // Amazon Associados — tag no fim da URL.
   if (host === "amazon.com.br" || host.endsWith(".amazon.com.br") || host === "amzn.to") {
@@ -112,16 +112,15 @@ export function ehLinkMonetizado(url: string | null | undefined): boolean {
   const host = u.hostname.replace(/^www\./, "").toLowerCase();
   // já vem como link de afiliado pronto
   if (host === "lmdee.link" || host === "awin1.com" || host === "meli.la"
-      || host === "shope.ee" || host.endsWith("shopee.com.br")) return true;
+      || host === "shope.ee" || host === "shopee.com.br" || host.endsWith(".shopee.com.br")) return true;
   // Amazon (tag) e Awin (MID aprovado) — embrulháveis no clique
   if (host === "amazon.com.br" || host.endsWith(".amazon.com.br") || host === "amzn.to") return true;
   if (AWIN_MIDS[host]) return true;
-  // Mercado Livre — sempre monetizado. O linkAfiliado() embrulha com meli.la
-  // quando há entrada manual no mapa; senão, redireciona à URL crua do produto
-  // (o usuário sempre chega na loja — mesma experiência de Shopee/Awin).
+  // A URL comum do Mercado Livre não prova atribuição; exige o link real do painel.
   if (host === "mercadolivre.com.br" || host.endsWith(".mercadolivre.com.br")
       || host === "mercadolibre.com.br" || host.endsWith(".mercadolibre.com.br")) {
-    return true;
+    const mlb = extrairMLB(u);
+    return Boolean(mlb && ML_AFILIADO[mlb]);
   }
   return false;
 }

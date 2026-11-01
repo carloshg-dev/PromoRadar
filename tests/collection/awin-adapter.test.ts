@@ -45,3 +45,22 @@ test("caller sem suporte a falha parcial recebe erro em vez de catálogo falsame
   context.mock.method(globalThis, "fetch", async () => new Response(null, { status: 500 }));
   await assert.rejects(new FastAwin().coletar({ log: () => {} }), /feedlist_read_failed/);
 });
+
+test("adapter não publica noimage, preços antigos como atuais ou conversão cambial estimada", async context => {
+  context.mock.method(globalThis, "fetch", async (url: unknown) => new Response(new URL(String(url)).pathname === "/list" ? master(["good"])
+    : headers + product.replace("99.90,149.90", "129.90,99.90")
+      + product.replace(",123,", ",124,").replace("BRL", "USD")
+      + product.replace(",123,", ",125,").replace("https://image.test/p.jpg", "https://images2.productserve.com/noimage.gif")));
+  const result = await new FastAwin().coletar({ log: () => {} });
+  assert.equal(result.length, 1);
+  assert.equal(result[0]?.precoAtual, 129.9);
+  assert.equal(result[0]?.precoOriginal, null);
+});
+
+test("feed sem coluna de moeda reporta fonte parcial em vez de supor BRL", async context => {
+  const failures: string[] = [];
+  context.mock.method(globalThis, "fetch", async (url: unknown) => new Response(new URL(String(url)).pathname === "/list" ? master(["good"]) : headers.replace(",currency", "") + product.replace(",BRL", "")));
+  const rows = await new FastAwin().coletar({ log: () => {}, reportFailure: code => failures.push(code) });
+  assert.equal(rows.length, 0);
+  assert.deepEqual(failures, ["awin_feed_read_failed:aliexpress"]);
+});

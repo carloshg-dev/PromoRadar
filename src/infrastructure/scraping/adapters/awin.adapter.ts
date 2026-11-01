@@ -5,24 +5,13 @@ import type { RawProduct } from "@/core/domain/types";
 import { contemTermoProibido } from "@/core/blacklist-nicho";
 import { anunciantesDoAdapter, awinLogoUrl } from "@/core/awin-anunciantes";
 import { validFeedUrl } from "@/core/collection/feed-url";
+import { awinPrice } from "@/core/collection/awin-price";
+import { validProductImage } from "@/core/catalog-policy";
 
 /** Feeds oficiais por anunciante; Diesel permanece no cron próprio. */
 function limitEnv(name: string, fallback: number, max: number) {
   const value = Number(process.env[name]);
   return Number.isFinite(value) && value >= 1 ? Math.min(max, Math.floor(value)) : fallback;
-}
-
-const TAXAS_FX: Record<string, number> = {
-  BRL: 1, USD: Number(process.env.AWIN_FX_USD) || 5.4, EUR: Number(process.env.AWIN_FX_EUR) || 5.9,
-};
-
-function parseMoeda(v: string | undefined): number {
-  if (v == null) return NaN;
-  const text = v.trim().replace(/[^\d.,]/g, "");
-  if (!text) return NaN;
-  const normalized = /,\d{1,2}$/.test(text) ? text.replace(/\./g, "").replace(",", ".") : text.replace(/,/g, "");
-  const number = Number(normalized);
-  return Number.isFinite(number) ? number : NaN;
 }
 
 export class AwinAdapter extends StoreAdapter {
@@ -74,27 +63,20 @@ export class AwinAdapter extends StoreAdapter {
             rowNumber++;
             const nome = row.product_name?.trim(), link = row.aw_deep_link?.trim();
             // Imagem direta do lojista primeiro; o proxy Awin pode responder placeholder.
-            const image = row.merchant_image_url?.trim() || row.aw_image_url?.trim() || "";
-            const moeda = row.currency?.trim().toUpperCase() || "BRL";
-            const fx = TAXAS_FX[moeda];
-            if (!fx) return;
-            // Preserva a política existente de preço/âncora; esta alteração é de transporte.
-            const prices = [row.search_price, row.rrp_price, row.product_price_old]
-              .map((value) => parseMoeda(value) * fx).filter((value) => Number.isFinite(value) && value > 0);
-            const price = prices.length ? Math.min(...prices) : NaN;
-            if (!nome || !link || !validFeedUrl(link) || !validFeedUrl(image) || !Number.isFinite(price) || price <= 0 || contemTermoProibido(nome)) return;
+            const image = [row.merchant_image_url, row.aw_image_url].map(value => value?.trim()).find(validProductImage) ?? "";
+            const price = awinPrice(row);
+            if (!nome || !link || !validFeedUrl(link) || !validFeedUrl(image) || !price || contemTermoProibido(nome)) return;
             const sku = `awin-${row.aw_product_id?.trim() || `${feed.fid}-${rowNumber}`}`;
             const dedupKey = `${advertiser.slug}:${sku}`;
             if (vistos.has(dedupKey)) return;
             vistos.add(dedupKey);
-            const original = Math.max(...prices);
             out.push({ skuLoja: sku, titulo: nome.slice(0, 500), url: link, imagemUrl: image,
               marca: row.brand_name?.trim() || row.merchant_name || advertiser.nome,
-              categoriaSlug: advertiser.categoria, precoAtual: price,
-              precoOriginal: Number.isFinite(original) && original > price ? original : null, emEstoque: true, loja });
+              categoriaSlug: advertiser.categoria, precoAtual: price.current,
+              precoOriginal: price.reference, emEstoque: true, loja });
             count++;
             if (count >= capProdutos || out.length >= maxTotal) return false;
-          }, { required: ["product_name", "aw_deep_link", "search_price"] });
+          }, { required: ["product_name", "aw_deep_link", "search_price", "currency"] });
           await this.sleep(600);
         } catch { failure(`awin_feed_read_failed:${advertiser.slug}`); }
       }
