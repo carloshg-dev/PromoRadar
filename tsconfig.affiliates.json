@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "incremental": false, "types": ["node", "next/types/global"] },
-  "include": ["scripts/sync-coupons.ts", "scripts/daily-business-report.ts", "scripts/daily-digest.ts", "scripts/validate-lomadee-attribution.ts"],
+  "include": ["scripts/sync-coupons.ts", "scripts/daily-business-report.ts", "scripts/daily-digest.ts", "scripts/validate-lomadee-attribution.ts", "scripts/pipeline-conteudo.ts"],
   "exclude": ["node_modules"]
 }

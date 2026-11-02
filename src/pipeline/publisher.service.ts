@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { listarPorStatus, atualizarCampanha, type Campanha } from "@/pipeline/campanhas.repo";
+import { hasRecentPrice } from "@/core/offer-freshness";
+import { MARKETING_PRICE_LIMIT } from "@/core/catalog-policy";
 
 /**
  * SERVIÇO PUBLISHER (etapa 3) — MODULAR. Lê campanhas READY e publica a ARTE
@@ -53,8 +55,15 @@ export async function publicar(dryRun = false): Promise<{ ok: number; falhas: nu
   }
 
   for (const c of prontas) {
+    const price = c.metadados.precoAtual;
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 9 || price > MARKETING_PRICE_LIMIT
+      || !hasRecentPrice(String(c.metadados.atualizadoEm ?? ""))) {
+      if (!dryRun) await atualizarCampanha(c.id, "FAILED", { erro: "campaign_price_not_current_or_outside_budget" });
+      falhas++;
+      continue;
+    }
     const png = c.imagens.feed;
-    if (!png) { await atualizarCampanha(c.id, "FAILED", { erro: "sem imagem feed" }); falhas++; continue; }
+    if (!png) { if (!dryRun) await atualizarCampanha(c.id, "FAILED", { erro: "sem imagem feed" }); falhas++; continue; }
     try {
       if (dryRun) {
         // dry-run: mostra o que faria e NÃO muda o status (fica READY p/ o post real)

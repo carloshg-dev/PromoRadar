@@ -75,7 +75,7 @@ export function montarArteOferta(d: DadosArte, tall = false): string {
   const dash = `${((score / 100) * CS).toFixed(0)} ${CS.toFixed(0)}`;
   const nm = wrap2(d.titulo);
   const desconto = d.descontoPct ? `−${d.descontoPct}%` : "OFERTA";
-  const link = esc(d.link ?? "promodetec.vercel.app");
+  const link = esc(d.link ?? "promodetec.com.br");
 
   // barras = histórico de preço (Mínimo verde em destaque; Médio/Máximo cinza).
   const mx = Math.max(d.precoMaxHist ?? 0, d.precoAvgHist ?? 0, d.precoMinHist ?? 0, d.precoAtual);

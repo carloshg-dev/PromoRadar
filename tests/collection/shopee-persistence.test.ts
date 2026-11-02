@@ -55,6 +55,8 @@ function database(context: TestContext, options: { baseline?: number; legacyBase
 }
 
 test("lote com falha interrompe a rodada e não inicia stale sweep", async (context) => {
+  const logged: string[] = [];
+  context.mock.method(console, "error", (...args: unknown[]) => { logged.push(args.join(" ")); });
   const mock = database(context, { failBatch: 2 });
   const stats = freshStats();
   await assert.rejects(persistShopeeFeed(mock.db, rows(600), store, started, stats), /upsert_failed/);
@@ -62,6 +64,7 @@ test("lote com falha interrompe a rodada e não inicia stale sweep", async (cont
   assert.equal(stats.batchErrors, 1);
   assert.equal(mock.sweeps(), 0);
   assert.deepEqual(mock.statuses, ["partial"]);
+  assert.deepEqual(logged, ["[Shopee] database_error phase=upsert code=57014 batchSize=250"]);
 });
 
 test("queda anormal de volume falha antes de alterar produtos", async (context) => {

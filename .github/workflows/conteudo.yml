@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "cura+renderiza mas NÃO publica"
+        description: "Gerar rascunhos locais sem gravar no banco nem publicar"
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: conteudo
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   conteudo:
-    name: Achados do dia → Telegram + Discord
+    name: Rascunhos diários e canal Telegram da marca
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -30,11 +30,20 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_FEED_CHAT_ID: ${{ secrets.TELEGRAM_FEED_CHAT_ID }}
-      DISCORD_DEALS_WEBHOOK_URL: ${{ secrets.DISCORD_DEALS_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4 # traz assets/fonts/*.ttf pro render
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - run: npm ci
-      - name: Rodar pipeline de conteúdo
-        run: npx tsx scripts/pipeline-conteudo.ts ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+      - name: Preparar rascunhos de achadinhos
+        run: npx tsx scripts/pipeline-conteudo.ts --dry-run
+      - name: Publicar no canal Telegram configurado
+        if: ${{ env.TELEGRAM_FEED_CHAT_ID != '' && github.event.inputs.dry_run != 'true' }}
+        run: npx tsx scripts/pipeline-conteudo.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promodetec-marketing-drafts-${{ github.run_id }}
+          path: reports/marketing-drafts/
+          if-no-files-found: error
+          retention-days: 14
