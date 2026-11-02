@@ -67,6 +67,18 @@ test("posts automáticos não promovem moeda pendente, foto genérica, preço an
   assert.deepEqual((await top5DoDia()).map(item => item.id), ["valid"]);
 });
 
+test("curadoria usa amostra por chave com prazo, sem ordenação global nem filtros caros da vitrine", async context => {
+  context.mock.method(globalThis, "fetch", async (url: unknown, init?: RequestInit) => {
+    const query = new URL(String(url));
+    assert.equal(query.searchParams.get("order"), "id.asc");
+    assert.equal(query.searchParams.get("limit"), "400");
+    assert.equal(query.searchParams.get("imagem_url"), null);
+    assert.ok(init?.signal);
+    return Response.json({ code: "57014", message: "timeout" }, { status: 500 });
+  });
+  await assert.rejects(top5DoDia());
+});
+
 test("teto e fotos genéricas são filtrados no banco antes da contagem/paginação", async context => {
   const limits: (string | null)[] = [];
   context.mock.method(globalThis, "fetch", async (url: unknown) => {

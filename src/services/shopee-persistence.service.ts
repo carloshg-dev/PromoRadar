@@ -36,7 +36,12 @@ export async function persistShopeeFeed<T extends Row>(db: SupabaseClient, rows:
     for (let start = 0; start < rows.length; start += BATCH) {
       const batch = rows.slice(start, start + BATCH);
       const { error } = await db.from("produtos").upsert(batch, { onConflict: "loja_id,sku_loja" }).abortSignal(AbortSignal.timeout(15_000));
-      if (error) { stats.batchErrors++; throw new Error("shopee_upsert_failed"); }
+      if (error) {
+        stats.batchErrors++;
+        const code = typeof error.code === "string" && /^(?:[A-Z0-9]{5}|PGRST\d{3})$/.test(error.code) ? error.code : "unknown";
+        console.error(`[Shopee] database_error phase=upsert code=${code} batchSize=${batch.length}`);
+        throw new Error("shopee_upsert_failed");
+      }
       stats.upserted += batch.length;
     }
     let after: string | null = null;

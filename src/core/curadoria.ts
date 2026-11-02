@@ -5,7 +5,7 @@ import { formatBRL } from "@/lib/utils";
  * CURADORIA v4.0 — o "Scoring Engine" da Máquina de Conteúdo. NÃO recalcula nada
  * pesado: parte do `promo_score` (já pronto na coleta) e sobrepõe a RELEVÂNCIA-
  * PRA-POST (o que "posta bem" ≠ o que rankeia no site). Puro e testável — a
- * seleção Top-N mora em produtos.repo (top5DoDia), que só traz ~120 linhas.
+ * seleção Top-N mora em produtos.repo (top5DoDia), que limita a amostra a 400 linhas.
  */
 
 /** Peso de relevância de POST por categoria (0-100). Tech/beleza/eletro puxam
@@ -70,26 +70,24 @@ const HASHTAG_CAT: Record<string, string> = {
  * (desconto, preço, histórico, PromoScore), que convence mais que IA genérica.
  */
 export function legendaPersuasiva(o: Produto): string {
-  // LIDERA COM O DESCONTO, não com a categoria: o categoria_slug de marketplace é
-  // não-confiável (cabo HDMI vira "Notebook"). Desconto/economia é sempre correto.
-  const desc = o.descontoPct ? `−${o.descontoPct}%` : "OFERTA";
-  const de = o.precoOriginal && o.precoOriginal > (o.precoAtual ?? 0)
-    ? `De ~${formatBRL(o.precoOriginal)}~ por ` : "";
-  const economia = o.precoOriginal && o.precoAtual && o.precoOriginal > o.precoAtual
-    ? `  ·  economize ${formatBRL(o.precoOriginal - o.precoAtual)}` : "";
+  const reference = o.precoOriginal && o.precoAtual && o.precoOriginal > o.precoAtual
+    ? `Referência informada pela loja: ${formatBRL(o.precoOriginal)}.` : null;
   const media = abaixoDaMedia(o);
-  const linhaHist = media ? `📉 ${media}% abaixo da média histórica · ` : "📊 ";
+  const linhaHist = media ? `📉 ${media}% abaixo da média histórica registrada.` : null;
   const tags = ["#promodetec", HASHTAG_CAT[o.categoriaSlug ?? ""], "#oferta", "#promoção", "#achadododia"]
     .filter(Boolean).join(" ");
 
   return [
-    `🔥 ACHADO DO DIA · ${desc}`,
+    `🧡 ACHADO PROMODETEC`,
     ``,
     `${tituloCurto(o.titulo)}`,
     ``,
-    `💸 ${de}${formatBRL(o.precoAtual)}${economia}`,
-    `${linhaHist}PromoScore ${Math.round(o.promoScore ?? 0)}/100`,
-    `🛒 ${o.lojaNome}  →  promodetec.vercel.app`,
+    `💰 ${formatBRL(o.precoAtual)} · ${o.lojaNome}`,
+    ...(reference ? [reference] : []),
+    ...(linhaHist ? [linhaHist] : []),
+    `📅 Preço coletado em ${new Date(o.atualizadoEm).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (Brasília).`,
+    `🔗 https://promodetec.com.br/produto/${encodeURIComponent(o.id)}`,
+    `Preço, frete e estoque são confirmados na loja. Podemos receber comissão pelos links.`,
     ``,
     tags,
   ].join("\n");

@@ -1,5 +1,6 @@
 import type { AchadoDoDia } from "@/infrastructure/repositories/produtos.repo";
 import { legendaPersuasiva } from "@/core/curadoria";
+import { formatBRL } from "@/core/formatting";
 
 /**
  * SERVIÇO CAMPAIGN — monta o "pacote" de uma campanha a partir de um achado:
@@ -20,9 +21,8 @@ function tituloCurto(t: string, max = 40): string {
 }
 
 export function montarCampanha(a: AchadoDoDia): CampanhaMontada {
-  const desconto = a.descontoPct ? `−${a.descontoPct}%` : "OFERTA";
   return {
-    headline: `${desconto} · ${tituloCurto(a.titulo)}`,
+    headline: `${formatBRL(a.precoAtual)} · ${tituloCurto(a.titulo)}`,
     legenda: legendaPersuasiva(a),
     hashtags: ["promodetec", "achadododia", "oferta", "promoção"],
     metadados: {
@@ -35,6 +35,7 @@ export function montarCampanha(a: AchadoDoDia): CampanhaMontada {
       precoAvgHist: a.precoAvgHist,
       precoMaxHist: a.precoMaxHist,
       imagemUrl: a.imagemUrl,
+      atualizadoEm: a.atualizadoEm,
       lojaNome: a.lojaNome,
       categoriaNome: a.categoriaNome,
     },

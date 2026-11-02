@@ -44,20 +44,22 @@ export interface AchadoDoDia extends Produto {
 }
 
 /**
- * TOP N do dia (Máquina de Conteúdo v4.0). Traz um POOL de candidatos já filtrado
- * e indexado (em_estoque + imagem + desconto + monetizado), pontua por conteúdo em
- * memória (scoreConteudo) e escolhe com VARIEDADE de categoria (máx 1 por nicho).
- * NUNCA carrega os milhares — a query retorna ~120 linhas no pior caso.
+ * TOP N em uma amostra de até 400 candidatos por chave. Valida elegibilidade e
+ * pontua em memória; prioriza variedade de loja/categoria. Não varre o catálogo.
  */
-export async function top5DoDia(n = 5, minDesconto = 15): Promise<AchadoDoDia[]> {
+export async function top5DoDia(n = 5, minDesconto = 15, maxPreco = DEFAULT_CATALOG_PRICE_LIMIT): Promise<AchadoDoDia[]> {
   const now = Date.now();
+  const leitura = criarLeituraVitrine();
+  // Amostra por PK e prazo compartilhado; ordenar a view inteira por score causava 57014.
+  const { data, error } = await consultaVitrine(leitura.client, leitura).limit(400);
+  if (error) throw error;
   // Mesma elegibilidade das vitrines; predicados permitem o índice parcial de leitura.
   // FILTRO DE CONTEÚDO (em memória): monetizado (post tem que pagar), com imagem,
-  // preço de conteúdo (≥R$20, sem cacareco) e desconto na BANDA CRÍVEL 20-78% —
+  // preço acessível (≥R$9) e desconto de referência na banda configurada até78% —
   // corta a âncora falsa da Shopee (90% off) que envenena a seleção.
-  const pool = (await listarOfertas({ limit: 400 })).filter((p) =>
+  const pool = mapVitrine(data ?? []).filter((p) =>
     p.emEstoque && validProductImage(p.imagemUrl) && verifiedBrlPrice(p.lojaSlug) && ehLinkMonetizado(p.url) &&
-    hasRecentPrice(p.atualizadoEm, now) && (p.precoAtual ?? 0) >= 20 && (p.precoAtual ?? Infinity) <= DEFAULT_CATALOG_PRICE_LIMIT &&
+    hasRecentPrice(p.atualizadoEm, now) && (p.precoAtual ?? 0) >= 9 && (p.precoAtual ?? Infinity) <= Math.min(maxPreco, DEFAULT_CATALOG_PRICE_LIMIT) &&
     (p.descontoPct ?? 0) >= minDesconto && (p.descontoPct ?? 0) <= 78);
   const ranqueado = pool
     .map((o) => ({ o, sc: scoreConteudo(o) }))
