@@ -1,0 +1,283 @@
+{
+  "recordedAt": "2026-11-01T20:24:02.249Z",
+  "repository": "carloshg-dev/PromoRadar",
+  "pullRequest": 17,
+  "authorization": "owner explicitly requested main integration, online publication and real user tests",
+  "candidate": "73bbdad4dfb9a98b8b5654333eae47893fe19ba8",
+  "main": "5a7b12db25ed8a2a00ef1f4d1e5f19df841f54d8",
+  "mergedAt": "2026-11-01T20:11:24Z",
+  "functionalTreeMatchesValidatedCandidate": true,
+  "cloudflare": {
+    "account": "0fcbdab34f0d44e0e948a4bb2f051810",
+    "worker": "promodetec",
+    "build": "0f5d9f98-7d25-4a52-b806-6f1691804c5d",
+    "buildCheck": "success",
+    "buildCompletedAt": "2026-11-01T20:13:35Z",
+    "publicBuildId": "0ajAsfCiO_aJKLpkClBAW",
+    "dashboardPostReleaseVersionAndTraffic": "not_read_browser_disabled"
+  },
+  "runs": [
+    {
+      "conclusion": "success",
+      "headSha": "73bbdad4dfb9a98b8b5654333eae47893fe19ba8",
+      "status": "completed",
+      "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/41344997609"
+    },
+    {
+      "conclusion": "success",
+      "headSha": "73bbdad4dfb9a98b8b5654333eae47893fe19ba8",
+      "status": "completed",
+      "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/41345004352"
+    },
+    {
+      "conclusion": "success",
+      "headSha": "5a7b12db25ed8a2a00ef1f4d1e5f19df841f54d8",
+      "status": "completed",
+      "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/41345650381"
+    },
+    {
+      "conclusion": "success",
+      "headSha": "5a7b12db25ed8a2a00ef1f4d1e5f19df841f54d8",
+      "status": "completed",
+      "url": "https://github.com/carloshg-dev/PromoRadar/actions/runs/41345982056"
+    }
+  ],
+  "validation": {
+    "growth": 130,
+    "collection": 36,
+    "worker": {
+      "passed": 35,
+      "failed": 0,
+      "buildId": "eRy7FBCrTPBlTklMqyCdX",
+      "wrangler": "4.151.2",
+      "compatibility": "2026-08-23",
+      "gzipKiB": 1581.41,
+      "warmBurstResponses": 512,
+      "productionCpuProof": false
+    },
+    "lomadee": {
+      "checkedAt": "2026-11-01T20:06:25.046Z",
+      "remoteWrites": false,
+      "status": "ok",
+      "pagesRead": 7,
+      "brands": 133,
+      "comparatorEligibleBrands": 105,
+      "channelGuardConfigured": true,
+      "expectedChannelMatchedBrands": 105,
+      "legacyTypeResolvedBrands": 105,
+      "expectedValueMatchesChannelType": true,
+      "passed": true
+    },
+    "publicHttp": {
+      "receipt": "reports/shop-release-2026-11-01/public-smoke-1793564193616.json",
+      "checkedAt": "2026-11-01T20:16:33.615Z",
+      "passed": 15,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "home-shop",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "cards": 48,
+          "maxPrice": 259.99,
+          "source": "ready",
+          "recovery": null
+        },
+        {
+          "name": "stylesheet-orange",
+          "status": 200,
+          "passed": true,
+          "buildId": null
+        },
+        {
+          "name": "affiliate-head-no-click",
+          "status": 204,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "product-detail",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "offers-shopee-under50",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "cards": 60,
+          "maxPrice": 49.99,
+          "source": "ready",
+          "recovery": null
+        },
+        {
+          "name": "store-carrefour",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "cards": 24,
+          "maxPrice": 28.99,
+          "source": "ready",
+          "recovery": "other-stores"
+        },
+        {
+          "name": "search-phone-under100",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "cards": 60,
+          "maxPrice": 99.9,
+          "source": "ready",
+          "recovery": null
+        },
+        {
+          "name": "offers-under20",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "cards": 60,
+          "maxPrice": 20,
+          "source": "ready",
+          "recovery": null
+        },
+        {
+          "name": "comparisons",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "source": "ready"
+        },
+        {
+          "name": "coupons",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW",
+          "copyButtons": 22
+        },
+        {
+          "name": "login-shell",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "admin-protected",
+          "status": 307,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "robots",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "sitemap",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        },
+        {
+          "name": "www-tls-canonical",
+          "status": 200,
+          "passed": true,
+          "buildId": "0ajAsfCiO_aJKLpkClBAW"
+        }
+      ],
+      "initialAuxiliaryMismatchReceipt": "reports/shop-release-2026-11-01/public-smoke-1793564143364.json",
+      "initialMismatches": "four invalid auxiliary expectations corrected after inspecting source/contracts; no app changes to make checks pass"
+    },
+    "browserProduction": {
+      "completed": false,
+      "reason": "Browser Use disabled during deployment; user input requested with settings deep link",
+      "localPreviewQaIsNotProduction": true
+    },
+    "productionCpu1102": "not_measured"
+  },
+  "coupons": {
+    "publication": {
+      "checkedAt": "2026-11-01T20:12:51.514Z",
+      "published": true,
+      "bytes": 74936,
+      "coupons": 200,
+      "codes": 47,
+      "sources": [
+        {
+          "source": "awin",
+          "status": "ok",
+          "count": 68
+        },
+        {
+          "source": "lomadee",
+          "status": "ok",
+          "brands": 105,
+          "brandStatus": "ok",
+          "brandPages": 7,
+          "campaignPages": 17,
+          "reportedPages": 17,
+          "selectionLimit": 160,
+          "count": 160
+        }
+      ],
+      "limitations": [
+        "Cupons podem depender de valor mínimo, público, app e estoque; condições exibidas",
+        "Shopee e Amazon não foram conectadas a uma API de cupons: nenhum código é inventado"
+      ]
+    },
+    "independentStorageRead": {
+      "checkedAt": "2026-11-01T20:18:50.113Z",
+      "remoteWrites": false,
+      "status": 200,
+      "generatedAt": "2026-11-01T20:12:51.514Z",
+      "campaigns": 200,
+      "codes": 47,
+      "bytes": 74936
+    },
+    "renderedPage": {
+      "checkedAt": "2026-11-01T20:22:52.835Z",
+      "route": "/cupons",
+      "status": 200,
+      "buildId": "0ajAsfCiO_aJKLpkClBAW",
+      "cache": "BYPASS",
+      "nextCache": null,
+      "source": null,
+      "cards": 0,
+      "campaigns": 67,
+      "copyButtons": 22,
+      "couponSnapshotAt": "2026-11-01T15:10:36.804Z",
+      "headerHasShop": false
+    },
+    "publicRenewalObserved": false
+  },
+  "businessReport": {
+    "run": 41345982056,
+    "generatedAt": "2026-11-01T20:16:50.538Z",
+    "days": 1,
+    "since": "2026-10-31T03:00:00.000Z",
+    "until": "2026-11-01T03:00:00.000Z",
+    "discordSent": false,
+    "embeds": 3,
+    "csvExists": true,
+    "machineDataExists": true
+  },
+  "boundaries": {
+    "dnsChanged": false,
+    "ddl": false,
+    "billingChanged": false,
+    "credentialsChanged": false,
+    "advertiserTermsAccepted": false,
+    "publicLoadTest": false,
+    "fullProductCollectionDispatched": false,
+    "affiliateClickRecorded": false,
+    "newDiscordMessageSent": false
+  },
+  "remaining": [
+    "production browser click/image/clipboard/login coverage",
+    "authenticated active Worker version and traffic percentage",
+    "comparable production CPU and1102 telemetry",
+    "confirm public coupon snapshot renewal"
+  ]
+}

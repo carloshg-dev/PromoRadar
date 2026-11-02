@@ -1,5 +1,13 @@
 # MISTAKES.md: caderno de erros do PromoDetec
 
+## 2026-11-02: expiração do Cache API não provou renovação ISR em produção
+
+- Fato observado: a main `5a7b12d` publicou 200 campanhas/47 códigos no Storage em 01/11, inclusive em schedule `41362906130`, mas `/cupons` ainda apresentava o snapshot 15:10:36UTC, 67 campanhas/22 códigos, às03:12:52UTC de02/11. Home pronta/48 itens continuou marcadaSTALE. Os15 contratos HTTP básicos passaram, sem medir essa renovação.
+- Desvio confirmado: `queue: "direct"` é modo documentado apenas para preview, não para produção. O gate anterior expirava o Cache API de120s, não o ISR de300s. Logs autenticados continuam inacessíveis; não atribuir o resultado a1102, WAF, credenciais ou a uma única causa sem medi-los.
+- Correção candidata: fila oficial Durable Object/SQLite, com autorreferência interna existente, deduplicação e tentativas limitadas. Gate isolado passa a compartilhar a configuração da fila e aguardar o ISR real de300s; exigeSTALE seguido deHIT e mudança do conteúdo, além do Cache API.
+- Regra preventiva: validar atualização de conteúdo depois da expiração de cada camada. Build, R2 contendo snapshot novo, HTTP200 e cacheHIT não comprovam atualização pública. Preservar a evidência negativa e comparar Storage/página no mesmo período após a publicação.
+- Evidência/estado: `docs/ISR_REVALIDATION_2026-11-02.md`; candidato ainda em validação, sem publicação desta correção.
+
 Leia antes de qualquer trabalho. Registre erros e quase-erros com causa e prevenção; não use este arquivo para culpar pessoas nem para guardar secrets.
 
 ## Modelo de entrada

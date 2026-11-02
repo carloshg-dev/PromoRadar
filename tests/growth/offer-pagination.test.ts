@@ -75,6 +75,8 @@ test("teto e fotos genéricas são filtrados no banco antes da contagem/paginaç
     const images = query.searchParams.getAll("imagem_url");
     assert.ok(images.includes("not.is.null"));
     assert.ok(images.includes("not.ilike.%noimage%"));
+    assert.ok(images.includes("not.ilike.%://www.dufrio.com.br/media/catalog/product/%"));
+    assert.ok(images.includes("not.ilike.%://dufrio.com.br/media/catalog/product/%"));
     assert.equal(query.searchParams.get("loja_slug"), "not.in.(aliexpress)");
     return new Response("[]", { headers: { "content-type": "application/json", "content-range": "*/0" } });
   });

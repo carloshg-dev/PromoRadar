@@ -1,4 +1,5 @@
 import type { Produto } from "@/core/domain/types";
+import { validProductImage } from "@/core/catalog-policy";
 
 export const SELECT_PRODUTO = `id,titulo,marca,url,imagem_url,preco_atual,preco_original,desconto_pct,
   promo_score,preco_min_hist,preco_max_hist,preco_avg_hist,em_estoque,atualizado_em,
@@ -10,7 +11,7 @@ export function mapProduto(r: Record<string, unknown>): Produto {
     titulo: r.titulo as string,
     marca: (r.marca as string) ?? null,
     url: r.url as string,
-    imagemUrl: (r.imagem_url as string) ?? null,
+    imagemUrl: validProductImage(r.imagem_url as string) ? r.imagem_url as string : null,
     precoAtual: (r.preco_atual as number) ?? null,
     precoOriginal: (r.preco_original as number) ?? null,
     descontoPct: (r.desconto_pct as number) ?? null,

@@ -9,8 +9,7 @@ import { parse } from "dotenv";
 
 const root = process.cwd();
 const lab = path.join(root, ".next/worker-lab");
-// O adapter direct escolhe HTTP somente para localhost; 127.0.0.1 faria a
-// revalidação ISR tentar TLS contra a porta HTTP do próprio laboratório.
+// Os adapters escolhem HTTP somente para localhost; manter a autorreferência local.
 const origin = "http://localhost:3215";
 const publicNames = new Set(["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SITE_URL", "PROMODETEC_ANALYTICS_DISABLED"]);
 const results: { name: string; passed: boolean; status?: number; ms?: number; bytes?: number; cache?: Record<string, string>; error?: string }[] = [];
@@ -53,11 +52,15 @@ function prepare() {
     assets: { directory: path.join(root, production.assets.directory), binding: "ASSETS" },
     rules: production.rules,
     services: [{ binding: "WORKER_SELF_REFERENCE", service: "promodetec-lab" }],
+    durable_objects: production.durable_objects,
+    migrations: production.migrations,
     r2_buckets: [{ binding: "NEXT_INC_CACHE_R2_BUCKET", bucket_name: "promodetec-lab-cache", remote: false }],
-    vars: { ...values, PROMODETEC_ANALYTICS_DISABLED: "1" },
+    vars: { ...production.vars, ...values, PROMODETEC_ANALYTICS_DISABLED: "1" },
   };
   assert.equal(config.r2_buckets[0]!.remote, false);
   assert.equal(config.services[0]!.service, config.name);
+  assert.deepEqual(config.durable_objects.bindings, [{ name: "NEXT_CACHE_DO_QUEUE", class_name: "DOQueueHandler" }]);
+  assert.deepEqual(config.migrations, [{ tag: "v1-isr-queue", new_sqlite_classes: ["DOQueueHandler"] }]);
   assert.equal("SUPABASE_SERVICE_ROLE_KEY" in config.vars, false);
   const configPath = path.join(lab, "wrangler.jsonc");
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
@@ -298,7 +301,13 @@ async function main() {
       assert.match(receipt.response.headers.get("content-type") ?? "", extension === ".js" ? /javascript/ : /css/);
     });
   }
-  for (const route of ["/robots.txt", "/sitemap.xml", "/cupons", "/login"]) await check(route, () => request(route));
+  for (const route of ["/robots.txt", "/sitemap.xml", "/login"]) await check(route, () => request(route));
+  const isrStartedAt = Date.now();
+  const couponsInitial = await check("coupons-initial-isr", () => request("/cupons"), receipt => {
+    assert.equal(receipt.response.status, 200);
+    assert.equal(receipt.cache["x-opennext-cache"] ?? receipt.cache["x-nextjs-cache"], "HIT");
+    assert.match(receipt.body.toString(), /<time dateTime=|<time datetime=/, "build_must_contain_coupon_snapshot");
+  });
   await check("admin-anonymous", () => request("/admin"), receipt => {
     assert.equal(receipt.response.status, 307);
     const target = new URL(receipt.response.headers.get("location")!, origin);
@@ -371,6 +380,26 @@ async function main() {
       assert.equal(receipt.cache["x-promodetec-cache"], "MISS");
     });
     await check("public-cache-recovery", () => cacheHit("/ofertas?busca=fone"), receipt => assert.equal(receipt.response.status, 200));
+    process.stdout.write("worker_lab: waiting for ISR expiry; no requests during wait\n");
+    while (Date.now() < isrStartedAt + 305_000) await delay(Math.min(1000, isrStartedAt + 305_000 - Date.now()));
+    await check("coupons-isr-expiry", () => request("/cupons"), receipt => {
+      assert.equal(receipt.response.status, 200);
+      assert.equal(receipt.cache["x-opennext-cache"] ?? receipt.cache["x-nextjs-cache"], "STALE");
+    });
+    await check("coupons-isr-recovery", async () => {
+      let receipt = await request("/cupons");
+      for (let attempt = 0; (receipt.cache["x-opennext-cache"] ?? receipt.cache["x-nextjs-cache"]) !== "HIT" && attempt < 15; attempt++) {
+        await delay(1000);
+        receipt = await request("/cupons");
+      }
+      return receipt;
+    }, receipt => {
+      assert.equal(receipt.response.status, 200);
+      assert.equal(receipt.cache["x-opennext-cache"] ?? receipt.cache["x-nextjs-cache"], "HIT", "isr_did_not_revalidate");
+      // O build lê o snapshot; o runtime isolado não tem service role e gera o estado vazio honesto.
+      assert.ok(couponsInitial?.mainSha256 && receipt.mainSha256 && couponsInitial.mainSha256 !== receipt.mainSha256, "isr_must_generate_new_content");
+      assert.match(receipt.body.toString(), /Novos cupons estão a caminho/);
+    });
   }
   const runtimeLog = readLog(logFile);
   const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -386,7 +415,7 @@ async function main() {
     checks: results, passed: results.length - failures.length, failed: failures.length,
     benchmarks,
     runtimeSignals: { queryTimeout: (runtimeLog.match(/57014|source_unavailable/g) ?? []).length, analyticsWriteFailure: (runtimeLog.match(/analytics_write_failed/g) ?? []).length, cpuExceeded: (runtimeLog.match(/CPU time limit|1102/g) ?? []).length },
-    limits: ["HTTP checks do not validate browser rendering or hydration", "Local process CPU/RSS are not Cloudflare billed CPU or isolate memory limits", "Local latency is not production Worker CPU, startup or Core Web Vitals", "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested", stress ? "Cache expiry/recovery tested with native local Cache API; distributed POPs and cold bursts remain separate" : "Cache expiry has unit coverage; native expiry/stress require --stress"],
+    limits: ["HTTP checks do not validate browser rendering or hydration", "Local process CPU/RSS are not Cloudflare billed CPU or isolate memory limits", "Local latency is not production Worker CPU, startup or Core Web Vitals", "No authenticated account, live event insertion, human affiliate redirect or real R2 bucket tested", stress ? "Native Cache API and 300s ISR expiry/recovery tested locally; coupon content changes to the honest empty state without service role. Distributed POPs and production data freshness remain separate" : "Cache expiry has unit coverage; native Cache API/ISR expiry and stress require --stress"],
   };
   fs.mkdirSync(path.join(root, "docs/evidence"), { recursive: true });
   const output = path.join(root, `docs/evidence/worker-lab-${new Date().toISOString().slice(0, 10)}.json`);
