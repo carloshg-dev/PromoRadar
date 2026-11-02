@@ -22,6 +22,7 @@ Este documento descreve fronteiras estáveis. Estado de deploy e incidentes pert
 
 - Cloudflare Worker com OpenNext atende a aplicação web.
 - `cloudflare-worker.ts` preserva o handler gerado e antecipa respostas públicas íntegras pelo Cache API. Elegibilidade, variantes e streaming limitado ficam em `src/infrastructure/cloudflare/public-response-cache.ts`; não substitui autenticação ou cache de dados.
+- ISR usa o adapter oficial `do-queue`, a autorreferência `WORKER_SELF_REFERENCE` e `NEXT_CACHE_DO_QUEUE`/`DOQueueHandler` com armazenamento SQLite. A classe guarda apenas coordenação do cache, separada do banco de produtos. Uma revalidação por instância e até duas tentativas extras limitam o trabalho; o limite de CPU por requisição do Worker continua valendo.
 - GitHub Actions executa coleta, ingestão, manutenção e backup.
 - Playwright e Chromium pertencem ao runtime de coleta e não podem entrar no bundle do Worker.
 - Secrets de servidor nunca usam prefixo `NEXT_PUBLIC_` nem chegam ao navegador.

@@ -6,6 +6,7 @@ on:
       - "src/**"
       - "cloudflare-worker.ts"
       - "wrangler.jsonc"
+      - "open-next.config.ts"
       - "scripts/validate-worker.ts"
       - "tests/growth/**"
       - "tests/collection/**"
