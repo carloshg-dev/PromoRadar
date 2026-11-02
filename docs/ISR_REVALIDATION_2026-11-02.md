@@ -24,3 +24,9 @@ Callers: todas as rotas SSG/ISR e fetches revalidados pelo OpenNext. Preços, Pr
 - O controle do navegador continua bloqueado pela configuração do aplicativo, mesmo após a resposta de reativação; cliques desktop/mobile e leitura autenticada de versão/100%/logs permanecem pendentes. Não substituir por automação de navegador fora da ferramenta autorizada.
 
 Estado inicial deste relatório: correção local, ainda sem homologação ou publicação. Resultados e limites serão registrados abaixo após execução.
+
+## Primeira homologação, antes do ajuste das fotos
+
+Candidato `82a2f2279da3e5ac088a05ea14a74009149028df`, PR #22. Crescimento `41382514791` aprovado. Build OpenNext e workerd `41382514238` aprovados: **37/37** contratos, incluindo ISR de 300s com STALE→HIT e conteúdo renovado. Recibo local em `reports/shop-release-2026-11-02/worker-isr-first/worker-ui-receipt.json`. Não é prova de CPU do Cloudflare nem de renovação pública.
+
+A checagem HTTP de imagens identificou a rota legada Dufrio com 404, confirmada em oito amostras do feed. Correção adicional de qualidade documentada em [DUFRIO_IMAGE_HEALTH_2026-11-02.md](DUFRIO_IMAGE_HEALTH_2026-11-02.md), em commit separado. O SHA final combinado exige nova homologação antes de integrar/publicar; o recibo anterior é preservado.

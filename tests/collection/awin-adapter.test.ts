@@ -50,7 +50,8 @@ test("adapter não publica noimage, preços antigos como atuais ou conversão ca
   context.mock.method(globalThis, "fetch", async (url: unknown) => new Response(new URL(String(url)).pathname === "/list" ? master(["good"])
     : headers + product.replace("99.90,149.90", "129.90,99.90")
       + product.replace(",123,", ",124,").replace("BRL", "USD")
-      + product.replace(",123,", ",125,").replace("https://image.test/p.jpg", "https://images2.productserve.com/noimage.gif")));
+      + product.replace(",123,", ",125,").replace("https://image.test/p.jpg", "https://images2.productserve.com/noimage.gif")
+      + product.replace(",123,", ",126,").replace("https://image.test/p.jpg", "https://www.dufrio.com.br/media/catalog/product/p/foto.jpg")));
   const result = await new FastAwin().coletar({ log: () => {} });
   assert.equal(result.length, 1);
   assert.equal(result[0]?.precoAtual, 129.9);
